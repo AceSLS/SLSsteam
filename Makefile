@@ -3,6 +3,7 @@
 
 #Force g++ cause clang crashes on some hooks
 CXX := g++
+CXXFLAGS += -std=c++20
 
 libs := $(wildcard lib/*.a)
 srcs := $(shell find src/ -type f -iname "*.cpp")
