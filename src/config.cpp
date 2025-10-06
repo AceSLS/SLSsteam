@@ -8,116 +8,155 @@
 #include <cstdio>
 #include <cstdlib>
 #include <filesystem>
+#include <fstream>
 #include <string>
 
-//TODO: Move into own .yaml file somehow
-static const char* defaultConfig = 
-"#Example AppIds Config for those not familiar with YAML:\n"
-"#AppIds:\n"
-"#  - 440\n"
-"#  - 730\n"
-"#Take care of not messing up your spaces! Otherwise it won't work\n\n"
-"#Example of DlcData:\n"
-"#DlcData:\n"
-"#  AppId:\n"
-"#    FirstDlcAppId: \"Dlc Name\"\n"
-"#    SecondDlcAppId: \"Dlc Name\"\n\n"
-"#Example of DenuvoGames:\n"
-"#DenuvoGames:\n"
-"#  SteamId:\n"
-"#    -  AppId1\n"
-"#    -  AppId2\n\n"
-"#Disables Family Share license locking for self and others\n"
-"DisableFamilyShareLock: yes\n\n"
-"#Switches to whitelist instead of the default blacklist\n"
-"UseWhitelist: no\n\n"
-"#Automatically filter Apps in CheckAppOwnership. Filters everything but Games and Applications. Should not affect DLC checks\n"
-"#Overrides black-/whitelist. Gets overriden by AdditionalApps\n"
-"AutoFilterList: yes\n\n"
-"#List of AppIds to ex-/include\n"
-"AppIds:\n\n"
-"#Enables playing of not owned games. Respects black-/whitelist AppIds\n"
-"PlayNotOwnedGames: no\n\n"
-"#Additional AppIds to inject (Overrides your black-/whitelist & also overrides OwnerIds for apps you got shared!) Best to use this only on games NOT in your library.\n"
-"AdditionalApps:\n\n"
-"#Extra Data for Dlcs belonging to a specific AppId. Only needed\n"
-"#when the App you're playing is hit by Steams 64 DLC limit\n"
-"DlcData:\n\n"
-"#Blocks games from unlocking on wrong accounts\n"
-"DenuvoGames:\n\n"
-"#Spoof Denuvo Games owner instead of blocking them\n"
-"DenuvoSpoof: no\n\n"
-"#Automatically disable SLSsteam when steamclient.so does not match a predefined file hash that is known to work\n"
-"#You should enable this if you're planing to use SLSsteam with Steam Deck's gamemode\n"
-"SafeMode: no\n\n"
-"#Toggles notifications via notify-send\n"
-"Notifications: yes\n\n"
-"#Warn user via notification when steamclient.so hash differs from known safe hash\n"
-"#Mostly useful for development so I don't accidentally miss an update\n"
-"WarnHashMissmatch: no\n\n"
-"#Notify when SLSsteam is done initializing\n"
-"NotifyInit: yes\n\n"
-"#Logs all calls to Steamworks (this makes the logfile huge! Only useful for debugging/analyzing\n"
-"ExtendedLogging: no";
+// TODO: Move into own .yaml file somehow
+static const char *defaultConfig =
+	"#Example AppIds Config for those not familiar with YAML:\n"
+	"#AppIds:\n"
+	"#  - 440\n"
+	"#  - 730\n"
+	"#Take care of not messing up your spaces! Otherwise it won't work\n\n"
+	"#Example of DlcData:\n"
+	"#DlcData:\n"
+	"#  AppId:\n"
+	"#    FirstDlcAppId: \"Dlc Name\"\n"
+	"#    SecondDlcAppId: \"Dlc Name\"\n\n"
+	"#Example of DenuvoGames:\n"
+	"#DenuvoGames:\n"
+	"#  SteamId:\n"
+	"#    -  AppId1\n"
+	"#    -  AppId2\n\n"
+	"#Disables Family Share license locking for self and others\n"
+	"DisableFamilyShareLock: yes\n\n"
+	"#Switches to whitelist instead of the default blacklist\n"
+	"UseWhitelist: no\n\n"
+	"#Automatically filter Apps in CheckAppOwnership. Filters everything but "
+	"Games and Applications. Should not affect DLC checks\n"
+	"#Overrides black-/whitelist. Gets overriden by AdditionalApps\n"
+	"AutoFilterList: yes\n\n"
+	"#List of AppIds to ex-/include\n"
+	"AppIds:\n\n"
+	"#Enables playing of not owned games. Respects black-/whitelist AppIds\n"
+	"PlayNotOwnedGames: no\n\n"
+	"#Additional AppIds to inject (Overrides your black-/whitelist & also "
+	"overrides OwnerIds for apps you got shared!) Best to use this only on "
+	"games NOT in your library.\n"
+	"AdditionalApps:\n\n"
+	"#Extra Data for Dlcs belonging to a specific AppId. Only needed\n"
+	"#when the App you're playing is hit by Steams 64 DLC limit\n"
+	"DlcData:\n\n"
+	"#Blocks games from unlocking on wrong accounts\n"
+	"DenuvoGames:\n\n"
+	"#Spoof Denuvo Games owner instead of blocking them\n"
+	"DenuvoSpoof: no\n\n"
+	"#Automatically disable SLSsteam when steamclient.so does not match a "
+	"predefined file hash that is known to work\n"
+	"#You should enable this if you're planing to use SLSsteam with Steam "
+	"Deck's gamemode\n"
+	"SafeMode: no\n\n"
+	"#Toggles notifications via notify-send\n"
+	"Notifications: yes\n\n"
+	"#Warn user via notification when steamclient.so hash differs from known "
+	"safe hash\n"
+	"#Mostly useful for development so I don't accidentally miss an update\n"
+	"WarnHashMissmatch: no\n\n"
+	"#Notify when SLSsteam is done initializing\n"
+	"NotifyInit: yes\n\n"
+	"#Logs all calls to Steamworks (this makes the logfile huge! Only useful "
+	"for debugging/analyzing\n"
+	"ExtendedLogging: no";
 
 std::string CConfig::getDir()
 {
-	char pathBuf[255];
-	const char* configDir = getenv("XDG_CONFIG_HOME"); //Most users should have this set iirc
-	if (configDir != NULL)
+	std::filesystem::path configPath;
+	// Use getenv to find the appropriate config directory path
+	if (const char *configHome = std::getenv("XDG_CONFIG_HOME"))
 	{
-		sprintf(pathBuf, "%s/SLSsteam", configDir);
-	} else
+		configPath = configHome;
+	}
+	else if (const char *home = std::getenv("HOME"))
 	{
-		const char* home = getenv("HOME");
-		sprintf(pathBuf, "%s/.config/SLSsteam", home);
+		configPath = home;
+		configPath /= ".config";
+	}
+	else
+	{
+		g_pLog->notify(
+			"Could not find XDG_CONFIG_HOME or HOME for config directory!");
+		return ""; // Return empty on failure
 	}
 
-	return std::string(pathBuf);
+	configPath /= "SLSsteam";
+	return configPath.string();
 }
 
 std::string CConfig::getPath()
 {
-	return getDir().append("/config.yaml");
+	std::filesystem::path dir = getDir();
+	if (dir.empty())
+	{
+		return "";
+	}
+	return (dir / "config.yaml").string();
 }
 
 bool CConfig::createFile()
 {
 	std::string path = getPath();
-	if (!std::filesystem::exists(path))
+	if (path.empty())
 	{
-		std::string dir = getDir();
+		return false;
+	}
+
+	if (std::filesystem::exists(path))
+	{
+		return true; // File already exists
+	}
+
+	std::string dir = getDir();
+	try
+	{
+		// Create the directory if it doesn't exist
 		if (!std::filesystem::exists(dir))
 		{
 			if (!std::filesystem::create_directory(dir))
 			{
-				g_pLog->notify("Unable to create config directory at %s!\n", dir.c_str());
+				g_pLog->notify("Unable to create config directory at %s!\n",
+							   dir.c_str());
 				return false;
 			}
-
 			g_pLog->debug("Created config directory at %s\n", dir.c_str());
 		}
-
-		FILE* file = fopen(path.c_str(), "w");
-		if (!file)
-		{
-			g_pLog->notify("Unable to create config at %s!\n", path.c_str());
-			return false;
-		}
-
-		fputs(defaultConfig, file);
-		fflush(file);
-		fclose(file);
 	}
+	catch (const std::filesystem::filesystem_error &e)
+	{
+		g_pLog->notify("Filesystem error while creating directory %s: %s\n",
+					   dir.c_str(), e.what());
+		return false;
+	}
+
+	std::ofstream file(path);
+	if (!file.is_open())
+	{
+		g_pLog->notify("Unable to create config at %s!\n", path.c_str());
+		return false;
+	}
+
+	file << defaultConfig;
+	file.close();
 
 	return true;
 }
 
 bool CConfig::init()
 {
-	createFile();
-	loadSettings();
-	return true;
+	if (createFile())
+	{
+		return loadSettings();
+	}
+	return false;
 }
 
 bool CConfig::loadSettings()
@@ -127,89 +166,101 @@ bool CConfig::loadSettings()
 	{
 		node = YAML::LoadFile(getPath());
 	}
-	catch (YAML::BadFile& bf)
+	catch (const YAML::BadFile &bf)
 	{
-		g_pLog->notifyLong("Can not read config.yaml! %s\nUsing defaults", bf.msg.c_str());
-		node = YAML::Node(); //Create empty node and let defaults kick in
+		g_pLog->notifyLong("Can not read config.yaml! %s\nUsing defaults",
+						   bf.msg.c_str());
+		node = YAML::Node(); // Create empty node and let defaults
 	}
-	catch (YAML::ParserException& pe)
+	catch (const YAML::ParserException &pe)
 	{
-		g_pLog->notifyLong("Error parsing config.yaml! %s\nUsing defaults", pe.msg.c_str());
-		node = YAML::Node(); //Create empty node and let defaults kick in
+		g_pLog->notifyLong("Error parsing config.yaml! %s\nUsing defaults",
+						   pe.msg.c_str());
+		node = YAML::Node(); // Create empty node and let defaults
 	}
-	
-	disableFamilyLock = getSetting<bool>(node, "DisableFamilyShareLock", true);
-	useWhiteList = getSetting<bool>(node, "UseWhitelist", false);
-	automaticFilter = getSetting<bool>(node, "AutoFilterList", true);
-	playNotOwnedGames = getSetting<bool>(node, "PlayNotOwnedGames", false);
-	safeMode = getSetting<bool>(node, "SafeMode", false);
-	notifications = getSetting<bool>(node, "Notifications", true);
-	warnHashMissmatch = getSetting<bool>(node, "WarnHashMissmatch", false);
-	notifyInit = getSetting<bool>(node, "NotifyInit", true);
-	extendedLogging = getSetting<bool>(node, "ExtendedLogging", false);
-	denuvoSpoof = getSetting<bool>(node, "DenuvoSpoof", false);
 
-	//TODO: Create smart logging function to log them automatically via getSetting
-	g_pLog->info("DisableFamilyShareLock: %i\n", disableFamilyLock);
-	g_pLog->info("UseWhitelist: %i\n", useWhiteList);
-	g_pLog->info("AutoFilterList: %i\n", automaticFilter);
-	g_pLog->info("PlayNotOwnedGames: %i\n", playNotOwnedGames);
-	g_pLog->info("SafeMode: %i\n", safeMode);
-	g_pLog->info("Notifications: %i\n", notifications);
-	g_pLog->info("WarnHashMissmatch: %i\n", warnHashMissmatch);
-	g_pLog->info("NotifyInit: %i\n", notifyInit);
-	g_pLog->info("ExtendedLogging: %i\n", extendedLogging);
-	g_pLog->info("DenuvoSpoof: %i\n", denuvoSpoof);
+	// Smartly get and log settings
+	disableFamilyLock =
+		getAndLogSetting<bool>(node, "DisableFamilyShareLock", true);
+	useWhiteList = getAndLogSetting<bool>(node, "UseWhitelist", false);
+	automaticFilter = getAndLogSetting<bool>(node, "AutoFilterList", true);
+	playNotOwnedGames =
+		getAndLogSetting<bool>(node, "PlayNotOwnedGames", false);
+	safeMode = getAndLogSetting<bool>(node, "SafeMode", false);
+	notifications = getAndLogSetting<bool>(node, "Notifications", true);
+	warnHashMissmatch =
+		getAndLogSetting<bool>(node, "WarnHashMissmatch", false);
+	notifyInit = getAndLogSetting<bool>(node, "NotifyInit", true);
+	extendedLogging = getAndLogSetting<bool>(node, "ExtendedLogging", false);
+	denuvoSpoof = getAndLogSetting<bool>(node, "DenuvoSpoof", false);
 
-	//TODO: Create function to parse these kinda nodes, instead of c+p them
-	const auto appIdsNode = node["AppIds"];
-	if (appIdsNode)
+	// Use dedicated functions to parse complex nodes
+	parseAppIdList(node, "AppIds", this->appIds);
+	parseAppIdList(node, "AdditionalApps", this->addedAppIds);
+	parseDlcData(node);
+	parseDenuvoGames(node);
+
+	return true;
+}
+
+// Helper to get a setting and also log its value.
+template <typename T>
+T CConfig::getAndLogSetting(const YAML::Node &node, const char *name, T defVal)
+{
+	T value = getSetting<T>(node, name, defVal);
+	std::stringstream ss;
+	ss << value;
+	g_pLog->info("%s: %s\n", name, ss.str().c_str());
+	return value;
+}
+
+// Explicit template instantiation for the linker
+template bool CConfig::getAndLogSetting<bool>(const YAML::Node &, const char *,
+											  bool);
+
+// Helper function to parse a list of AppIDs from the YAML config.
+void CConfig::parseAppIdList(const YAML::Node &parentNode, const char *key,
+							 std::unordered_set<uint32_t> &targetSet)
+{
+	const YAML::Node &listNode = parentNode[key];
+	if (!listNode)
 	{
-		for(auto& appIdNode : appIdsNode)
+		g_pLog->notify("Missing %s entry in config!", key);
+		return;
+	}
+
+	if (listNode.IsSequence())
+	{
+		for (const auto &itemNode : listNode)
 		{
 			try
 			{
-				uint32_t appId = appIdNode.as<uint32_t>();
-				this->appIds.emplace(appId);
-				g_pLog->info("Added %u to AppIds\n", appId);
+				uint32_t appId = itemNode.as<uint32_t>();
+				targetSet.emplace(appId);
+				g_pLog->info("Added %u to %s\n", appId, key);
 			}
-			catch(...)
+			catch (const YAML::Exception &)
 			{
-				g_pLog->notify("Failed to parse %s in AppIds!", appIdNode.as<std::string>().c_str());
+				g_pLog->notify("Failed to parse '%s' in %s!",
+							   itemNode.as<std::string>().c_str(), key);
 			}
 		}
 	}
-	else
+}
+
+// Helper function to parse the DlcData node.
+void CConfig::parseDlcData(const YAML::Node &parentNode)
+{
+	const YAML::Node &dlcDataNode = parentNode["DlcData"];
+	if (!dlcDataNode)
 	{
-		g_pLog->notify("Missing AppIds entry in config!");
+		g_pLog->notify("Missing DlcData entry in config!");
+		return;
 	}
 
-	const auto additionalAppsNode = node["AdditionalApps"];
-	if (additionalAppsNode)
+	if (dlcDataNode.IsMap())
 	{
-		for(auto& appIdNode : additionalAppsNode)
-		{
-			try
-			{
-				uint32_t appId = appIdNode.as<uint32_t>();
-				this->addedAppIds.emplace(appId);
-				g_pLog->info("Added %u to AdditionalApps\n", appId);
-			}
-			catch(...)
-			{
-				g_pLog->notify("Failed to parse %s in AdditionalApps!", appIdNode.as<std::string>().c_str());
-			}
-		}
-	}
-	else
-	{
-		g_pLog->notify("Missing AdditionalApps entry in config!");
-	}
-
-	const auto dlcDataNode = node["DlcData"];
-	if(dlcDataNode)
-	{
-		for(auto& app : dlcDataNode)
+		for (const auto &app : dlcDataNode)
 		{
 			try
 			{
@@ -219,61 +270,57 @@ bool CConfig::loadSettings()
 				data.parentId = parentId;
 				g_pLog->debug("Adding DlcData for %u\n", parentId);
 
-				for(auto& dlc : app.second)
+				for (const auto &dlc : app.second)
 				{
 					const uint32_t dlcId = dlc.first.as<uint32_t>();
-					//There's more efficient types to store strings, but they mostly do not work
 					const std::string dlcName = dlc.second.as<std::string>();
 
 					data.dlcIds[dlcId] = dlcName;
 					g_pLog->debug("DlcId %u -> %s\n", dlcId, dlcName.c_str());
 				}
-
 				dlcData[parentId] = data;
 			}
-			catch(...)
+			catch (const YAML::Exception &)
 			{
 				g_pLog->notify("Failed to parse DlcData!");
 				break;
 			}
 		}
 	}
-	else
+}
+
+// Helper function to parse the DenuvoGames node.
+void CConfig::parseDenuvoGames(const YAML::Node &parentNode)
+{
+	const YAML::Node &denuvoGamesNode = parentNode["DenuvoGames"];
+	if (!denuvoGamesNode)
 	{
-		g_pLog->notify("Missing DlcData entry in config!");
+		g_pLog->notify("Missing DenuvoGames entry in config!");
+		return;
 	}
 
-	const auto denuvoGamesNode = node["DenuvoGames"];
-	if (denuvoGamesNode)
+	if (denuvoGamesNode.IsMap())
 	{
-		for (auto& steamIdNode : denuvoGamesNode)
+		for (const auto &steamIdNode : denuvoGamesNode)
 		{
 			try
 			{
 				const uint32_t steamId = steamIdNode.first.as<uint32_t>();
 				denuvoGames[steamId] = std::unordered_set<uint32_t>();
 
-				for (auto& appIdNode : steamIdNode.second)
+				for (const auto &appIdNode : steamIdNode.second)
 				{
 					const uint32_t appId = appIdNode.as<uint32_t>();
 					denuvoGames[steamId].emplace(appId);
-
-					//Again, not loggin SteamId because of privacy
 					g_pLog->debug("Added DenuvoGame %u\n", appId);
 				}
 			}
-			catch (...)
+			catch (const YAML::Exception &)
 			{
 				g_pLog->notify("Failed to parse DenuvoGames!");
 			}
 		}
 	}
-	else
-	{
-		g_pLog->notify("Missing DenuvoGames entry in config!");
-	}
-
-	return true;
 }
 
 bool CConfig::isAddedAppId(uint32_t appId)
@@ -287,23 +334,23 @@ bool CConfig::addAdditionalAppId(uint32_t appId)
 		return false;
 
 	addedAppIds.emplace(appId);
-	g_pLog->once("Force owned %u\n", appId); //once is unnessecary but just for consistency
+	g_pLog->once("Force owned %u\n", appId);
 	return true;
 }
 
 bool CConfig::shouldExcludeAppId(uint32_t appId)
 {
 	bool exclude = false;
-	//Proper way would be with getAppType, but that seems broken so we need to do this instead
-	constexpr uint32_t ONE_BILLION = 1E9; //Implicit cast from double to unsigned int, hopefully this does not break anything
-	if (appId >= ONE_BILLION) //Higher and equal to 10^9 gets used by Steam Internally
+	constexpr uint32_t ONE_BILLION = 1'000'000'000;
+	if (appId >= ONE_BILLION)  // Used by Steam internally
 	{
 		exclude = true;
 	}
 	else
 	{
 		bool found = appIds.contains(appId);
-		exclude = !isAddedAppId(appId) && ((useWhiteList && !found) || (!useWhiteList && found));
+		exclude = !isAddedAppId(appId) &&
+				  ((useWhiteList && !found) || (!useWhiteList && found));
 	}
 
 	g_pLog->once("shouldExcludeAppId(%u) -> %i\n", appId, exclude);
@@ -312,11 +359,11 @@ bool CConfig::shouldExcludeAppId(uint32_t appId)
 
 uint32_t CConfig::getDenuvoGameOwner(uint32_t appId)
 {
-	for(const auto& tpl : denuvoGames)
+	for (const auto &tpl : denuvoGames)
 	{
 		if (tpl.second.contains(appId))
 		{
-			//g_pLog->once("%u is DenuvoGame\n", appId);
+			// g_pLog->once("%u is DenuvoGame\n", appId);
 			return tpl.first;
 		}
 	}
