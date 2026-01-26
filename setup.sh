@@ -65,25 +65,46 @@ install_desktop_file()
 	echo "Created $USR_APP_DIR/$NAME"
 }
 
-install_path()
-{
-	SHELLPATH="$(realpath "$SHELL")"
-	CMD="$(echo "export PATH=\"$SLSPATH:\$PATH\"")"
+install_path() {
+    # Detect the current shell
+    CURRENT_SHELL=$(ps -p $$ -o comm= | tr -d '[:space:]')
 
-	if [ "$SHELLPATH" = "/usr/bin/fish" ]; then
-		SLSSTEAM_FISH="$HOME/.config/fish/conf.d/SLSsteam.fish"
-		if [ ! -f "$SLSSTEAM_FISH" ]; then
-			echo "$CMD" > "$SLSSTEAM_FISH"
-			echo "Wrote $CMD to $SLSSTEAM_FISH"
+    if [ "$CURRENT_SHELL" = "fish" ]; then
+        SLSSTEAM_FISH="$HOME/.config/fish/conf.d/SLSsteam.fish"
+        mkdir -p "$(dirname "$SLSSTEAM_FISH")"
 
-			echo "Relog for changes to take effect!"
-		fi
-	else
-		echo "User is on unsupported shell! Skipping path installation"
-		return 1
-	fi
+        # Fish command to update PATH
+        CMD="set -gx PATH $SLSPATH \$PATH"
 
-	return 0
+        if [ ! -f "$SLSSTEAM_FISH" ]; then
+            echo "$CMD" > "$SLSSTEAM_FISH"
+            echo "Wrote $CMD to $SLSSTEAM_FISH"
+            echo "Relog for changes to take effect!"
+        else
+            echo "PATH already configured for fish"
+        fi
+        return 0
+    else
+        # If fish exists on the system but is not the current shell, still install config
+        if command -v fish >/dev/null 2>&1; then
+            SLSSTEAM_FISH="$HOME/.config/fish/conf.d/SLSsteam.fish"
+            mkdir -p "$(dirname "$SLSSTEAM_FISH")"
+            CMD="set -gx PATH $SLSPATH \$PATH"
+
+            if [ ! -f "$SLSSTEAM_FISH" ]; then
+                echo "$CMD" > "$SLSSTEAM_FISH"
+                echo "Wrote $CMD to $SLSSTEAM_FISH"
+                echo "You can start a fish shell later to pick up the PATH changes."
+            else
+                echo "PATH already configured for fish"
+            fi
+            return 0
+        fi
+
+        # Fish not found on the system, skip installation
+        echo "Fish not detected. Skipping path installation."
+        return 1
+    fi
 }
 
 install_slssteam()
