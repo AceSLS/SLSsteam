@@ -4,6 +4,7 @@
 
 #include "../sdk/IClientInventory.hpp"
 
+#include "../config.hpp"
 #include "../log.hpp"
 
 
@@ -40,14 +41,28 @@ void Inventory::getResultItems(SteamItemDetails_t* pItems, uint32_t pItemsSize, 
 		return;
 	}
 
+	const auto configItems = g_config.inventoryItems.get();
+
 	for(unsigned int i = 0; i < pItemsSize; i++)
 	{
 		SteamItemDetails_t& itm = pItems[i];
 		itm.id = items[i];
-		itm.quantity = 1;
 		itm.handle = 0;
 		itm.flags = 0;
 
-		g_pLog->debug("Added item %u\n", items[i]);
+		if (configItems.contains(appId))
+		{
+			const auto configMap = configItems.at(appId);
+			if (configMap.items.contains(itm.id))
+			{
+				itm.quantity = configMap.items.at(itm.id);
+			}
+		}
+		else
+		{
+			itm.quantity = 1;
+		}
+
+		g_pLog->debug("Added %u item %u\n", itm.quantity, items[i]);
 	}
 }

@@ -267,6 +267,46 @@ bool CConfig::loadSettings(bool firstLoad)
 		setError(ELoadError::MissingKey);
 	}
 
+	const auto inventoryItemsNode = node["InventoryItems"];
+	if(inventoryItemsNode)
+	{
+		auto _inventoryItems = inventoryItems.empty();
+
+		for(auto& app : inventoryItemsNode)
+		{
+			try
+			{
+				const uint32_t appId = app.first.as<uint32_t>();
+
+				InventoryItems_t items;
+				items.appId = appId;
+				g_pLog->info("Adding InventoryItems for %u\n", appId);
+
+				for(auto& item : app.second)
+				{
+					const uint32_t id = item.first.as<uint32_t>();
+					const uint32_t count = item.second.as<uint32_t>();
+
+					items.items[id] = count;
+					g_pLog->info("InventoryItem %u -> %u\n", id, count);
+				}
+
+				_inventoryItems[appId] = items;
+			}
+			catch(...)
+			{
+				g_pLog->notify("Failed to parse InventoryItems!");
+				break;
+			}
+		}
+
+		inventoryItems = _inventoryItems;
+	}
+	else
+	{
+		g_pLog->notify("Missing InventoryItems entry in config!");
+	}
+
 	const auto denuvoGamesNode = node["DenuvoGames"];
 	if (denuvoGamesNode)
 	{

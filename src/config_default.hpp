@@ -59,6 +59,9 @@ ManifestIds:
 #Never download these depots
 DepotBlacklist:
 
+#Inventory item list
+InventoryItems:
+
 #Custom ingame statuses. Set AppId to 0 to disable
 IdleStatus:
   AppId: 0

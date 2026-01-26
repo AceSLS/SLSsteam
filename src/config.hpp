@@ -28,6 +28,13 @@ public:
 		std::string title;
 	};
 
+	struct InventoryItems_t
+	{
+	public:
+		uint32_t appId;
+		std::unordered_map<uint32_t, uint32_t> items;
+	};
+
 	class CDlcData
 	{
 	public:
@@ -53,6 +60,7 @@ public:
 	MTVariable<std::unordered_map<AppId_t, AppId_t>> fakeAppIds;
 	MTVariable<std::unordered_map<AppId_t, uint64_t>> manifestIds;
 	MTVariable<std::unordered_set<AppId_t>> depotBlacklist;
+	MTVariable<std::unordered_map<AppId_t, InventoryItems_t>> inventoryItems;
 	MTVariable<FakeGame_t> idleStatus;
 	MTVariable<std::unordered_map<AppId_t, std::string>> gameTitles;
 	MTVariable<std::unordered_map<AppId_t, uint32_t>> subscriptionTimestamps;
