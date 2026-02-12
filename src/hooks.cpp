@@ -27,6 +27,7 @@
 #include "feats/dlc.hpp"
 #include "feats/misc.hpp"
 #include "feats/fakeappid.hpp"
+#include "feats/inventory.hpp"
 #include "feats/ticket.hpp"
 
 #include "libmem/libmem.h"
@@ -687,6 +688,44 @@ static void hkClientApps_RunIPCFrame(void* pClientApps, void* a1, void* a2, void
 	Hooks::IClientApps_RunIPCFrame.originalFn.fn(pClientApps, a1, a2, a3);
 }
 
+static bool hkClientInventory_GetResultItems(void* pClientInventory, uint32_t handle, SteamItemDetails_t* arrItems, uint32_t arrItemsSize, uint32_t* pItemsCount)
+{
+	const bool success = Hooks::IClientInventory_GetResultItems.originalFn.fn(pClientInventory, handle, arrItems, arrItemsSize, pItemsCount);
+
+	Inventory::getResultItems(arrItems, arrItemsSize, pItemsCount);
+
+	return success;
+}
+
+static bool hkClientInventory_GetItemDefinitionIDs(void* pClientInventory, uint32_t* arrItems, uint32_t arrItemsSize, uint32_t handle)
+{
+	const bool success = Hooks::IClientInventory_GetItemDefinitionIDs.originalFn.fn(pClientInventory, arrItems, arrItemsSize, handle);
+
+	Inventory::getItemDefinitionIds(arrItems, arrItemsSize);
+
+	return success;
+}
+
+static void hkClientInventory_RunIPCFrame(void* pClientInventory, void* a1, void* a2, void* a3)
+{
+	static bool hooked = false;
+	if (!hooked)
+	{
+		std::shared_ptr<lm_vmt_t> vft = std::make_shared<lm_vmt_t>();
+		LM_VmtNew(*reinterpret_cast<lm_address_t**>(pClientInventory), vft.get());
+
+		Hooks::IClientInventory_GetItemDefinitionIDs.setup(vft, VFTIndexes::IClientInventory::GetItemDefinitionIDs, hkClientInventory_GetItemDefinitionIDs);
+		Hooks::IClientInventory_GetResultItems.setup(vft, VFTIndexes::IClientInventory::GetResultItems, hkClientInventory_GetResultItems);
+
+		Hooks::IClientInventory_GetItemDefinitionIDs.place();
+		Hooks::IClientInventory_GetResultItems.place();
+
+		hooked = true;
+	}
+
+	Hooks::IClientInventory_RunIPCFrame.tramp.fn(pClientInventory, a1, a2, a3);
+}
+
 static bool hkClientRemoteStorage_IsCloudEnabledForApp(void* pClientRemoteStorage, AppId_t appId)
 {
 	const bool enabled = Hooks::IClientRemoteStorage_IsCloudEnabledForApp.originalFn.fn(pClientRemoteStorage, appId);
@@ -1080,6 +1119,7 @@ namespace Hooks
 
 	DetourHook<IClientAppManager_RunIPCFrame_t> IClientAppManager_RunIPCFrame;
 	DetourHook<IClientApps_RunIPCFrame_t> IClientApps_RunIPCFrame;
+	DetourHook<IClientInventory_RunIPCFrame_t> IClientInventory_RunIPCFrame;
 	DetourHook<IClientRemoteStorage_RunIPCFrame_t> IClientRemoteStorage_RunIPCFrame;
 	DetourHook<IClientUtils_RunIPCFrame_t> IClientUtils_RunIPCFrame;
 	DetourHook<IClientUser_RunIPCFrame_t> IClientUser_RunIPCFrame;
@@ -1114,6 +1154,9 @@ namespace Hooks
 	VFTHook<IClientApps_GetDLCDataByIndex_t> IClientApps_GetDLCDataByIndex;
 	VFTHook<IClientApps_GetDLCCount_t> IClientApps_GetDLCCount;
 
+	VFTHook<IClientInventory_GetResultItems_t> IClientInventory_GetResultItems("IClientInventory::GetResultItems");
+	VFTHook<IClientInventory_GetItemDefinitionIDs_t> IClientInventory_GetItemDefinitionIDs("IClientInventory::GetItemDefinitionsIDs");
+
 	VFTHook<IClientRemoteStorage_IsCloudEnabledForApp_t> IClientRemoteStorage_IsCloudEnabledForApp;
 
 	VFTHook<IClientUtils_GetAppId_t> IClientUtils_GetAppId;
@@ -1124,6 +1167,11 @@ namespace Hooks
 	VFTHook<IClientUser_GetAppOwnershipTicketExtendedData_t> IClientUser_GetAppOwnershipTicketExtendedData;
 	VFTHook<IClientUser_IsUserSubscribedAppInTicket_t> IClientUser_IsUserSubscribedAppInTicket;
 	VFTHook<IClientUser_RequiresLegacyCDKey_t> IClientUser_RequiresLegacyCDKey;
+
+	VFTHook<IClientRemoteStorage_IsCloudEnabledForApp_t> IClientRemoteStorage_IsCloudEnabledForApp("IClientRemoteStorage::IsCloudEnabledForApp");
+
+	VFTHook<IClientUtils_GetAppId_t> IClientUtils_GetAppId("IClientUtils::GetAppId");
+	VFTHook<IClientUtils_GetOfflineMode_t> IClientUtils_GetOfflineMode("IClientUtils::GetOfflineMode");
 
 
 	//steamui.so
@@ -1145,6 +1193,7 @@ bool Hooks::setup()
 
 		&& IClientApps_RunIPCFrame.setup(Patterns::IClientApps::RunIPCFrame, hkClientApps_RunIPCFrame)
 		&& IClientAppManager_RunIPCFrame.setup(Patterns::IClientAppManager::RunIPCFrame, hkClientAppManager_RunIPCFrame)
+		&& IClientInventory_RunIPCFrame.setup(Patterns::IClientInventory::RunIPCFrame, hkClientInventory_RunIPCFrame)
 		&& IClientRemoteStorage_RunIPCFrame.setup(Patterns::IClientRemoteStorage::RunIPCFrame, hkClientRemoteStorage_RunIPCFrame)
 		&& IClientUtils_RunIPCFrame.setup(Patterns::IClientUtils::RunIPCFrame, hkClientUtils_RunIPCFrame)
 		&& IClientUser_RunIPCFrame.setup(Patterns::IClientUser::RunIPCFrame, hkClientUser_RunIPCFrame)
@@ -1189,6 +1238,7 @@ void Hooks::place()
 
 	IClientApps_RunIPCFrame.place();
 	IClientAppManager_RunIPCFrame.place();
+	IClientInventory_RunIPCFrame.place();
 	IClientRemoteStorage_RunIPCFrame.place();
 	IClientUtils_RunIPCFrame.place();
 	IClientUser_RunIPCFrame.place();
@@ -1224,6 +1274,7 @@ void Hooks::remove()
 
 	IClientApps_RunIPCFrame.remove();
 	IClientAppManager_RunIPCFrame.remove();
+	IClientInventory_RunIPCFrame.remove();
 	IClientRemoteStorage_RunIPCFrame.remove();
 	IClientUtils_RunIPCFrame.remove();
 	IClientUser_RunIPCFrame.remove();
@@ -1260,6 +1311,9 @@ void Hooks::remove()
 
 	IClientApps_GetDLCDataByIndex.remove();
 	IClientApps_GetDLCCount.remove();
+
+	IClientInventory_GetItemDefinitionIDs.remove();
+	IClientInventory_GetResultItems.remove();
 
 	IClientRemoteStorage_IsCloudEnabledForApp.remove();
 

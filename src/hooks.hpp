@@ -23,6 +23,7 @@ class CUtlVector;
 struct AppOwnershipInfo_t;
 struct DepotInfo_t;
 struct gameserverdetails_t;
+struct SteamItemDetails_t;
 
 struct Pattern_t;
 struct VFTableInfo_t;
@@ -90,6 +91,7 @@ namespace Hooks
 
 	typedef void(*IClientAppManager_RunIPCFrame_t)(void*, void*, void*, void*);
 	typedef void(*IClientApps_RunIPCFrame_t)(void*, void*, void*, void*);
+	typedef void(*IClientInventory_RunIPCFrame_t)(void*, void*, void*, void*);
 	typedef void(*IClientRemoteStorage_RunIPCFrame_t)(void*, void*, void*, void*);
 	typedef void(*IClientUtils_RunIPCFrame_t)(void*, void*, void*, void*);
 	typedef void(*IClientUser_RunIPCFrame_t)(void*, void*, void*, void*);
@@ -101,6 +103,9 @@ namespace Hooks
 	typedef uint32_t(*CClientUnifiedServiceMethod_SendAndRecvMsg_t)(CClientUnifiedServiceTransport*, const char*, void*, void*, void*);
 
 	typedef void(*CCMInterface_RecvPkt_t)(void*, CNetPacket*);
+
+	typedef bool(*IClientInventory_GetResultItems_t)(void*, uint32_t, SteamItemDetails_t*, uint32_t, uint32_t*);
+	typedef bool(*IClientInventory_GetItemDefinitionIDs_t)(void*, uint32_t*, uint32_t, uint32_t);
 
 	typedef uint32_t(*CSteamEngine_RunInterface_t)(void*, CUtlBuffer*, CUtlBuffer*);
 	typedef AppId_t(*CSteamEngine_SetAppIdForCurrentPipe_t)(void*, AppId_t, bool);
@@ -119,6 +124,7 @@ namespace Hooks
 
 	extern DetourHook<IClientAppManager_RunIPCFrame_t> IClientAppManager_RunIPCFrame;
 	extern DetourHook<IClientApps_RunIPCFrame_t> IClientApps_RunIPCFrame;
+	extern DetourHook<IClientInventory_RunIPCFrame_t> IClientInventory_RunIPCFrame;
 	extern DetourHook<IClientRemoteStorage_RunIPCFrame_t> IClientRemoteStorage_RunIPCFrame;
 	extern DetourHook<IClientUtils_RunIPCFrame_t> IClientUtils_RunIPCFrame;
 	extern DetourHook<IClientUser_RunIPCFrame_t> IClientUser_RunIPCFrame;
@@ -174,6 +180,9 @@ namespace Hooks
 
 	extern VFTHook<IClientApps_GetDLCDataByIndex_t> IClientApps_GetDLCDataByIndex;
 	extern VFTHook<IClientApps_GetDLCCount_t> IClientApps_GetDLCCount;
+
+	extern VFTHook<IClientInventory_GetResultItems_t> IClientInventory_GetResultItems;
+	extern VFTHook<IClientInventory_GetItemDefinitionIDs_t> IClientInventory_GetItemDefinitionIDs;
 
 	extern VFTHook<IClientRemoteStorage_IsCloudEnabledForApp_t> IClientRemoteStorage_IsCloudEnabledForApp;
 

@@ -169,6 +169,17 @@ namespace Patterns
 		};
 	}
 
+	namespace IClientInventory
+	{
+		Pattern_t RunIPCFrame
+		{
+			"IClientInventory::RunIPCFrame",
+			"FF B5 ? ? ? ? 50 8D 86 ? ? ? ? 68 FC 12 00 00",
+			SigFollowMode::PrologueUpwards,
+			std::vector<uint8_t> { 0x56, 0x57, 0xe5, 0x89, 0x55 }
+		};
+	}
+
 	namespace IClientRemoteStorage
 	{
 		Pattern_t RunIPCFrame
