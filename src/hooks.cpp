@@ -25,6 +25,7 @@
 #include "feats/achievements.hpp"
 #include "feats/apps.hpp"
 #include "feats/dlc.hpp"
+#include "feats/license.hpp"
 #include "feats/misc.hpp"
 #include "feats/fakeappid.hpp"
 #include "feats/inventory.hpp"
@@ -285,6 +286,7 @@ static void hkCMInterface_RecvPkt(void* pCMInterface, CNetPacket* pNetPacket)
 
 		Misc::recvMsg(pNetPacket);
 		Ticket::recvMsg(pNetPacket);
+		License::recvMsg(pNetPacket);
 	}
 
 	Hooks::CCMInterface_RecvPkt.tramp.fn(pCMInterface, pNetPacket);

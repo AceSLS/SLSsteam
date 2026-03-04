@@ -37,6 +37,12 @@ AppIds:
 #It will get ignored in exclusion checks for the parent AppId
 AdditionalApps:
 
+#Additional licenses to inject. Only works with store packages!
+AdditionalPackages:
+
+#Used to download via the client
+DepotKeys:
+
 #Extra Data for Dlcs belonging to a specific AppId. Only needed
 #when the App you're playing is hit by Steams 64 DLC limit
 DlcData:
