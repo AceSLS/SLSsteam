@@ -169,13 +169,7 @@ void VFTHook<T>::setup(std::shared_ptr<lm_vmt_t> vft, const VFTableInfo_t& info,
 
 static uint32_t hkGetManifest(void* arg0, uint32_t appId, uint32_t depotId, uint32_t arg3, uint32_t arg4, uint32_t arg5, uint32_t arg6)
 {
-	const auto& keys = g_config.depotKeys.get();
-	if (keys.contains(depotId))
-	{
-		depotId = 1;
-	}
-
-	return Hooks::GetManifest.tramp.fn(arg0, appId, depotId, arg3, arg4, arg5, arg6);
+	return Hooks::GetManifest.tramp.fn(arg0, appId, 1, arg3, arg4, arg5, arg6);
 }
 
 __attribute__((hot))

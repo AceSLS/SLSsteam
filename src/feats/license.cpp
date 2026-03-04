@@ -21,29 +21,5 @@ void License::recvMsg(CProtoBufMsgBase* msg)
 			}
 			break;
 		}
-
-		case 5439:
-		{
-			const auto body = msg->getBody<CMsgClientGetDepotDecryptionKeyResponse>();
-			if (body->eresult() == ERESULT_OK)
-			{
-				break;
-			}
-
-			const auto& keys = g_config.depotKeys.get();
-			if (!keys.contains(body->depot_id()))
-			{
-				break;
-			}
-
-			auto cpy = CMsgClientGetDepotDecryptionKeyResponse(*body);
-
-			cpy.set_eresult(ERESULT_OK);
-			cpy.set_depot_encryption_key(keys.at(body->depot_id()));
-
-			body->ParseFromString(cpy.SerializeAsString());
-			break;
-		}
-
 	}
 }
