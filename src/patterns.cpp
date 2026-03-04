@@ -51,6 +51,14 @@ using SigFollowMode = MemHlp::SigFollowMode;
 
 namespace Patterns
 {
+
+	Pattern_t GetManifest
+	{
+		"GetManifest",
+		"E8 ? ? ? ? 83 C4 20 83 F8 01 0F 85 ? ? ? ? 83 EC 08",
+		SigFollowMode::Relative,
+	};
+
 	Pattern_t TraceIPC
 	{
 		"TraceIPC",

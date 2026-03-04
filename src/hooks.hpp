@@ -87,6 +87,7 @@ public:
 
 namespace Hooks
 {
+	typedef uint32_t(*GetManifest_t)(void*, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t);
 	typedef void(*TraceIPC_t)(const char*, const char*);
 
 	typedef void(*IClientAppManager_RunIPCFrame_t)(void*, void*, void*, void*);
@@ -120,6 +121,7 @@ namespace Hooks
 
 	typedef bool(*CWebSocketConnection_BBuildAndAsyncSendFrame_t)(void*, uint32_t, void*, uint32_t);
 
+	extern DetourHook<GetManifest_t> GetManifest;
 	extern DetourHook<TraceIPC_t> TraceIPC;
 
 	extern DetourHook<IClientAppManager_RunIPCFrame_t> IClientAppManager_RunIPCFrame;

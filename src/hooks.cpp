@@ -167,6 +167,17 @@ void VFTHook<T>::setup(std::shared_ptr<lm_vmt_t> vft, const VFTableInfo_t& info,
 	this->hookFn.fn = hookFn;
 }
 
+static uint32_t hkGetManifest(void* arg0, uint32_t appId, uint32_t depotId, uint32_t arg3, uint32_t arg4, uint32_t arg5, uint32_t arg6)
+{
+	const auto& keys = g_config.depotKeys.get();
+	if (keys.contains(depotId))
+	{
+		depotId = 1;
+	}
+
+	return Hooks::GetManifest.tramp.fn(arg0, appId, depotId, arg3, arg4, arg5, arg6);
+}
+
 __attribute__((hot))
 static void hkTraceIPC(const char* iface, const char* fn)
 {
@@ -1117,6 +1128,7 @@ bool Hooks::createAndPlaceSteamIdHook()
 namespace Hooks
 {
 	//TODO: Lazily intialize in a different way, or preload glibc
+	DetourHook<GetManifest_t> GetManifest;
 	DetourHook<TraceIPC_t> TraceIPC;
 
 	DetourHook<IClientAppManager_RunIPCFrame_t> IClientAppManager_RunIPCFrame;
@@ -1191,7 +1203,8 @@ bool Hooks::setup()
 	IClientUser_GetSteamId = Patterns::IClientUser::GetSteamId.address;
 
 	bool succeeded =
-		TraceIPC.setup(Patterns::TraceIPC, &hkTraceIPC)
+		GetManifest.setup(Patterns::GetManifest, &hkGetManifest)
+		&& TraceIPC.setup(Patterns::TraceIPC, &hkTraceIPC)
 
 		&& IClientApps_RunIPCFrame.setup(Patterns::IClientApps::RunIPCFrame, hkClientApps_RunIPCFrame)
 		&& IClientAppManager_RunIPCFrame.setup(Patterns::IClientAppManager::RunIPCFrame, hkClientAppManager_RunIPCFrame)
@@ -1236,6 +1249,7 @@ void Hooks::place()
 	createAndPlaceSteamIdHook();
 
 	//Detours
+	GetManifest.place();
 	TraceIPC.place();
 
 	IClientApps_RunIPCFrame.place();
@@ -1272,6 +1286,7 @@ void Hooks::place()
 void Hooks::remove()
 {
 	//Detours
+	GetManifest.remove();
 	TraceIPC.remove();
 
 	IClientApps_RunIPCFrame.remove();
