@@ -10,7 +10,6 @@ void License::recvMsg(CProtoBufMsgBase* msg)
 {
 	switch(msg->type)
 	{
-
 		case 780:
 		{
 			const auto body = msg->getBody<CMsgClientLicenseList>();

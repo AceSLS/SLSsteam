@@ -182,7 +182,7 @@ namespace Patterns
 		Pattern_t RunIPCFrame
 		{
 			"IClientInventory::RunIPCFrame",
-			"FF B5 ? ? ? ? 50 8D 86 ? ? ? ? 68 FC 12 00 00",
+			"E8 ? ? ? ? 8B 85 ? ? ? ? 83 C4 10 3D ? 9E F4 93",
 			SigFollowMode::PrologueUpwards,
 			std::vector<uint8_t> { 0x56, 0x57, 0xe5, 0x89, 0x55 }
 		};
