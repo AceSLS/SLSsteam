@@ -1,7 +1,7 @@
 #include "license.hpp"
 
 #include "../sdk/CProtoBufMsgBase.hpp"
-#include "../sdk/EAppOwnershipFlags.hpp"
+#include "../sdk/ELicenseFlags.hpp"
 #include "../sdk/ELicenseType.hpp"
 
 #include "../config.hpp"
@@ -26,8 +26,10 @@ void License::recvMsg(CProtoBufMsgBase* msg)
 			{
 				auto lic = body->mutable_licenses(i);
 
+				g_pLog->once("License for %u with flags %u of type %u\n", lic->package_id(), lic->flags(), lic->license_type());
+
 				lic->set_owner_id(g_currentSteamId);
-				lic->set_flags(EAPPOWNERSHIPFLAGS_SUBSCRIBED);
+				lic->set_flags(ELICENSE_FLAGS_NONE);
 				lic->set_license_type(ELICENSE_TYPE_SINGLE_PURCHASE);
 			}
 
