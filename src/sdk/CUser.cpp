@@ -2,6 +2,7 @@
 
 #include "CUser.hpp"
 
+#include "../config.hpp"
 #include "../hooks.hpp"
 #include "../patterns.hpp"
 
@@ -15,6 +16,11 @@ bool CUser::isSubscribed(const AppId_t appId)
 {
 	AppOwnershipInfo_t info {};
 	if (!checkAppOwnership(appId, &info))
+	{
+		return false;
+	}
+
+	if (g_config.addedPackageIds.get().contains(info.subId))
 	{
 		return false;
 	}
