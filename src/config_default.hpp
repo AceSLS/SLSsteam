@@ -37,6 +37,9 @@ AppIds:
 #It will get ignored in exclusion checks for the parent AppId
 AdditionalApps:
 
+#Additional DepotIds to inject (used for downloading in combination to AdditionalApps)
+AdditionalDepots:
+
 #Additional licenses to inject. Only works with store packages!
 AdditionalPackages:
 

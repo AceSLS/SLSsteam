@@ -54,6 +54,7 @@ public:
 
 	MTVariable<std::unordered_set<AppId_t>> appIds;
 	MTVariable<std::unordered_set<AppId_t>> addedAppIds;
+	MTVariable<std::unordered_set<AppId_t>> addedDepotIds;
 	MTVariable<std::unordered_set<uint32_t>> addedPackageIds;
 	MTVariable<std::unordered_map<AppId_t, CDlcData>> dlcData;
 	MTVariable<std::unordered_map<AppId_t, uint64_t>> appTokens;

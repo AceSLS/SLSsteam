@@ -191,6 +191,7 @@ bool CConfig::loadSettings(bool firstLoad)
 	addedAppIds = _addedAppIds;
 
 	appIds = getList<AppId_t>(node, "AppIds");
+	addedDepotIds = getList<AppId_t>(node, "AdditionalDepots");
 	addedPackageIds = getList<AppId_t>(node, "AdditionalPackages");
 	fakeOffline = getList<AppId_t>(node, "FakeOffline");
 	depotBlacklist = getList<AppId_t>(node, "DepotBlacklist");
@@ -198,7 +199,6 @@ bool CConfig::loadSettings(bool firstLoad)
 	fakeAppIds = getMap<AppId_t, AppId_t>(node, "FakeAppIds");
 	manifestIds = getMap<AppId_t, uint64_t>(node, "ManifestIds");
 	appTokens = getMap<AppId_t, uint64_t>(node, "AppTokens");
-	depotKeys = getMap<AppId_t, std::string>(node, "DepotKeys");
 	gameTitles = getMap<AppId_t, std::string>(node, "GameTitles");
 	subscriptionTimestamps = getMap<AppId_t, uint32_t>(node, "SubscriptionTimestamps");
 

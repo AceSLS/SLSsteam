@@ -86,6 +86,16 @@ namespace Patterns
 		};
 	}
 
+	namespace CPackageInfoCache
+	{
+		Pattern_t GetPackageInfo
+		{
+			"CPackageInfoCache::GetPackageInfo",
+			"E8 ? ? ? ? 83 45 A4 ?",
+			SigFollowMode::Relative
+		};
+	}
+
 	namespace CWebSocketConnection
 	{
 		Pattern_t BBuildAndAsyncSendFrame

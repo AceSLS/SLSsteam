@@ -5,6 +5,7 @@
 #include <cstdint>
 
 
+class CPackageInfoCache;
 class CUser;
 
 class CSteamEngine

@@ -12,7 +12,12 @@
 
 class CAPIJob;
 class CClientUnifiedServiceTransport;
+<<<<<<< HEAD
 class CNetPacket;
+=======
+class CPackageInfo;
+class CPackageInfoCache;
+>>>>>>> 3f0e142 (feat(license): Add Depot injection)
 class CProtoBufMsgBase;
 
 class CUtlBuffer;
@@ -101,6 +106,8 @@ namespace Hooks
 
 	typedef uint32_t(*CAppDataCache_BParseResponseFromMessage_t)(void*, CProtoBufMsgBase*);
 
+	typedef CPackageInfo*(*CPackageInfoCache_GetPackageInfo_t)(CPackageInfoCache*, uint32_t, uint32_t, uint32_t);
+
 	typedef uint32_t(*CClientUnifiedServiceMethod_SendAndRecvMsg_t)(CClientUnifiedServiceTransport*, const char*, void*, void*, void*);
 
 	typedef void(*CCMInterface_RecvPkt_t)(void*, CNetPacket*);
@@ -138,6 +145,8 @@ namespace Hooks
 	extern DetourHook<CClientUnifiedServiceMethod_SendAndRecvMsg_t> CClientUnifiedServiceMethod_SendAndRecvMsg;
 
 	extern DetourHook<CCMInterface_RecvPkt_t> CCMInterface_RecvPkt;
+
+	extern DetourHook<CPackageInfoCache_GetPackageInfo_t> CPackageInfoCache_GetPackageInfo;
 
 	extern DetourHook<CSteamMatchmakingServers_GetServerDetails_t> CSteamMatchmakingServers_GetServerDetails;
 	extern DetourHook<CSteamMatchmakingServers_RequestInternetServerList_t> CSteamMatchmakingServers_RequestInternetServerList;

@@ -11,6 +11,7 @@
 #include "sdk/CAPIJob.hpp"
 #include "sdk/CClientUnifiedServiceTransport.hpp"
 #include "sdk/CNetPacket.hpp"
+#include "sdk/CPackageInfoCache.hpp"
 #include "sdk/CProtoBufMsgBase.hpp"
 #include "sdk/CSteamEngine.hpp"
 #include "sdk/CSteamMatchmakingServers.hpp"
@@ -269,6 +270,26 @@ static uint32_t hkClientUnifiedServiceTransport_SendAndRecvMsg(CClientUnifiedSer
 	);
 
 	return ret;
+}
+
+static CPackageInfo* hkPackageInfoCache_GetPackageInfo(CPackageInfoCache* pCache, uint32_t packageId, uint32_t a2, uint32_t a3)
+{
+	const auto pkg = Hooks::CPackageInfoCache_GetPackageInfo.tramp.fn(pCache, packageId, a2, a3);
+	g_pLog->once
+	(
+		"%s(%p, %u, %u, %u) -> %p\n",
+
+		Hooks::CPackageInfoCache_GetPackageInfo.name.c_str(),
+		pCache,
+		packageId,
+		a2,
+		a3,
+		pkg
+	);
+
+	License::injectDepots(pkg);
+
+	return pkg;
 }
 
 static void hkCMInterface_RecvPkt(void* pCMInterface, CNetPacket* pNetPacket)
@@ -1143,7 +1164,7 @@ namespace Hooks
 
 	DetourHook<CClientUnifiedServiceMethod_SendAndRecvMsg_t> CClientUnifiedServiceMethod_SendAndRecvMsg;
 
-	DetourHook<CCMInterface_RecvPkt_t> CCMInterface_RecvPkt;
+	DetourHook<CPackageInfoCache_GetPackageInfo_t> CPackageInfoCache_GetPackageInfo;
 
 	DetourHook<CSteamMatchmakingServers_GetServerDetails_t> CSteamMatchmakingServers_GetServerDetails;
 	DetourHook<CSteamMatchmakingServers_RequestInternetServerList_t> CSteamMatchmakingServers_RequestInternetServerList;
@@ -1223,6 +1244,8 @@ bool Hooks::setup()
 		//To lazy to move this for now. Doesn't really matter wheter we detour or vft hook
 		&& CCMInterface_RecvPkt.setup(VFTIndexes::CCMInterface::RecvPkt, &hkCMInterface_RecvPkt)
 
+		&& CPackageInfoCache_GetPackageInfo.setup(Patterns::CPackageInfoCache::GetPackageInfo, &hkPackageInfoCache_GetPackageInfo)
+
 		&& CSteamMatchmakingServers_GetServerDetails.setup(VFTIndexes::CSteamMatchmakingServers::GetServerDetails, &hkSteamMatchmakingServers_GetServerDetails)
 		&& CSteamMatchmakingServers_RequestInternetServerList.setup(VFTIndexes::CSteamMatchmakingServers::RequestInternetServerList, &hkSteamMatchmakingServers_RequestInternetServerList)
 
@@ -1266,6 +1289,8 @@ void Hooks::place()
 
 	CCMInterface_RecvPkt.place();
 
+	CPackageInfoCache_GetPackageInfo.place();
+
 	CSteamEngine_RunInterface.place();
 	CSteamEngine_SetAppIdForCurrentPipe.place();
 
@@ -1302,6 +1327,8 @@ void Hooks::remove()
 	CClientUnifiedServiceMethod_SendAndRecvMsg.remove();
 
 	CCMInterface_RecvPkt.remove();
+
+	CPackageInfoCache_GetPackageInfo.remove();
 
 	CSteamEngine_RunInterface.remove();
 	CSteamEngine_SetAppIdForCurrentPipe.remove();
