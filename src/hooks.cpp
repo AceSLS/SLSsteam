@@ -727,6 +727,19 @@ static bool hkClientInventory_GetResultItems(void* pClientInventory, uint32_t ha
 
 	Inventory::getResultItems(arrItems, arrItemsSize, pItemsCount);
 
+	g_pLog->debug
+		(
+			"%s(%p, %u, %p, %u, %u) -> %i\n",
+
+			Hooks::IClientInventory_GetResultItems.name.c_str(),
+			pClientInventory,
+			handle,
+			arrItems,
+			arrItemsSize,
+			*pItemsCount,
+			success
+		);
+
 	return success;
 }
 

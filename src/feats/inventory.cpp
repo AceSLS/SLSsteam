@@ -28,12 +28,32 @@ void Inventory::getResultItems(SteamItemDetails_t* pItems, uint32_t pItemsSize, 
 {
 	const uint32_t appId = FakeAppIds::getRealAppIdForCurrentPipe();
 
-	if (!itemList.contains(appId))
+	auto items = itemList[appId];
+	auto confItems = g_config.inventoryItems.get();
+
+	if(confItems.contains(appId))
 	{
-		return;
+		for(const auto& itm : confItems[appId].items)
+		{
+			bool skip = false;
+
+			for(const auto& itm2 : items)
+			{
+				if (itm.first == itm2)
+				{
+					skip = true;
+					break;
+				}
+			}
+
+			if (!skip)
+			{
+				items.emplace_back(itm.first);
+				g_pLog->debug("Injecting item %u from config\n", itm.first);
+			}
+		}
 	}
 
-	auto items = itemList[appId];
 	*pItemsCount = items.size();
 
 	if (!pItemsSize)
@@ -47,7 +67,7 @@ void Inventory::getResultItems(SteamItemDetails_t* pItems, uint32_t pItemsSize, 
 	{
 		SteamItemDetails_t& itm = pItems[i];
 		itm.id = items[i];
-		itm.handle = 0;
+		itm.handle = i + 1;
 		itm.flags = 0;
 
 		if (configItems.contains(appId))
