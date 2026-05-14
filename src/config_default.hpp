@@ -85,6 +85,9 @@ NotifyInit: yes
 #Enable sending commands to SLSsteam via /tmp/SLSsteam.API
 API: no
 
+#Disable cloud saves for SLSsteam-unlocked games. Set to "no" if using CloudRedirect or similar.
+DisableCloud: yes
+
 #Changes your account's E-Mail clientsided. Leave blank to disable
 FakeEmail: ""
 
