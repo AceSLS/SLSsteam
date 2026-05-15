@@ -12,8 +12,62 @@
 
 #include "fakeappid.hpp"
 
+#include <cstdio>
+#include <string>
+#include <unordered_map>
+
 bool Apps::applistRequested;
 std::map<uint32_t, int> Apps::appIdOwnerOverride;
+
+namespace
+{
+	constexpr uint32_t SHORTCUT_APP_ID_HIGH_BIT = 0x80000000;
+	constexpr uint64_t SHORTCUT_GAME_ID_LOW_BITS = 0x02000000;
+	constexpr uint64_t SHORTCUT_GAME_ID_LOW_MASK = 0xffffffff;
+
+	uint32_t makeShortcutAppId(uint32_t appId)
+	{
+		return SHORTCUT_APP_ID_HIGH_BIT | appId;
+	}
+
+	uint64_t makeShortcutGameId(uint32_t appId)
+	{
+		return (static_cast<uint64_t>(makeShortcutAppId(appId)) << 32) | SHORTCUT_GAME_ID_LOW_BITS;
+	}
+
+	std::string getPresenceTitle(uint32_t appId, const std::unordered_map<uint32_t, std::string>& titles, const std::string& existingTitle = "")
+	{
+		if (titles.contains(appId))
+		{
+			return titles.at(appId);
+		}
+
+		if (g_pClientApps)
+		{
+			char name[256] {};
+			g_pClientApps->getAppData(appId, "common/name", name, sizeof(name));
+			if (name[0])
+			{
+				g_pLog->debug("AppName %s\n", name);
+				return name;
+			}
+		}
+
+		if (!existingTitle.empty())
+		{
+			return existingTitle;
+		}
+
+		char fallback[32] {};
+		std::snprintf(fallback, sizeof(fallback), "App %u", appId);
+		return fallback;
+	}
+}
+
+bool Apps::isShortcutGameId(uint64_t gameId)
+{
+	return (gameId >> 32) && ((gameId & SHORTCUT_GAME_ID_LOW_MASK) == SHORTCUT_GAME_ID_LOW_BITS);
+}
 
 bool Apps::unlockApp(uint32_t appId, CAppOwnershipInfo* info, uint32_t ownerId)
 {
@@ -167,17 +221,24 @@ void Apps::sendGamesPlayed(CMsgClientGamesPlayed* msg)
 {
 	auto titles = g_config.gameTitles.get();
 	bool owned = false;
+	const auto addedAppIds = g_config.addedAppIds.get();
 
 	for(int i = 0; i < msg->games_played_size(); i++)
 	{
 		auto game = CMsgClientGamesPlayed_GamePlayed(msg->games_played(i));
+		const uint64_t originalGameId = game.game_id();
 
-		if (!game.game_id())
+		if (!originalGameId)
 		{
 			continue;
 		}
 
-		if(!owned && g_pSteamEngine->getUser(0)->isSubscribed(game.game_id()))
+		const uint32_t gameAppId = static_cast<uint32_t>(originalGameId);
+		const uint32_t launchedAppId = FakeAppIds::getRealAppIdForCurrentPipe(false);
+		const uint32_t additionalAppId = launchedAppId ? launchedAppId : gameAppId;
+		const bool additionalApp = addedAppIds.contains(additionalAppId);
+
+		if(!owned && !additionalApp && g_pSteamEngine->getUser(0)->isSubscribed(gameAppId))
 		{
 			owned = true;
 		}
@@ -187,16 +248,23 @@ void Apps::sendGamesPlayed(CMsgClientGamesPlayed* msg)
 			game.set_owner_id(1);
 		}
 
-		if (titles.contains(game.game_id()))
+		if (additionalApp)
 		{
-			game.set_game_extra_info(titles[game.game_id()]);
+			const auto title = getPresenceTitle(additionalAppId, titles, game.game_extra_info());
+			const uint64_t shortcutGameId = makeShortcutGameId(additionalAppId);
+
+			game.set_game_id(shortcutGameId);
+			game.set_game_extra_info(title);
+
+			g_pLog->debug("Setting AdditionalApp %u presence to shortcut %llu (%s); local game_id was %llu\n", additionalAppId, shortcutGameId, title.c_str(), originalGameId);
 		}
-		else if (!owned || FakeAppIds::getFakeAppId(game.game_id()))
+		else if (titles.contains(gameAppId))
 		{
-			char name[256] {}; //No clue how long titles can get
-			g_pClientApps->getAppData(game.game_id(), "common/name", name, sizeof(name));
-			g_pLog->debug("AppName %s\n", name);
-			game.set_game_extra_info(name);
+			game.set_game_extra_info(titles[gameAppId]);
+		}
+		else if (!owned || FakeAppIds::getFakeAppId(gameAppId))
+		{
+			game.set_game_extra_info(getPresenceTitle(gameAppId, titles));
 		}
 
 		msg->mutable_games_played(i)->ParseFromString(game.SerializeAsString());

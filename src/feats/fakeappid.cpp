@@ -2,6 +2,8 @@
 
 #include "../config.hpp"
 
+#include "apps.hpp"
+
 #include "../sdk/CProtoBufMsgBase.hpp"
 #include "../sdk/CSteamEngine.hpp"
 #include "../sdk/CSteamMatchmakingServers.hpp"
@@ -153,6 +155,11 @@ void FakeAppIds::sendMsg(CProtoBufMsgBase* msg)
 	for(int i = 0; i < body->games_played_size(); i++)
 	{
 		const auto game = body->mutable_games_played(i);
+		if (Apps::isShortcutGameId(game->game_id()))
+		{
+			continue;
+		}
+
 		const uint32_t fakeAppId = FakeAppIds::getFakeAppId(game->game_id());
 		if (!fakeAppId)
 		{

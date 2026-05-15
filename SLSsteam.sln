@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{07C2787E-EAC7-C090-1BA3-A61EC2A24D84}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ticket-grabber", "tools\ticket-grabber\ticket-grabber.csproj", "{8F96102A-86D6-C2F1-B7D5-A950D730128F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8F96102A-86D6-C2F1-B7D5-A950D730128F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F96102A-86D6-C2F1-B7D5-A950D730128F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F96102A-86D6-C2F1-B7D5-A950D730128F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F96102A-86D6-C2F1-B7D5-A950D730128F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{8F96102A-86D6-C2F1-B7D5-A950D730128F} = {07C2787E-EAC7-C090-1BA3-A61EC2A24D84}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8D8C1DE0-B09D-4CD9-8264-B571C345A666}
+	EndGlobalSection
+EndGlobal

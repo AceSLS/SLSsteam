@@ -24,6 +24,8 @@ namespace Apps
 	bool shouldDisableCDKey(uint32_t appId);
 	bool shouldDisableUpdates(uint32_t appId);
 
+	bool isShortcutGameId(uint64_t gameId);
+
 	void sendGamesPlayed(CMsgClientGamesPlayed* msg);
 	void sendPICSInfoRequest(CMsgClientPICSProductInfoRequest* msg);
 	void sendMsg(CProtoBufMsgBase* msg);
