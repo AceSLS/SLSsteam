@@ -236,9 +236,17 @@ void Apps::sendGamesPlayed(CMsgClientGamesPlayed* msg)
 		const uint32_t gameAppId = static_cast<uint32_t>(originalGameId);
 		const uint32_t launchedAppId = FakeAppIds::getRealAppIdForCurrentPipe(false);
 		const uint32_t additionalAppId = launchedAppId ? launchedAppId : gameAppId;
-		const bool additionalApp = addedAppIds.contains(additionalAppId);
+		const bool shortcutApp = Apps::isShortcutGameId(originalGameId) || (additionalAppId & SHORTCUT_APP_ID_HIGH_BIT);
+		if (shortcutApp)
+		{
+			g_pLog->debug("Leaving shortcut game %llu untouched\n", originalGameId);
+			continue;
+		}
 
-		if(!owned && !additionalApp && g_pSteamEngine->getUser(0)->isSubscribed(gameAppId))
+		const bool ownedApp = g_pSteamEngine->getUser(0)->isSubscribed(gameAppId);
+		const bool additionalApp = addedAppIds.contains(additionalAppId) && !ownedApp;
+
+		if(!owned && !additionalApp && ownedApp)
 		{
 			owned = true;
 		}
