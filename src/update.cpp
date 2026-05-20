@@ -14,8 +14,6 @@
 #include <map>
 #include <string>
 
-static CURL* curl = nullptr;
-
 std::map<uint64_t, std::unordered_set<std::string>> Updater::clientHashMap = std::map<uint64_t, std::unordered_set<std::string>>();
 
 bool Updater::init()

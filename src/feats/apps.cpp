@@ -147,7 +147,9 @@ void Apps::getSubscribedApps(uint32_t* appList, size_t size, uint32_t& count)
 bool Apps::shouldDisableCloud(uint32_t appId)
 {
 	if (!g_config.disableCloud.get())
+	{
 		return false;
+	}
 
 	return !g_pSteamEngine->getUser(0)->isSubscribed(appId);
 }

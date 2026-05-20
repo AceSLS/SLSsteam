@@ -52,6 +52,7 @@ FakeOffline:
 
 #Change AppIds of games to enable networking features
 #Use 0 as a key to set for all unowned Apps
+#Keeps track of the proper AppIds via game launches, so please do not start multiple FakeAppId enabled games simultaneously
 FakeAppIds:
 
 #Custom ingame statuses. Set AppId to 0 to disable
@@ -85,7 +86,7 @@ NotifyInit: yes
 #Enable sending commands to SLSsteam via /tmp/SLSsteam.API
 API: no
 
-#Disable cloud saves for SLSsteam-unlocked games. Set to "no" if using CloudRedirect or similar.
+#Disable cloud saves for unlocked games. Set to "no" if using CloudRedirect or similar.
 DisableCloud: yes
 
 #Changes your account's E-Mail clientsided. Leave blank to disable
