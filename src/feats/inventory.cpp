@@ -28,7 +28,15 @@ void Inventory::getResultItems(SteamItemDetails_t* pItems, uint32_t pItemsSize, 
 {
 	const uint32_t appId = FakeAppIds::getRealAppIdForCurrentPipe();
 
-	auto items = itemList[appId];
+	auto items = std::vector<uint32_t>();
+	if (itemList.contains(appId))
+	{
+		for(const auto& item :  itemList[appId])
+		{
+			items.emplace_back(item);
+		}
+	}
+
 	auto confItems = g_config.inventoryItems.get();
 
 	if(confItems.contains(appId))
@@ -61,18 +69,26 @@ void Inventory::getResultItems(SteamItemDetails_t* pItems, uint32_t pItemsSize, 
 		return;
 	}
 
-	const auto configItems = g_config.inventoryItems.get();
+	//Don't trust pItemSize
+	g_pLog->debug("items.size() = %u, pItemSize = %u\n", items.size(), pItemsSize);
 
-	for(unsigned int i = 0; i < pItemsSize; i++)
+	if (items.size() > pItemsSize)
+	{
+
+		g_pLog->debug("Aborting inventory injection! items.size() > pItemSize\n");
+		return;
+	}
+
+	for(unsigned int i = 0; i < items.size(); i++)
 	{
 		SteamItemDetails_t& itm = pItems[i];
 		itm.id = items[i];
 		itm.handle = i + 1;
 		itm.flags = 0;
 
-		if (configItems.contains(appId))
+		if (confItems.contains(appId))
 		{
-			const auto configMap = configItems.at(appId);
+			const auto configMap = confItems.at(appId);
 			if (configMap.items.contains(itm.id))
 			{
 				itm.quantity = configMap.items.at(itm.id);
