@@ -27,10 +27,16 @@ enum EAppState : int
 	APPSTATE_UPDATED_DISABLED_BY_APP = 0x80000,
 };
 
+enum EAppUpdateError : int32_t
+{
+	APP_UPDATE_ERROR_NONE = 0,
+	APP_UPDATE_ERROR_MISSING_CONFIG = 9,
+};
+
 class IClientAppManager
 {
 public:
-	bool installApp(uint32_t appId, uint32_t librarIndex);
+	EAppUpdateError installApp(uint32_t appId, int32_t libraryIndex);
 	EAppState getAppInstallState(uint32_t appId);
 };
 

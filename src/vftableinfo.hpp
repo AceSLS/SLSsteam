@@ -26,6 +26,7 @@ namespace VFTIndexes
 		constexpr int IsAppDlcInstalled = 9;
 		constexpr int BIsDlcEnabled = 11;
 		constexpr int GetUpdateInfo = 20;
+		constexpr int GetAppOwnershipInfo = 71;
 	}
 
 	namespace IClientRemoteStorage

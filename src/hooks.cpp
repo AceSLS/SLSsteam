@@ -2,6 +2,7 @@
 
 #include "config.hpp"
 #include "globals.hpp"
+#include "api.hpp"
 #include "log.hpp"
 #include "memhlp.hpp"
 #include "patterns.hpp"
@@ -430,28 +431,49 @@ static bool hkClientAppManager_GetUpdateInfo(void* pClientAppManager, uint32_t a
 	return success;
 }
 
+static bool hkClientAppManager_GetAppOwnershipInfo(void* pClientAppManager, uint32_t appId, uint32_t* pInfo)
+{
+	const bool ret = Hooks::IClientAppManager_GetAppOwnershipInfo.originalFn.fn(pClientAppManager, appId, pInfo);
+	constexpr uint32_t invalidPlatformFlag = 0x10;
+
+	if (ret && pInfo && SLSAPI::currentInstallAppId() == appId && (pInfo[1] & invalidPlatformFlag))
+	{
+		g_pLog->info("API Clearing invalid-platform ownership flag for %u during InstallApp\n", appId);
+		pInfo[1] &= ~invalidPlatformFlag;
+	}
+
+	return ret;
+}
+
 __attribute__((hot))
 static void hkClientAppManager_RunIPCFrame(void* pClientAppManager, void* a1, void* a2, void* a3)
 {
 	g_pClientAppManager = reinterpret_cast<IClientAppManager*>(pClientAppManager);
 
-	std::shared_ptr<lm_vmt_t> vft = std::make_shared<lm_vmt_t>();
-	LM_VmtNew(*reinterpret_cast<lm_address_t**>(pClientAppManager), vft.get());
+	static bool vftHooksInitialized = false;
+	if (!vftHooksInitialized)
+	{
+		std::shared_ptr<lm_vmt_t> vft = std::make_shared<lm_vmt_t>();
+		LM_VmtNew(*reinterpret_cast<lm_address_t**>(pClientAppManager), vft.get());
 
-	Hooks::IClientAppManager_BIsDlcEnabled.setup(vft, VFTIndexes::IClientAppManager::BIsDlcEnabled, hkClientAppManager_BIsDlcEnabled);
-	Hooks::IClientAppManager_GetAppUpdateInfo.setup(vft, VFTIndexes::IClientAppManager::GetUpdateInfo, hkClientAppManager_GetUpdateInfo);
-	Hooks::IClientAppManager_LaunchApp.setup(vft, VFTIndexes::IClientAppManager::LaunchApp, hkClientAppManager_LaunchApp);
-	Hooks::IClientAppManager_IsAppDlcInstalled.setup(vft, VFTIndexes::IClientAppManager::IsAppDlcInstalled, hkClientAppManager_IsAppDlcInstalled);
+		Hooks::IClientAppManager_BIsDlcEnabled.setup(vft, VFTIndexes::IClientAppManager::BIsDlcEnabled, hkClientAppManager_BIsDlcEnabled);
+		Hooks::IClientAppManager_GetAppUpdateInfo.setup(vft, VFTIndexes::IClientAppManager::GetUpdateInfo, hkClientAppManager_GetUpdateInfo);
+		Hooks::IClientAppManager_LaunchApp.setup(vft, VFTIndexes::IClientAppManager::LaunchApp, hkClientAppManager_LaunchApp);
+		Hooks::IClientAppManager_IsAppDlcInstalled.setup(vft, VFTIndexes::IClientAppManager::IsAppDlcInstalled, hkClientAppManager_IsAppDlcInstalled);
+		Hooks::IClientAppManager_GetAppOwnershipInfo.setup(vft, VFTIndexes::IClientAppManager::GetAppOwnershipInfo, hkClientAppManager_GetAppOwnershipInfo);
 
-	Hooks::IClientAppManager_BIsDlcEnabled.place();
-	Hooks::IClientAppManager_GetAppUpdateInfo.place();
-	Hooks::IClientAppManager_LaunchApp.place();
-	Hooks::IClientAppManager_IsAppDlcInstalled.place();
+		Hooks::IClientAppManager_BIsDlcEnabled.place();
+		Hooks::IClientAppManager_GetAppUpdateInfo.place();
+		Hooks::IClientAppManager_LaunchApp.place();
+		Hooks::IClientAppManager_IsAppDlcInstalled.place();
+		Hooks::IClientAppManager_GetAppOwnershipInfo.place();
 
-	g_pLog->debug("IClientAppManager->vft at %p\n", vft->vtable);
+		g_pLog->debug("IClientAppManager->vft at %p\n", vft->vtable);
+		vftHooksInitialized = true;
+	}
 
-	Hooks::IClientAppManager_RunIPCFrame.remove();
-	Hooks::IClientAppManager_RunIPCFrame.originalFn.fn(pClientAppManager, a1, a2, a3);
+	Hooks::IClientAppManager_RunIPCFrame.tramp.fn(pClientAppManager, a1, a2, a3);
+	SLSAPI::runPendingRequests();
 }
 
 static unsigned int hkClientApps_GetDLCCount(void* pClientApps, uint32_t appId)
@@ -528,6 +550,7 @@ static void hkClientApps_RunIPCFrame(void* pClientApps, void* a1, void* a2, void
 	}
 
 	Hooks::IClientApps_RunIPCFrame.tramp.fn(pClientApps, a1, a2, a3);
+	SLSAPI::runPendingRequests();
 }
 
 static bool hkClientRemoteStorage_IsCloudEnabledForApp(void* pClientRemoteStorage, uint32_t appId)
@@ -573,6 +596,7 @@ static void hkClientRemoteStorage_RunIPCFrame(void* pClientRemoteStorage, void* 
 	FakeAppIds::runIPCFrame(false);
 	Hooks::IClientRemoteStorage_RunIPCFrame.tramp.fn(pClientRemoteStorage, a1, a2, a3);
 	FakeAppIds::runIPCFrame(true);
+	SLSAPI::runPendingRequests();
 }
 
 static void hkClientUGC_RunIPCFrame(void* pClientUGC, void* a1, void* a2, void* a3)
@@ -581,6 +605,7 @@ static void hkClientUGC_RunIPCFrame(void* pClientUGC, void* a1, void* a2, void* 
 	FakeAppIds::runIPCFrame(false);
 	Hooks::IClientUGC_RunIPCFrame.tramp.fn(pClientUGC, a1, a2, a3);
 	FakeAppIds::runIPCFrame(true);
+	SLSAPI::runPendingRequests();
 }
 
 static uint32_t hkClientUtils_GetAppId(void* pClientUtils)
@@ -640,6 +665,7 @@ static void hkClientUtils_RunIPCFrame(void* pClientUtils, void* a1, void* a2, vo
 	}
 
 	Hooks::IClientUtils_RunIPCFrame.tramp.fn(pClientUtils, a1, a2, a3);
+	SLSAPI::runPendingRequests();
 }
 
 static bool hkClientUser_BLoggedOn(void* pClientUser)
@@ -793,6 +819,7 @@ static void hkClientUser_RunIPCFrame(void* pClientUser, void* a1, void* a2, void
 	
 	//FakeAppIds::pipeLoop(false);
 	Hooks::IClientUser_RunIPCFrame.tramp.fn(pClientUser, a1, a2, a3);
+	SLSAPI::runPendingRequests();
 	//FakeAppIds::pipeLoop(true);
 }
 
@@ -802,6 +829,7 @@ static void hkClientUserStats_RunIPCFrame(void* pClientUserStats, void* a1, void
 	FakeAppIds::runIPCFrame(false);
 	Hooks::IClientUserStats_RunIPCFrame.tramp.fn(pClientUserStats, a1, a2, a3);
 	FakeAppIds::runIPCFrame(true);
+	SLSAPI::runPendingRequests();
 }
 
 static void hkSteamMatchmakingPingResponse_ServerResponded(void* pSteamMatchingPingResponse, gameserverdetails_t* details)
@@ -968,6 +996,7 @@ namespace Hooks
 	VFTHook<IClientAppManager_GetAppUpdateInfo_t> IClientAppManager_GetAppUpdateInfo("IClientAppManager::GetAppUpdateInfo");
 	VFTHook<IClientAppManager_LaunchApp_t> IClientAppManager_LaunchApp("IClientAppManager::LaunchApp");
 	VFTHook<IClientAppManager_IsAppDlcInstalled_t> IClientAppManager_IsAppDlcInstalled("IClientAppManager::IsAppDlcInstalled");
+	VFTHook<IClientAppManager_GetAppOwnershipInfo_t> IClientAppManager_GetAppOwnershipInfo("IClientAppManager::GetAppOwnershipInfo");
 
 	VFTHook<IClientApps_GetDLCDataByIndex_t> IClientApps_GetDLCDataByIndex("IClientApps::GetDLCDataByIndex");
 	VFTHook<IClientApps_GetDLCCount_t> IClientApps_GetDLCCount("IClientApps::GetDLCCount");
@@ -1120,6 +1149,7 @@ void Hooks::remove()
 	IClientAppManager_GetAppUpdateInfo.remove();
 	IClientAppManager_LaunchApp.remove();
 	IClientAppManager_IsAppDlcInstalled.remove();
+	IClientAppManager_GetAppOwnershipInfo.remove();
 
 	IClientApps_GetDLCDataByIndex.remove();
 	IClientApps_GetDLCCount.remove();

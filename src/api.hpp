@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <fstream>
 
 
@@ -12,6 +13,8 @@ namespace SLSAPI
 	extern CFileWatcher* watcher;
 
 	bool isEnabled();
+	uint32_t currentInstallAppId();
 	void onFileChange();
+	void runPendingRequests();
 	void init();
 }

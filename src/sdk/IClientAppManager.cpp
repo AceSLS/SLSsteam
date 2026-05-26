@@ -5,9 +5,9 @@
 
 #include <cstdint>
 
-bool IClientAppManager::installApp(uint32_t appId, uint32_t librarIndex)
+EAppUpdateError IClientAppManager::installApp(uint32_t appId, int32_t libraryIndex)
 {
-	return MemHlp::callVFunc<bool(*)(void*, uint32_t, uint32_t, uint8_t)>(VFTIndexes::IClientAppManager::InstallApp, this, appId, librarIndex, 0);
+	return MemHlp::callVFunc<EAppUpdateError(*)(void*, uint32_t, int32_t, uint8_t)>(VFTIndexes::IClientAppManager::InstallApp, this, appId, libraryIndex, 0);
 }
 
 EAppState IClientAppManager::getAppInstallState(uint32_t appId)
