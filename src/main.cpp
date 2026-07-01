@@ -66,6 +66,7 @@ static bool cleanEnvVar(const char* varName, const char* endsWith)
 static void unload()
 {
 	Hooks::remove();
+	SLSAPI::deinit();
 
 	//This is absolutely unnessecary for applications loading SLSsteam where it cancels from setup()
 	//Would be nice to run have for failed load() attempts though 
