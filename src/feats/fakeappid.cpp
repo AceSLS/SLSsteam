@@ -105,7 +105,6 @@ void FakeAppIds::getServerDetails(uint32_t handle, gameserverdetails_t& details)
 	}
 
 	const uint32_t realAppId = fakeAppIdMapServer[handle];
-
 	fakeAppIdMapPings[*reinterpret_cast<uint64_t*>(&details.address)] = realAppId;
 	details.appId = realAppId;
 
@@ -158,13 +157,22 @@ void FakeAppIds::sendMsg(CProtoBufMsgBase* msg)
 	for(int i = 0; i < body->games_played_size(); i++)
 	{
 		const auto game = body->mutable_games_played(i);
-		const uint32_t fakeAppId = FakeAppIds::getFakeAppId(game->game_id());
+		const uint64_t gameId = game->game_id();
+
+		// Native non-Steam shortcut IDs use 0x02000000 in their low 32 bits.
+		// Preserve the original 64-bit shortcut ID instead of applying a fake AppID.
+		if ((gameId & 0xffffffffULL) == 0x02000000ULL)
+		{
+			continue;
+		}
+
+		const uint32_t fakeAppId = FakeAppIds::getFakeAppId(gameId);
 		if (!fakeAppId)
 		{
 			continue;
 		}
 
-		g_pLog->debug("Setting %llu to %u\n", game->game_id(), fakeAppId);
+		g_pLog->debug("Setting %llu to %u\n", gameId, fakeAppId);
 		game->set_game_id(fakeAppId);
 	}
 }
