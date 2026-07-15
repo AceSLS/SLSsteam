@@ -32,7 +32,16 @@ public:
 	bool saveTicketToCache(const CMsgClientGetAppOwnershipTicketResponse& resp);
 
 	void launchApp(const AppId_t appId);
-	void getTicketOwnershipExtendedData(const AppId_t appId);
+	uint32_t getTicketOwnershipExtendedData
+	(
+		const AppId_t appId,
+		void* ticket,
+		const uint32_t ticketSize,
+		uint32_t* offAppId,
+		uint32_t* offSteamId,
+		uint32_t* offSig,
+		uint32_t* sigSize
+	);
 
 	std::string getEncryptedTicketPath(const AppId_t appId);
 	SavedTicket getCachedEncryptedTicket(const AppId_t appId);

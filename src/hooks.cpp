@@ -922,21 +922,24 @@ static uint32_t hkClientUser_GetAppOwnershipTicketExtendedData
 	uint32_t* pSigSize
 )
 {
-	const uint32_t ret = Hooks::IClientUser_GetAppOwnershipTicketExtendedData.originalFn.fn
-	(
-		pClientUser,
-		appId,
-		pTicket,
-		ticketSize,
-		pOffAppId,
-		pOffSteamId,
-		pOffSig,
-		pSigSize
-   );
+	uint32_t ret = Ticket::getTicketOwnershipExtendedData(appId, pTicket, ticketSize, pOffAppId, pOffSteamId, pOffSig, pSigSize);
 
-	g_pLog->once("%s(%u)->%u\n", Hooks::IClientUser_GetAppOwnershipTicketExtendedData.name.c_str(), appId, ret);
+	if (ret == 0)
+	{
+		ret = Hooks::IClientUser_GetAppOwnershipTicketExtendedData.tramp.fn
+		(
+			pClientUser,
+			appId,
+			pTicket,
+			ticketSize,
+			pOffAppId,
+			pOffSteamId,
+			pOffSig,
+			pSigSize
+		);
+	}
 
-	Ticket::getTicketOwnershipExtendedData(appId);
+	g_pLog->once("%s(%p, %u)->%u\n", Hooks::IClientUser_GetAppOwnershipTicketExtendedData.name.c_str(), pClientUser, appId, ret);
 
 	return ret;
 }
@@ -1178,6 +1181,8 @@ namespace Hooks
 
 	DetourHook<CClientUnifiedServiceMethod_SendAndRecvMsg_t> CClientUnifiedServiceMethod_SendAndRecvMsg;
 
+	DetourHook<CCMInterface_RecvPkt_t> CCMInterface_RecvPkt;
+
 	DetourHook<CPackageInfoCache_GetPackageInfo_t> CPackageInfoCache_GetPackageInfo;
 
 	DetourHook<CSteamMatchmakingServers_GetServerDetails_t> CSteamMatchmakingServers_GetServerDetails;
@@ -1257,6 +1262,8 @@ bool Hooks::setup()
 
 		//To lazy to move this for now. Doesn't really matter wheter we detour or vft hook
 		&& CCMInterface_RecvPkt.setup(VFTIndexes::CCMInterface::RecvPkt, &hkCMInterface_RecvPkt)
+
+		&& CCMInterface_RecvPkt.setup(Patterns::CCMInterface::RecvPkt, &hkCMInterface_RecvPkt)
 
 		&& CPackageInfoCache_GetPackageInfo.setup(Patterns::CPackageInfoCache::GetPackageInfo, &hkPackageInfoCache_GetPackageInfo)
 

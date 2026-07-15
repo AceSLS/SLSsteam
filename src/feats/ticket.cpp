@@ -8,6 +8,8 @@
 #include "../sdk/CNetPacket.hpp"
 #include "../sdk/CSteamEngine.hpp"
 #include "../sdk/CUser.hpp"
+#include "../sdk/IClientUser.hpp"
+#include "../sdk/IClientUtils.hpp"
 #include "../sdk/steam.hpp"
 
 #include "base64/base64.hpp"
@@ -18,6 +20,7 @@
 #include <fstream>
 #include <ios>
 #include <sstream>
+#include <vector>
 
 uint32_t Ticket::oneTimeSteamIdSpoof = 0;
 std::map<AppId_t, Ticket::SavedTicket> Ticket::ticketMap = std::map<AppId_t, SavedTicket>();
@@ -120,16 +123,53 @@ void Ticket::launchApp(const AppId_t appId)
 	g_pLog->once("Force loaded AppOwnershipTicket for %i\n", appId);
 }
 
-void Ticket::getTicketOwnershipExtendedData(const AppId_t appId)
+uint32_t Ticket::getTicketOwnershipExtendedData
+(
+	const AppId_t appId,
+	void* ticket,
+	const uint32_t ticketSize,
+	uint32_t* offAppId,
+	uint32_t* offSteamId,
+	uint32_t* offSig,
+	uint32_t* sigSize
+)
 {
 	const SavedTicket cached = Ticket::getCachedTicket(appId);
 	const uint32_t steamId = cached.steamId;
-	if (!steamId)
+	if (steamId)
 	{
-		return;
+		oneTimeSteamIdSpoof = steamId;
+		return 0;
 	}
 
-	oneTimeSteamIdSpoof = steamId;
+	//Exploit from OpenSteam001
+	std::vector<char> splicedTicket;
+	splicedTicket.resize(ticketSize);
+
+	uint32_t actualSize = g_pClientUser->getAppOwnershipTicketExtendeData
+	(
+		7,
+		splicedTicket.data(),
+		splicedTicket.size(),
+		offAppId,
+		offSteamId,
+		offSig,
+		sigSize
+	);
+
+	g_pLog->debug("Ticket 7 size %u\n", actualSize);
+
+	const uint8_t* appIdBytes = reinterpret_cast<const uint8_t*>(&appId);
+	splicedTicket.insert(std::next(splicedTicket.begin(), *offSig), appIdBytes, appIdBytes + sizeof(appId));
+
+	*offAppId = *offSig;
+	*offSig = *offAppId + sizeof(appId);
+
+	memcpy(ticket, splicedTicket.data(), splicedTicket.size());
+	
+	g_pLog->debug("Spliced ticket for %u\n", appId);
+	
+	return actualSize;
 }
 
 std::string Ticket::getEncryptedTicketPath(const AppId_t appId)
