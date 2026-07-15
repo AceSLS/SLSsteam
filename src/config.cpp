@@ -188,11 +188,42 @@ bool CConfig::loadSettings(bool firstLoad)
 		}
 	}
 
+	reloadDepots = true;
+
+	std::lock_guard packagesChanged(packagesChangedMutex);
+	const auto prevPackageIds = addedPackageIds.get();
+	auto _addedPackageIds = getList<uint32_t>(node, "AdditionalPackages");
+
+	if (!firstLoad)
+	{
+		for(const auto& pkg : _addedPackageIds)
+		{
+			if (prevPackageIds.contains(pkg))
+			{
+				continue;
+			}
+
+			newPackages.emplace(pkg);
+			g_pLog->debug("PackageId %u added to AdditionalPackageIds\n", pkg);
+		}
+
+		for(const auto& pkg : prevPackageIds)
+		{
+			if (_addedPackageIds.contains(pkg))
+			{
+				continue;
+			}
+
+			removedPackages.emplace(pkg);
+			g_pLog->debug("PackageId %u removed from AdditionalPackageIds\n", pkg);
+		}
+	}
+
 	addedAppIds = _addedAppIds;
+	addedPackageIds = _addedPackageIds;
 
 	appIds = getList<AppId_t>(node, "AppIds");
 	addedDepotIds = getList<AppId_t>(node, "AdditionalDepots");
-	addedPackageIds = getList<AppId_t>(node, "AdditionalPackages");
 	fakeOffline = getList<AppId_t>(node, "FakeOffline");
 	depotBlacklist = getList<AppId_t>(node, "DepotBlacklist");
 

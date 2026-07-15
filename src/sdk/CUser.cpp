@@ -28,6 +28,12 @@ bool CUser::isSubscribed(const AppId_t appId)
 	return info.ownsLicense && !info.licenseExpired;
 }
 
+bool CUser::processLicenseList(const CMsgClientLicenseList* licenses)
+{
+	const static auto fn = reinterpret_cast<bool(*)(void*, const CMsgClientLicenseList*)>(Patterns::CUser::ProcessLicenseList.address);
+	return fn(this, licenses);
+}
+
 void CUser::postCallback(const ECallbackType type, void* pCallback, const uint32_t callbackSize)
 {
 	const static auto fn = reinterpret_cast<void(*)(void*, ECallbackType, void*, uint32_t, uint32_t)>(Patterns::CUser::PostCallback.address);

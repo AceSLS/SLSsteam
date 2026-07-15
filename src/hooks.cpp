@@ -287,7 +287,7 @@ static CPackageInfo* hkPackageInfoCache_GetPackageInfo(CPackageInfoCache* pCache
 		pkg
 	);
 
-	License::injectDepots(pkg);
+	License::getPackageInfo(pkg);
 
 	return pkg;
 }
@@ -346,6 +346,7 @@ static uint32_t hkSteamEngine_RunInterface(void* pSteamEngine, CUtlBuffer* pBufI
 	}
 
 	Apps::runIPCFrame();
+	License::runIPCFrame();
 	SLSAPI::runIPCFrame();
 
 	if (g_config.extendedLogging.get())

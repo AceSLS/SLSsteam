@@ -89,6 +89,12 @@ public:
 	std::unordered_set<AppId_t> newApps;
 	std::unordered_set<AppId_t> removedApps;
 
+	MTVariable<bool> reloadDepots;
+
+	std::mutex packagesChangedMutex;
+	std::unordered_set<uint32_t> newPackages;
+	std::unordered_set<uint32_t> removedPackages;
+
 	//Using incomplete class to avoid runtime linking errors
 	CFileWatcher* watcher;
 

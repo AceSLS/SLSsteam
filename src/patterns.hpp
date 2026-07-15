@@ -72,6 +72,7 @@ namespace Patterns
 		//TODO: Order & Convert old patterns
 		extern Pattern_t CheckAppOwnership;
 		extern Pattern_t GetSubscribedApps;
+		extern Pattern_t ProcessLicenseList;
 		extern Pattern_t PostCallback;
 		extern Pattern_t UpdateAppOwnershipTicket;
 	}

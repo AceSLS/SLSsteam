@@ -5,6 +5,8 @@
 #include <cstdint>
 
 
+class CMsgClientLicenseList;
+
 enum class ECallbackType : uint32_t
 {
 	LicensesUpdate_t = 0x7d,
@@ -74,12 +76,18 @@ struct AppOwnershipInfo_t {
     bool field28_0x37;
 }; //0x38
 
+struct LicensesUpdated_t
+{
+	uint8_t __pad0x0;
+};
+
 class CUser
 {
 public:
 	bool checkAppOwnership(const AppId_t appId, AppOwnershipInfo_t* pInfo);
 	bool isSubscribed(const AppId_t appId);
 
+	bool processLicenseList(const CMsgClientLicenseList* licenses);
 	void postCallback(const ECallbackType type, void* pCallback, const uint32_t callbackSize);
 	void updateAppOwnershipTicket(const AppId_t appId, void* pTicket, const uint32_t len);
 };

@@ -1,13 +1,11 @@
 #pragma once
 
-#include <cstdint>
-
 class CPackageInfo;
 class CProtoBufMsgBase;
 
 namespace License
 {
-	void injectDepots(CPackageInfo* pkg);
-	void getManifest(uint32_t depotId);
+	void getPackageInfo(CPackageInfo* pkg);
 	void recvMsg(CProtoBufMsgBase* msg);
+	void runIPCFrame();
 }

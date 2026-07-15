@@ -149,6 +149,12 @@ namespace Patterns
 			"E8 ? ? ? ? 8D 86 ? ? ? ? 83 C4 18 68 F6 01 00 00",
 			SigFollowMode::Relative
 		};
+		Pattern_t ProcessLicenseList
+		{
+			"CUser::ProcessLicenseList",
+			"E8 ? ? ? ? 05 ? ? ? ? 55 89 E5 57 56 53 83 EC ? 8B 7D 0C 6A ? 89 45 D0",
+			SigFollowMode::None
+		};
 		Pattern_t UpdateAppOwnershipTicket
 		{
 			"CUser::UpdateAppOwnershipTicket",
