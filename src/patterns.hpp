@@ -41,19 +41,11 @@ namespace Patterns
 		extern Pattern_t BParseResponseMessage;
 	}
 
-<<<<<<< HEAD
-=======
 	namespace CPackageInfoCache
 	{
 		extern Pattern_t GetPackageInfo;
 	}
 
-	namespace CProtoBufMsgBase
-	{
-		extern Pattern_t Send;
-	};
-
->>>>>>> d6b5c03 (feat(license): Add Depot injection)
 	namespace CSteamEngine
 	{
 		extern Pattern_t SetAppIdForCurrentPipe;

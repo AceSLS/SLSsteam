@@ -12,12 +12,9 @@
 
 class CAPIJob;
 class CClientUnifiedServiceTransport;
-<<<<<<< HEAD
 class CNetPacket;
-=======
 class CPackageInfo;
 class CPackageInfoCache;
->>>>>>> 3f0e142 (feat(license): Add Depot injection)
 class CProtoBufMsgBase;
 
 class CUtlBuffer;
@@ -92,7 +89,7 @@ public:
 
 namespace Hooks
 {
-	typedef uint32_t(*GetManifest_t)(void*, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t);
+	typedef uint32_t(*GetManifest_t)(void*, AppId_t, AppId_t, uint32_t, uint32_t, uint32_t, uint32_t);
 	typedef void(*TraceIPC_t)(const char*, const char*);
 
 	typedef void(*IClientAppManager_RunIPCFrame_t)(void*, void*, void*, void*);

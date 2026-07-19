@@ -192,7 +192,7 @@ bool CConfig::loadSettings(bool firstLoad)
 
 	std::lock_guard packagesChanged(packagesChangedMutex);
 	const auto prevPackageIds = addedPackageIds.get();
-	auto _addedPackageIds = getList<uint32_t>(node, "AdditionalPackages");
+	auto _addedPackageIds = getList<AppId_t>(node, "AdditionalPackages");
 
 	if (!firstLoad)
 	{
@@ -309,7 +309,7 @@ bool CConfig::loadSettings(bool firstLoad)
 		{
 			try
 			{
-				const uint32_t appId = app.first.as<uint32_t>();
+				const AppId_t appId = app.first.as<AppId_t>();
 
 				InventoryItems_t items;
 				items.appId = appId;

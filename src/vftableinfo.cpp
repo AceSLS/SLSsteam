@@ -187,6 +187,20 @@ namespace VFTIndexes
 	//	};
 	//}
 
+	namespace IClientInventory
+	{
+		VFTableInfo_t GetResultItems
+		{
+			"19IClientInventoryMap",
+			"GetResultItems"
+		};
+		VFTableInfo_t GetItemDefinitionIDs
+		{
+			"19IClientInventoryMap",
+			"GetItemDefinitionIDs"
+		};
+	}
+
 	namespace IClientRemoteStorage
 	{
 		VFTableInfo_t IsCloudEnabledForApp

@@ -51,12 +51,6 @@ namespace VFTIndexes
 		extern VFTableInfo_t RequestAppInfoUpdate;
 	}
 
-	namespace IClientInventory
-	{
-		constexpr int GetResultItems = 2;
-		constexpr int GetItemDefinitionIDs = 19;
-	}
-
 	namespace IClientAppManager
 	{
 		extern VFTableInfo_t BCanRemotePlayTogether;
@@ -72,6 +66,12 @@ namespace VFTIndexes
 	namespace IClientEngine
 	{
 		extern VFTableInfo_t GetClientUser;
+	}
+
+	namespace IClientInventory
+	{
+		extern VFTableInfo_t GetResultItems;
+		extern VFTableInfo_t GetItemDefinitionIDs;
 	}
 
 	namespace IClientRemoteStorage

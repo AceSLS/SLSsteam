@@ -168,7 +168,7 @@ void VFTHook<T>::setup(std::shared_ptr<lm_vmt_t> vft, const VFTableInfo_t& info,
 	this->hookFn.fn = hookFn;
 }
 
-static uint32_t hkGetManifest(void* arg0, uint32_t appId, uint32_t depotId, uint32_t arg3, uint32_t arg4, uint32_t arg5, uint32_t arg6)
+static uint32_t hkGetManifest(void* arg0, AppId_t appId, AppId_t depotId, uint32_t arg3, uint32_t arg4, uint32_t arg5, uint32_t arg6)
 {
 	if (!g_pSteamEngine->getUser(0)->isSubscribed(appId) || g_config.addedAppIds.get().contains(appId))
 	{
@@ -272,7 +272,7 @@ static uint32_t hkClientUnifiedServiceTransport_SendAndRecvMsg(CClientUnifiedSer
 	return ret;
 }
 
-static CPackageInfo* hkPackageInfoCache_GetPackageInfo(CPackageInfoCache* pCache, uint32_t packageId, uint32_t a2, uint32_t a3)
+static CPackageInfo* hkPackageInfoCache_GetPackageInfo(CPackageInfoCache* pCache, AppId_t packageId, uint32_t a2, uint32_t a3)
 {
 	const auto pkg = Hooks::CPackageInfoCache_GetPackageInfo.tramp.fn(pCache, packageId, a2, a3);
 	g_pLog->once
@@ -926,7 +926,7 @@ static uint32_t hkClientUser_GetAppOwnershipTicketExtendedData
 
 	if (ret == 0)
 	{
-		ret = Hooks::IClientUser_GetAppOwnershipTicketExtendedData.tramp.fn
+		ret = Hooks::IClientUser_GetAppOwnershipTicketExtendedData.originalFn.fn
 		(
 			pClientUser,
 			appId,
@@ -1207,8 +1207,8 @@ namespace Hooks
 	VFTHook<IClientApps_GetDLCDataByIndex_t> IClientApps_GetDLCDataByIndex;
 	VFTHook<IClientApps_GetDLCCount_t> IClientApps_GetDLCCount;
 
-	VFTHook<IClientInventory_GetResultItems_t> IClientInventory_GetResultItems("IClientInventory::GetResultItems");
-	VFTHook<IClientInventory_GetItemDefinitionIDs_t> IClientInventory_GetItemDefinitionIDs("IClientInventory::GetItemDefinitionsIDs");
+	VFTHook<IClientInventory_GetResultItems_t> IClientInventory_GetResultItems;
+	VFTHook<IClientInventory_GetItemDefinitionIDs_t> IClientInventory_GetItemDefinitionIDs;
 
 	VFTHook<IClientRemoteStorage_IsCloudEnabledForApp_t> IClientRemoteStorage_IsCloudEnabledForApp;
 
@@ -1220,11 +1220,6 @@ namespace Hooks
 	VFTHook<IClientUser_GetAppOwnershipTicketExtendedData_t> IClientUser_GetAppOwnershipTicketExtendedData;
 	VFTHook<IClientUser_IsUserSubscribedAppInTicket_t> IClientUser_IsUserSubscribedAppInTicket;
 	VFTHook<IClientUser_RequiresLegacyCDKey_t> IClientUser_RequiresLegacyCDKey;
-
-	VFTHook<IClientRemoteStorage_IsCloudEnabledForApp_t> IClientRemoteStorage_IsCloudEnabledForApp("IClientRemoteStorage::IsCloudEnabledForApp");
-
-	VFTHook<IClientUtils_GetAppId_t> IClientUtils_GetAppId("IClientUtils::GetAppId");
-	VFTHook<IClientUtils_GetOfflineMode_t> IClientUtils_GetOfflineMode("IClientUtils::GetOfflineMode");
 
 
 	//steamui.so
@@ -1262,8 +1257,6 @@ bool Hooks::setup()
 
 		//To lazy to move this for now. Doesn't really matter wheter we detour or vft hook
 		&& CCMInterface_RecvPkt.setup(VFTIndexes::CCMInterface::RecvPkt, &hkCMInterface_RecvPkt)
-
-		&& CCMInterface_RecvPkt.setup(Patterns::CCMInterface::RecvPkt, &hkCMInterface_RecvPkt)
 
 		&& CPackageInfoCache_GetPackageInfo.setup(Patterns::CPackageInfoCache::GetPackageInfo, &hkPackageInfoCache_GetPackageInfo)
 

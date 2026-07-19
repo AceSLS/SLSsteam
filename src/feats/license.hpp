@@ -1,11 +1,11 @@
 #pragma once
 
+class CNetPacket;
 class CPackageInfo;
-class CProtoBufMsgBase;
 
 namespace License
 {
 	void getPackageInfo(CPackageInfo* pkg);
-	void recvMsg(CProtoBufMsgBase* msg);
+	void recvMsg(CNetPacket* pkt);
 	void runIPCFrame();
 }

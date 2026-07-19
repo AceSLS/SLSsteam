@@ -8,11 +8,11 @@
 #include "../log.hpp"
 
 
-std::unordered_map<uint32_t, std::vector<uint32_t>> Inventory::itemList;
+std::unordered_map<AppId_t, std::vector<uint32_t>> Inventory::itemList;
 
 void Inventory::getItemDefinitionIds(uint32_t* pItemsArr, uint32_t count)
 {
-	const uint32_t appId = FakeAppIds::getRealAppIdForCurrentPipe();
+	const AppId_t appId = FakeAppIds::getRealAppIdForCurrentPipe();
 
 	itemList[appId] = std::vector<uint32_t>();
 	for(unsigned int i = 0; i < count; i++)
@@ -26,7 +26,7 @@ void Inventory::getItemDefinitionIds(uint32_t* pItemsArr, uint32_t count)
 
 void Inventory::getResultItems(SteamItemDetails_t* pItems, uint32_t pItemsSize, uint32_t* pItemsCount)
 {
-	const uint32_t appId = FakeAppIds::getRealAppIdForCurrentPipe();
+	const AppId_t appId = FakeAppIds::getRealAppIdForCurrentPipe();
 
 	auto items = std::vector<uint32_t>();
 	if (itemList.contains(appId))

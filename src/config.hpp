@@ -31,7 +31,7 @@ public:
 	struct InventoryItems_t
 	{
 	public:
-		uint32_t appId;
+		AppId_t appId;
 		std::unordered_map<uint32_t, uint32_t> items;
 	};
 
@@ -55,7 +55,7 @@ public:
 	MTVariable<std::unordered_set<AppId_t>> appIds;
 	MTVariable<std::unordered_set<AppId_t>> addedAppIds;
 	MTVariable<std::unordered_set<AppId_t>> addedDepotIds;
-	MTVariable<std::unordered_set<uint32_t>> addedPackageIds;
+	MTVariable<std::unordered_set<AppId_t>> addedPackageIds;
 	MTVariable<std::unordered_map<AppId_t, CDlcData>> dlcData;
 	MTVariable<std::unordered_map<AppId_t, uint64_t>> appTokens;
 	MTVariable<std::unordered_set<AppId_t>> fakeOffline;
@@ -92,8 +92,8 @@ public:
 	MTVariable<bool> reloadDepots;
 
 	std::mutex packagesChangedMutex;
-	std::unordered_set<uint32_t> newPackages;
-	std::unordered_set<uint32_t> removedPackages;
+	std::unordered_set<AppId_t> newPackages;
+	std::unordered_set<AppId_t> removedPackages;
 
 	//Using incomplete class to avoid runtime linking errors
 	CFileWatcher* watcher;

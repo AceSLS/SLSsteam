@@ -1,5 +1,6 @@
 #include "license.hpp"
 
+#include "../sdk/CNetPacket.hpp"
 #include "../sdk/CProtoBufMsgBase.hpp"
 #include "../sdk/CPackageInfoCache.hpp"
 #include "../sdk/CSteamEngine.hpp"
@@ -40,7 +41,7 @@ void License::getPackageInfo(CPackageInfo* pkg)
 	static auto mutex = std::mutex();
 	const std::lock_guard lock(mutex);
 
-	static auto originalDepotIds = std::vector<uint32_t>();
+	static auto originalDepotIds = std::vector<AppId_t>();
 	if (!originalDepotIds.size())
 	{
 		for(unsigned int i = 0; i < pkg->depotIds.size; i++)
@@ -52,8 +53,8 @@ void License::getPackageInfo(CPackageInfo* pkg)
 	const auto depots = g_config.addedDepotIds.get();
 	const auto newSize = originalDepotIds.size() + depots.size();
 
-	uint32_t* newDepots = reinterpret_cast<uint32_t*>(malloc(newSize * sizeof(uint32_t)));
-	memcpy(newDepots, originalDepotIds.data(), originalDepotIds.size() * sizeof(uint32_t));
+	AppId_t* newDepots = reinterpret_cast<AppId_t*>(malloc(newSize * sizeof(AppId_t)));
+	memcpy(newDepots, originalDepotIds.data(), originalDepotIds.size() * sizeof(AppId_t));
 
 	unsigned int i = 0;
 	for(const auto& depot : depots)
@@ -62,7 +63,7 @@ void License::getPackageInfo(CPackageInfo* pkg)
 		i++;
 	}
 
-	uint32_t* oldDepots = pkg->depotIds.memory.base;
+	AppId_t* oldDepots = pkg->depotIds.memory.base;
 	pkg->depotIds.size = newSize;
 	pkg->depotIds.memory.base = newDepots;
 	free(oldDepots);
@@ -88,40 +89,44 @@ void License::getPackageInfo(CPackageInfo* pkg)
 //TODO: Fix crash on dealloc (when Steam exits)
 static CMsgClientLicenseList* msgLicenses = nullptr;
 
-void License::recvMsg(CProtoBufMsgBase* msg)
+void License::recvMsg(CNetPacket* pkt)
 {
-	switch(msg->type)
+	switch(pkt->getProtoBufType())
 	{
-		case 780:
+		case k_EMsgClientLicenseList:
 		{
-			const auto body = msg->getBody<CMsgClientLicenseList>();
+			auto msg = pkt->deserializeBody<CMsgClientLicenseList>();
 			for(const auto& package : g_config.addedPackageIds.get())
 			{
-				const auto lic = body->add_licenses();
+				const auto lic = msg.add_licenses();
 				lic->set_package_id(package);
 			}
 
 			//Merge all licenses into one :)
-			for(signed int i = 0; i < body->licenses_size(); i++)
+			for(int i = 0; i < msg.licenses_size(); i++)
 			{
-				auto lic = body->mutable_licenses(i);
+				auto lic = msg.mutable_licenses(i);
 
 				g_pLog->once("License for %u with flags %u of type %u\n", lic->package_id(), lic->flags(), lic->license_type());
 
 				lic->set_owner_id(g_currentSteamId);
-				lic->set_flags(ELICENSE_FLAGS_NONE);
-				lic->set_license_type(ELICENSE_TYPE_SINGLE_PURCHASE);
+				lic->set_flags(k_ELicenseFlagsNone);
+				lic->set_license_type(k_ELicenseTypeSinglePurchase);
 			}
 
-			msgLicenses = new CMsgClientLicenseList(*body);
+			msgLicenses = new CMsgClientLicenseList(msg);
+			pkt->serialize(msg);
 			break;
 		}
+
+		default:
+			break;
 	}
 }
 
 void License::runIPCFrame()
 {
-	std::lock_guard packagesChanged(g_config.packagesChangedMutex);
+	const std::lock_guard packagesChanged(g_config.packagesChangedMutex);
 
 	if (!g_config.newPackages.size() && !g_config.removedPackages.size())
 	{
@@ -146,8 +151,8 @@ void License::runIPCFrame()
 		auto lic = licenses->Add();
 		lic->set_package_id(pkg);
 		lic->set_owner_id(g_currentSteamId);
-		lic->set_flags(ELICENSE_FLAGS_NONE);
-		lic->set_license_type(ELICENSE_TYPE_SINGLE_PURCHASE);
+		lic->set_flags(k_ELicenseFlagsNone);
+		lic->set_license_type(k_ELicenseTypeSinglePurchase);
 	}
 
 	for(const auto& pkg : g_config.removedPackages)

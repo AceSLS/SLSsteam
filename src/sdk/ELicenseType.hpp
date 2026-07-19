@@ -2,12 +2,13 @@
 
 enum ELicenseType
 {
-	ELICENSE_TYPE_NONE = 0x0,
-	ELICENSE_TYPE_SINGLE_PURCHASE = 0x1,
-	ELICENSE_TYPE_SINGLE_PURCHASE_LIMITED_USE = 0x2,
-	ELICENSE_TYPE_RECURRING_CHARGE = 0x3,
-	ELICENSE_TYPE_UNKNOWN = 0x4,
-	ELICENSE_TYPE_UNKNOWN2 = 0x5,
-	ELICENSE_TYPE_RECURRING_PAYMENT_OPTION = 0x6,
-	ELICENSE_TYPE_LIMITED_USE,_DELAYED_ACTIVATION = 0x7,
+	k_ELicenseFlagsNone = 0x0,
+	k_ELicenseTypeNone = 0x0,
+	k_ELicenseTypeSinglePurchase = 0x1,
+	k_ELicenseTypeSinglePurchaseLimitedUse = 0x2,
+	k_ELicenseTypeRecurringCharge = 0x3,
+	//k_ELicenseTypeUnknown = 0x4,
+	//k_ELicenseTypeUnknown = 0x5,
+	k_ELicenseTypeRecurringpaymentoption = 0x6,
+	k_ELicenseTypeLimiteduseDelayedActivation = 0x7
 };
