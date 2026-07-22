@@ -142,7 +142,7 @@ namespace Patterns
 		Pattern_t RequestInternetServerList
 		{
 			"CSteamMatchmakingServers::RequestInternetServerList",
-			"C7 04 24 50 03 00 00 E8 ? ? ? ? 5A 89 45 ? 59 FF B6 ? ? ? ? FF B6 ? ? ? ? FF B6 ? ? ? ? FF B6 ? ? ? ? FF B6 ? ? ? ? 6A 01",
+			"C7 04 24 54 03 00 00 E8 ? ? ? ? 5A 89 45 ? 59 FF B6 ? ? ? ? FF B6 ? ? ? ? FF B6 ? ? ? ? FF B6 ? ? ? ? FF B6 ? ? ? ? 6A 01",
 			SigFollowMode::PrologueUpwards,
 			std::vector<uint8_t> { 0xe8, 0x57, 0xe5, 0x89, 0x55 }
 		};
@@ -230,7 +230,7 @@ namespace Patterns
 		Pattern_t RunIPCFrame
 		{
 			"IClientRemoteStorage::RunIPCFrame",
-			"E8 ? ? ? ? 8B 85 ? ? ? ? 83 C4 10 3D ? E8 2F 87",
+			"E8 ? ? ? ? 8B 85 ? ? ? ? 83 C4 10 3D ? DD 12 87",
 			SigFollowMode::PrologueUpwards,
 			std::vector<uint8_t> { 0x56, 0x57, 0xe5, 0x89, 0x55 }
 		};
