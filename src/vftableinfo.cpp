@@ -71,6 +71,16 @@ namespace VFTIndexes
 		};
 	};
 
+	namespace CRemoteClientManager
+	{
+		VFTableInfo_t RecvPkt
+		{
+			"20CRemoteClientManager",
+			"RecvPkt",
+			3
+		};
+	}
+
 	namespace CClientUnifiedServiceTransport
 	{
 		VFTableInfo_t SendAndRecvMsg

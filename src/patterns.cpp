@@ -78,6 +78,17 @@ namespace Patterns
 		};
 	}
 
+	namespace CRemoteClientManager
+	{
+		Pattern_t SendProtoBufMsg
+		{
+			"CRemoteClientManager::SendProtoBufMsg",
+			"8B 45 10 8B 75 08 8B 80 A4 00 00 00 85 C0 0F 85 ? ? ? ? 8B 8E 98 02 00 00",
+			SigFollowMode::PrologueUpwards,
+			std::vector<int16_t> { 0x57, 0xE5, 0x89, 0x55 }
+		};
+	}
+
 	namespace CWebSocketConnection
 	{
 		Pattern_t BBuildAndAsyncSendFrame
@@ -202,4 +213,3 @@ namespace Patterns
 
 	std::vector<Pattern_t*> patterns;
 }
-

@@ -15,6 +15,11 @@ namespace Apps
 	extern std::mutex pendingLicenseChangesMutex;
 	extern std::unordered_set<AppId_t> pendingLicenseChanges;
 
+	bool updateRemoteApps(const std::unordered_set<AppId_t>& appIds);
+	bool isRemoteApp(const AppId_t appId);
+	void requestRemoteAppBroadcast();
+	uint64_t getRemoteAppBroadcastGeneration();
+
 	bool unlockApp(const AppId_t appId, AppOwnershipInfo_t* info, const CSteamId& ownerId);
 	bool unlockApp(const AppId_t appId, AppOwnershipInfo_t* info);
 
@@ -25,7 +30,7 @@ namespace Apps
 	void parseProductInfoFromResponse(CMsgClientPICSProductInfoResponse* msg);
 	void runIPCFrame();
 
-	void postAppLicensesChanged(const std::unordered_set<AppId_t>& apps);
+	void postAppLicensesChanged(const std::unordered_set<AppId_t>& apps, const bool appsAdded = true);
 
 	bool shouldDisableCloud(const AppId_t appId);
 	bool shouldDisableCDKey(const AppId_t appId);

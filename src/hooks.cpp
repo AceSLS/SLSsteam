@@ -18,6 +18,8 @@
 
 #include "libmem/libmem.h"
 
+#include <atomic>
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
@@ -26,6 +28,8 @@
 #include <mutex>
 #include <pthread.h>
 #include <strings.h>
+#include <unordered_map>
+#include <unordered_set>
 #include <unistd.h>
 #include <vector>
 
@@ -312,6 +316,567 @@ static void hkCMInterface_RecvPkt(CCMInterface* pCMInterface, CNetPacket* pNetPa
 	LOG_TRACE("Calling tramp\n");
 	Hooks::CCMInterface_RecvPkt.tramp.fn(pCMInterface, pNetPacket);
 }
+
+namespace
+{
+	constexpr uint32_t REMOTE_APP_STATUS_EMSG = 9502;
+	constexpr uint32_t REMOTE_APP_CANDIDATE_FIELDS = 0x1fc;
+	constexpr size_t MIN_FULL_REMOTE_STATUS_ENTRIES = 64;
+	constexpr size_t MAX_REMOTE_MESSAGE_SIZE = 64 * 1024 * 1024;
+
+	struct RemoteAppStatusEntry
+	{
+		AppId_t appId = 0;
+		uint32_t appState = 0;
+		uint32_t presentFields = 0;
+		size_t begin = 0;
+		size_t end = 0;
+	};
+
+	struct ParsedRemoteAppStatus
+	{
+		bool valid = false;
+		std::vector<RemoteAppStatusEntry> entries;
+	};
+
+	bool readVarInt(const uint8_t*& cursor, const uint8_t* end, uint64_t& value)
+	{
+		value = 0;
+		for (unsigned int shift = 0; shift < 64 && cursor < end; shift += 7)
+		{
+			const uint8_t byte = *cursor++;
+			value |= static_cast<uint64_t>(byte & 0x7f) << shift;
+			if (!(byte & 0x80))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool skipProtoField(const uint32_t wireType, const uint8_t*& cursor, const uint8_t* end)
+	{
+		uint64_t value = 0;
+		switch (wireType)
+		{
+			case 0:
+				return readVarInt(cursor, end, value);
+			case 1:
+				if (static_cast<size_t>(end - cursor) < 8)
+				{
+					return false;
+				}
+				cursor += 8;
+				return true;
+			case 2:
+				if (!readVarInt(cursor, end, value) || value > static_cast<uint64_t>(end - cursor))
+				{
+					return false;
+				}
+				cursor += value;
+				return true;
+			case 5:
+				if (static_cast<size_t>(end - cursor) < 4)
+				{
+					return false;
+				}
+				cursor += 4;
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	bool parseRemoteAppStatusEntry(
+		const uint8_t* cursor,
+		const uint8_t* end,
+		RemoteAppStatusEntry& entry)
+	{
+		while (cursor < end)
+		{
+			uint64_t tag = 0;
+			if (!readVarInt(cursor, end, tag) || !tag)
+			{
+				return false;
+			}
+
+			const uint32_t field = tag >> 3;
+			const uint32_t wireType = tag & 7;
+			uint64_t value = 0;
+
+			if ((field == 1 || field == 2) && wireType == 0)
+			{
+				if (!readVarInt(cursor, end, value))
+				{
+					return false;
+				}
+
+				if (field == 1)
+				{
+					entry.appId = value;
+					entry.presentFields |= 1 << 7;
+				}
+				else
+				{
+					entry.appState = value;
+					entry.presentFields |= 1 << 8;
+				}
+				continue;
+			}
+
+			if (field >= 3 && field <= 9)
+			{
+				entry.presentFields |= 1 << (field - 3);
+			}
+
+			if (!skipProtoField(wireType, cursor, end))
+			{
+				return false;
+			}
+		}
+
+		return cursor == end;
+	}
+
+	ParsedRemoteAppStatus parseRemoteAppStatus(const uint8_t* body, const size_t size)
+	{
+		ParsedRemoteAppStatus parsed;
+		const uint8_t* cursor = body;
+		const uint8_t* const end = body + size;
+
+		while (cursor < end)
+		{
+			const size_t fieldBegin = cursor - body;
+			uint64_t tag = 0;
+			if (!readVarInt(cursor, end, tag) || !tag)
+			{
+				return parsed;
+			}
+
+			const uint32_t field = tag >> 3;
+			const uint32_t wireType = tag & 7;
+			if (field != 1 || wireType != 2)
+			{
+				if (!skipProtoField(wireType, cursor, end))
+				{
+					return parsed;
+				}
+				continue;
+			}
+
+			uint64_t entrySize = 0;
+			if (!readVarInt(cursor, end, entrySize) || entrySize > static_cast<uint64_t>(end - cursor))
+			{
+				return parsed;
+			}
+
+			RemoteAppStatusEntry entry;
+			entry.begin = fieldBegin;
+			const uint8_t* const entryEnd = cursor + entrySize;
+			if (!parseRemoteAppStatusEntry(cursor, entryEnd, entry))
+			{
+				return parsed;
+			}
+			cursor = entryEnd;
+			entry.end = cursor - body;
+			parsed.entries.emplace_back(entry);
+		}
+
+		parsed.valid = true;
+		return parsed;
+	}
+
+	bool getRemoteMessageBody(
+		const std::vector<uint8_t>& message,
+		size_t& bodyOffset)
+	{
+		if (message.size() < sizeof(CNetPacketBody))
+		{
+			return false;
+		}
+
+		uint32_t type = 0;
+		uint32_t headerSize = 0;
+		memcpy(&type, message.data(), sizeof(type));
+		memcpy(&headerSize, message.data() + sizeof(type), sizeof(headerSize));
+		bodyOffset = sizeof(CNetPacketBody) + headerSize;
+
+		return (type & ~PROTOBUF_TYPE_MASK) == REMOTE_APP_STATUS_EMSG
+			&& bodyOffset <= message.size();
+	}
+
+	bool serializeRemoteClientMessage(
+		CProtoBufMsgBase* pMsg,
+		std::vector<uint8_t>& message)
+	{
+		if (!pMsg)
+		{
+			return false;
+		}
+
+		const auto vtable = *reinterpret_cast<uintptr_t**>(pMsg);
+		if (!vtable || !vtable[4] || !vtable[5])
+		{
+			return false;
+		}
+
+		using GetSize_t = uint32_t(*)(void*);
+		using Serialize_t = uint32_t(*)(void*, void*, uint32_t);
+		const auto getSize = reinterpret_cast<GetSize_t>(vtable[4]);
+		const auto serialize = reinterpret_cast<Serialize_t>(vtable[5]);
+		const uint32_t size = getSize(pMsg);
+		if (!size || size > MAX_REMOTE_MESSAGE_SIZE)
+		{
+			return false;
+		}
+
+		message.resize(size);
+		return serialize(pMsg, message.data(), size) == size;
+	}
+
+	void writeVarInt(std::vector<uint8_t>& message, uint64_t value)
+	{
+		while (value >= 0x80)
+		{
+			message.emplace_back(static_cast<uint8_t>(value & 0x7f) | 0x80);
+			value >>= 7;
+		}
+		message.emplace_back(value);
+	}
+
+	void appendRemoteAppStatus(std::vector<uint8_t>& body, const AppId_t appId)
+	{
+		//Match Steam's native AdditionalApps status entries.
+		std::vector<uint8_t> status;
+		status.emplace_back(1 << 3);
+		writeVarInt(status, appId);
+		status.emplace_back(2 << 3);
+		writeVarInt(status, 4);
+		status.insert(status.end(), { 5 << 3, 1, 6 << 3, 0, 7 << 3, 0, 8 << 3, 1, 9 << 3 | 2, 0 });
+
+		body.emplace_back(1 << 3 | 2);
+		writeVarInt(body, status.size());
+		body.insert(body.end(), status.begin(), status.end());
+	}
+
+	std::mutex remoteStatusCacheMutex;
+	std::vector<uint8_t> remoteStatusPrefix;
+	std::vector<uint8_t> remoteStatusBaseBody;
+	std::unordered_map<void*, uint64_t> remoteClientSyncGeneration;
+
+	bool cacheRemoteAppStatus(
+		const std::vector<uint8_t>& message,
+		const size_t bodyOffset,
+		const ParsedRemoteAppStatus& parsed)
+	{
+		if (!parsed.valid || parsed.entries.size() < MIN_FULL_REMOTE_STATUS_ENTRIES)
+		{
+			return false;
+		}
+
+		const auto addedApps = g_config.addedAppIds.get();
+		const uint8_t* const body = message.data() + bodyOffset;
+		const size_t bodySize = message.size() - bodyOffset;
+		std::vector<uint8_t> baseBody;
+		baseBody.reserve(bodySize);
+
+		size_t cursor = 0;
+		for (const auto& entry : parsed.entries)
+		{
+			baseBody.insert(baseBody.end(), body + cursor, body + entry.begin);
+			if (!addedApps.contains(entry.appId))
+			{
+				baseBody.insert(baseBody.end(), body + entry.begin, body + entry.end);
+			}
+			cursor = entry.end;
+		}
+		baseBody.insert(baseBody.end(), body + cursor, body + bodySize);
+
+		const std::lock_guard lock(remoteStatusCacheMutex);
+		remoteStatusPrefix.assign(message.begin(), message.begin() + bodyOffset);
+		remoteStatusBaseBody = std::move(baseBody);
+		return true;
+	}
+
+	bool buildRemoteAppStatus(std::vector<uint8_t>& message)
+	{
+		{
+			const std::lock_guard lock(remoteStatusCacheMutex);
+			if (remoteStatusPrefix.empty())
+			{
+				return false;
+			}
+			message = remoteStatusPrefix;
+			message.insert(message.end(), remoteStatusBaseBody.begin(), remoteStatusBaseBody.end());
+		}
+
+		auto addedApps = g_config.addedAppIds.get();
+		std::vector<AppId_t> sortedApps(addedApps.begin(), addedApps.end());
+		std::sort(sortedApps.begin(), sortedApps.end());
+		for (const auto appId : sortedApps)
+		{
+			appendRemoteAppStatus(message, appId);
+		}
+		return true;
+	}
+
+	struct CachedRemoteMessageVTable
+	{
+		void* unused[4] {};
+		uint32_t(*getSize)(void*);
+		uint32_t(*serialize)(void*, void*, uint32_t);
+	};
+
+	struct CachedRemoteMessage
+	{
+		CachedRemoteMessageVTable* vtable;
+		const std::vector<uint8_t>* message;
+	};
+
+	uint32_t cachedRemoteMessageSize(void* pMessage)
+	{
+		const auto* cached = reinterpret_cast<CachedRemoteMessage*>(pMessage);
+		return cached->message->size();
+	}
+
+	uint32_t serializeCachedRemoteMessage(void* pMessage, void* output, const uint32_t size)
+	{
+		const auto* cached = reinterpret_cast<CachedRemoteMessage*>(pMessage);
+		const auto* message = cached->message;
+		if (!message || size < message->size())
+		{
+			return 0;
+		}
+		memcpy(output, message->data(), message->size());
+		return message->size();
+	}
+
+	//Enough of CProtoBufMsgBase for Steam's sender to serialize the cached packet.
+	CachedRemoteMessageVTable cachedRemoteMessageVTable
+	{
+		{},
+		cachedRemoteMessageSize,
+		serializeCachedRemoteMessage
+	};
+}
+
+static void hkRemoteClientManager_RecvPkt(
+	void* pRemoteClientManager,
+	CNetPacket* pNetPacket)
+{
+	bool updateRemoteSnapshot = false;
+	std::unordered_set<AppId_t> remoteApps;
+	CNetPacket replayPacket {};
+	bool replayPacketValid = false;
+
+	if (
+		pNetPacket
+		&& pNetPacket->isValid()
+		&& pNetPacket->isProtoBuf()
+	)
+	{
+		const uint32_t type = pNetPacket->getProtoBufType();
+		const size_t bodyOffset = sizeof(CNetPacketBody) + pNetPacket->body->headerSize;
+		if (bodyOffset <= pNetPacket->size && type == REMOTE_APP_STATUS_EMSG)
+		{
+			const auto* body = reinterpret_cast<const uint8_t*>(pNetPacket->body) + bodyOffset;
+			const auto parsed = parseRemoteAppStatus(body, pNetPacket->size - bodyOffset);
+			const bool syncEnabled = g_config.syncRemoteAdditionalApps.get();
+			auto* usr = g_pSteamEngine ? g_pSteamEngine->getUser() : nullptr;
+
+			if (parsed.valid && usr)
+			{
+				for (size_t i = 0; i < parsed.entries.size(); ++i)
+				{
+					const auto& entry = parsed.entries[i];
+					if (
+						entry.presentFields != REMOTE_APP_CANDIDATE_FIELDS
+						|| entry.appState != 4
+					)
+					{
+						continue;
+					}
+
+					AppOwnershipInfo_t ownership {};
+					if (usr->checkAppOwnership(entry.appId, &ownership) && !ownership.ownsLicense)
+					{
+						remoteApps.emplace(entry.appId);
+						LOG_DEBUG
+						(
+							"REMOTE CANDIDATE app=%u idx=%zu has=0x%x "
+							"state=0x%x owns=%u expired=%u release=%d sub=%d\n",
+							entry.appId,
+							i,
+							entry.presentFields,
+							entry.appState,
+							ownership.ownsLicense,
+							ownership.licenseExpired,
+							ownership.releaseState,
+							ownership.subId
+						);
+					}
+				}
+			}
+
+			static std::atomic<size_t> fullStatusEntryCount = 0;
+			const size_t previousFullCount = fullStatusEntryCount.load();
+			const size_t fullCountFloor = previousFullCount > 4
+				? previousFullCount / 2
+				: 2;
+			const bool fullSnapshot = parsed.valid && parsed.entries.size() >= fullCountFloor;
+			if (fullSnapshot)
+			{
+				fullStatusEntryCount.store(parsed.entries.size());
+			}
+
+			if (syncEnabled && fullSnapshot && usr)
+			{
+				updateRemoteSnapshot = true;
+				void* const replayBody = Steam::Plat_Alloc(pNetPacket->size);
+				if (replayBody)
+				{
+					memcpy(replayBody, pNetPacket->body, pNetPacket->size);
+					replayPacket = *pNetPacket;
+					replayPacket.body = reinterpret_cast<CNetPacketBody*>(replayBody);
+					replayPacket.originalBody = replayPacket.body;
+					replayPacket.refs = 1;
+					replayPacketValid = true;
+				}
+			}
+
+			const auto header = pNetPacket->deserializeHeader();
+			const int32_t clientSessionId = header.has_client_sessionid()
+				? header.client_sessionid()
+				: -1;
+			const uint64_t sourceJobId = header.has_jobid_source()
+				? header.jobid_source()
+				: 0;
+			LOG_DEBUG
+			(
+				"RemoteAppStatus RX count=%zu candidates=%zu session=%d "
+				"sourceJob=%llu packet=%p source=%p sync=%u full=%u fullCount=%zu\n",
+				parsed.entries.size(),
+				remoteApps.size(),
+				clientSessionId,
+				static_cast<unsigned long long>(sourceJobId),
+				reinterpret_cast<void*>(pNetPacket),
+				pRemoteClientManager,
+				syncEnabled,
+				fullSnapshot,
+				fullStatusEntryCount.load()
+			);
+		}
+	}
+
+	Hooks::CRemoteClientManager_RecvPkt.tramp.fn(pRemoteClientManager, pNetPacket);
+
+	const bool registered = updateRemoteSnapshot && Apps::updateRemoteApps(remoteApps);
+	if (registered && replayPacketValid)
+	{
+		LOG_DEBUG("REMOTE STATUS REPLAY source=manager-recv\n");
+		Hooks::CRemoteClientManager_RecvPkt.tramp.fn(pRemoteClientManager, &replayPacket);
+	}
+
+	if (replayPacket.body)
+	{
+		Steam::Plat_Free(replayPacket.body);
+		replayPacket.body = nullptr;
+	}
+}
+
+static bool hkRemoteClientManager_SendProtoBufMsg(
+	void* pRemoteClientManager,
+	CProtoBufMsgBase* pMsg,
+	void* pRemoteClient)
+{
+	bool fullNativeStatus = false;
+	if (
+		pMsg
+		&& static_cast<uint32_t>(pMsg->getProtoBufType()) == REMOTE_APP_STATUS_EMSG
+	)
+	{
+		std::vector<uint8_t> message;
+		size_t bodyOffset = 0;
+		if (
+			serializeRemoteClientMessage(pMsg, message)
+			&& getRemoteMessageBody(message, bodyOffset)
+		)
+		{
+			const auto parsed = parseRemoteAppStatus(
+				message.data() + bodyOffset,
+				message.size() - bodyOffset
+			);
+			fullNativeStatus = cacheRemoteAppStatus(message, bodyOffset, parsed);
+			if (fullNativeStatus)
+			{
+				LOG_DEBUG("RemoteAppStatus TX cached count=%zu client=%p\n", parsed.entries.size(), pRemoteClient);
+			}
+		}
+	}
+
+	const bool sent = Hooks::CRemoteClientManager_SendProtoBufMsg.tramp.fn(
+		pRemoteClientManager,
+		pMsg,
+		pRemoteClient
+	);
+
+	if (!g_config.syncRemoteAdditionalApps.get() || !pRemoteClient)
+	{
+		return sent;
+	}
+
+	const uint64_t generation = Apps::getRemoteAppBroadcastGeneration();
+	if (fullNativeStatus)
+	{
+		const std::lock_guard lock(remoteStatusCacheMutex);
+		remoteClientSyncGeneration[pRemoteClient] = generation;
+		return sent;
+	}
+
+	{
+		const std::lock_guard lock(remoteStatusCacheMutex);
+		if (
+			remoteStatusPrefix.empty()
+			|| remoteClientSyncGeneration[pRemoteClient] >= generation
+		)
+		{
+			return sent;
+		}
+	}
+
+	std::vector<uint8_t> message;
+	if (!buildRemoteAppStatus(message))
+	{
+		return sent;
+	}
+
+	{
+		const std::lock_guard lock(remoteStatusCacheMutex);
+		if (remoteClientSyncGeneration[pRemoteClient] >= generation)
+		{
+			return sent;
+		}
+		remoteClientSyncGeneration[pRemoteClient] = generation;
+	}
+
+	CachedRemoteMessage cachedMessage { &cachedRemoteMessageVTable, &message };
+	const bool resent = Hooks::CRemoteClientManager_SendProtoBufMsg.tramp.fn(
+		pRemoteClientManager,
+		reinterpret_cast<CProtoBufMsgBase*>(&cachedMessage),
+		pRemoteClient
+	);
+	LOG_DEBUG
+	(
+		"REMOTE STATUS RESEND generation=%llu bytes=%zu client=%p sent=%u\n",
+		static_cast<unsigned long long>(generation),
+		message.size(),
+		pRemoteClient,
+		resent
+	);
+
+	return sent;
+}
+
 
 //I don't like forward declerations, but with the current style & hooks layout it's a necessity
 static CSteamId hkClientUser_GetSteamId(const CSteamId& steamId);
@@ -1160,6 +1725,9 @@ namespace Hooks
 
 	DetourHook<CCMInterface_RecvPkt_t> CCMInterface_RecvPkt;
 
+	DetourHook<CRemoteClientManager_RecvPkt_t> CRemoteClientManager_RecvPkt;
+	DetourHook<CRemoteClientManager_SendProtoBufMsg_t> CRemoteClientManager_SendProtoBufMsg;
+
 	DetourHook<CSteamMatchmakingServers_GetServerDetails_t> CSteamMatchmakingServers_GetServerDetails;
 	DetourHook<CSteamMatchmakingServers_RequestInternetServerList_t> CSteamMatchmakingServers_RequestInternetServerList;
 
@@ -1298,6 +1866,18 @@ bool Hooks::setup()
 		//To lazy to move this for now. Doesn't really matter wheter we detour or vft hook
 		&& CCMInterface_RecvPkt.setup(VFTIndexes::CCMInterface::RecvPkt, hkCMInterface_RecvPkt)
 
+		&& CRemoteClientManager_RecvPkt.setup
+		(
+			VFTIndexes::CRemoteClientManager::RecvPkt,
+			hkRemoteClientManager_RecvPkt
+		)
+
+		&& CRemoteClientManager_SendProtoBufMsg.setup
+		(
+			Patterns::CRemoteClientManager::SendProtoBufMsg,
+			hkRemoteClientManager_SendProtoBufMsg
+		)
+
 		&& CSteamMatchmakingServers_GetServerDetails.setup(VFTIndexes::CSteamMatchmakingServers::GetServerDetails, hkSteamMatchmakingServers_GetServerDetails)
 		&& CSteamMatchmakingServers_RequestInternetServerList.setup(VFTIndexes::CSteamMatchmakingServers::RequestInternetServerList, hkSteamMatchmakingServers_RequestInternetServerList)
 
@@ -1332,6 +1912,9 @@ void Hooks::place()
 	CClientUnifiedServiceMethod_SendAndRecvMsg.place();
 
 	CCMInterface_RecvPkt.place();
+
+	CRemoteClientManager_RecvPkt.place();
+	CRemoteClientManager_SendProtoBufMsg.place();
 
 	CSteamEngine_ProcessIPCFrame.place();
 	CSteamEngine_SetAppIdForCurrentPipe.place();
@@ -1473,6 +2056,9 @@ void Hooks::remove()
 	CClientUnifiedServiceMethod_SendAndRecvMsg.remove();
 
 	CCMInterface_RecvPkt.remove();
+
+	CRemoteClientManager_RecvPkt.remove();
+	CRemoteClientManager_SendProtoBufMsg.remove();
 
 	CSteamEngine_ProcessIPCFrame.remove();
 	CSteamEngine_SetAppIdForCurrentPipe.remove();

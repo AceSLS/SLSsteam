@@ -40,6 +40,11 @@ namespace Patterns
 		extern Pattern_t BParseResponseMessage;
 	}
 
+	namespace CRemoteClientManager
+	{
+		extern Pattern_t SendProtoBufMsg;
+	}
+
 	namespace CSteamEngine
 	{
 		extern Pattern_t GetServerPipe;

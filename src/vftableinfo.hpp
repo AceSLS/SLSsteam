@@ -30,6 +30,11 @@ namespace VFTIndexes
 		extern VFTableInfo_t RecvPkt;
 	}
 
+	namespace CRemoteClientManager
+	{
+		extern VFTableInfo_t RecvPkt;
+	}
+
 	namespace CClientUnifiedServiceTransport
 	{
 		extern VFTableInfo_t SendAndRecvMsg;

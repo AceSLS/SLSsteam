@@ -1,6 +1,7 @@
 #include "config.hpp"
 #include "config_default.hpp"
 
+#include "feats/apps.hpp"
 #include "filewatcher.hpp"
 #include "log.hpp"
 #include "utils.hpp"
@@ -181,12 +182,16 @@ bool CConfig::loadSettings(bool firstLoad)
 	fakeWalletBalance = getSetting<int32_t>(node, "FakeWalletBalance", 0);
 	disableCloud = getSetting<bool>(node, "DisableCloud", true);
 	disableUpdates = getSetting<bool>(node, "DisableUpdates", true);
+	syncRemoteAdditionalApps = node["SyncRemoteAdditionalApps"]
+		? getSetting<bool>(node, "SyncRemoteAdditionalApps", false)
+		: false;
 	dumpInterfaceMaps = getSetting<bool>(node, "DumpClientInterfaces", false);
 	extendedLogging = getSetting<bool>(node, "ExtendedLogging", false);
 
 	const std::lock_guard appsChanged(appsChangedMutex);
 	const auto prevAppIds = addedAppIds.get();
 	const auto _addedAppIds = getList<AppId_t>(node, "AdditionalApps");
+	bool localAppsRemoved = false;
 
 	if (!firstLoad)
 	{
@@ -198,6 +203,7 @@ bool CConfig::loadSettings(bool firstLoad)
 			}
 
 			removedApps.emplace(appId);
+			localAppsRemoved = true;
 			LOG_DEBUG("AppId %u removed from AdditionalApps\n", appId);
 		}
 		for (const auto& appId : _addedAppIds)
@@ -213,6 +219,12 @@ bool CConfig::loadSettings(bool firstLoad)
 	}
 
 	addedAppIds = _addedAppIds;
+	if (localAppsRemoved && syncRemoteAdditionalApps.get())
+	{
+		//Broadcast after addedAppIds contains the new snapshot.
+		Apps::requestRemoteAppBroadcast();
+		LOG_DEBUG("REMOTE BROADCAST QUEUED reason=config-remove\n");
+	}
 
 	appIds = getList<AppId_t>(node, "AppIds");
 	fakeOffline = getList<AppId_t>(node, "FakeOffline");

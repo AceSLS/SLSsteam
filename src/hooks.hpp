@@ -82,6 +82,9 @@ namespace Hooks
 
 	typedef void(*CCMInterface_RecvPkt_t)(CCMInterface*, CNetPacket*);
 
+	typedef void(*CRemoteClientManager_RecvPkt_t)(void*, CNetPacket*);
+	typedef bool(*CRemoteClientManager_SendProtoBufMsg_t)(void*, CProtoBufMsgBase*, void*);
+
 	typedef uint32_t(*CSteamEngine_ProcessIPCFrame_t)(CSteamEngine*, HSteamPipe, CUtlBuffer*, CUtlBuffer*);
 	typedef AppId_t(*CSteamEngine_SetAppIdForCurrentPipe_t)(CSteamEngine*, AppId_t, bool);
 
@@ -113,6 +116,9 @@ namespace Hooks
 	extern DetourHook<CClientUnifiedServiceMethod_SendAndRecvMsg_t> CClientUnifiedServiceMethod_SendAndRecvMsg;
 
 	extern DetourHook<CCMInterface_RecvPkt_t> CCMInterface_RecvPkt;
+
+	extern DetourHook<CRemoteClientManager_RecvPkt_t> CRemoteClientManager_RecvPkt;
+	extern DetourHook<CRemoteClientManager_SendProtoBufMsg_t> CRemoteClientManager_SendProtoBufMsg;
 
 	extern DetourHook<CSteamMatchmakingServers_GetServerDetails_t> CSteamMatchmakingServers_GetServerDetails;
 	extern DetourHook<CSteamMatchmakingServers_RequestInternetServerList_t> CSteamMatchmakingServers_RequestInternetServerList;
