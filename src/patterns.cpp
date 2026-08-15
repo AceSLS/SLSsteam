@@ -78,6 +78,41 @@ namespace Patterns
 		};
 	}
 
+	namespace CRemoteClientManager
+	{
+		Pattern_t BroadcastAppStatus
+		{
+			"CRemoteClientManager::BroadcastAppStatus",
+			"8B 96 80 04 00 00 85 D2 0F 9F C0 84 C0 74 09 80 BE 12 06 00 00 00 74 24",
+			SigFollowMode::PrologueUpwards,
+			std::vector<int16_t> { 0x57, 0xE5, 0x89, 0x55 }
+		};
+
+		Pattern_t UpdateRemoteAppState
+		{
+			"CRemoteClientManager::UpdateRemoteAppState",
+			"8B 80 F4 00 00 00 89 FB EB 10",
+			SigFollowMode::PrologueUpwards,
+			std::vector<int16_t>
+			{
+				0x53, 0x56, 0x57, 0x55,
+				-1, -1, -1, -1, 0xC1, 0x81,
+				-1, -1, -1, -1, 0xE8
+			}
+		};
+	}
+
+	namespace CRemoteClient
+	{
+		Pattern_t DecodeAppStatus
+		{
+			"CRemoteClient::DecodeAppStatus",
+			"C6 46 0C 00 85 DB 0F 84 ? ? ? ? 8B 03 83 EC 0C 53 FF 50 14",
+			SigFollowMode::PrologueUpwards,
+			std::vector<int16_t> { 0x57, 0xE5, 0x89, 0x55 }
+		};
+	}
+
 	namespace CWebSocketConnection
 	{
 		Pattern_t BBuildAndAsyncSendFrame
@@ -202,4 +237,3 @@ namespace Patterns
 
 	std::vector<Pattern_t*> patterns;
 }
-

@@ -40,6 +40,17 @@ namespace Patterns
 		extern Pattern_t BParseResponseMessage;
 	}
 
+	namespace CRemoteClient
+	{
+		extern Pattern_t DecodeAppStatus;
+	}
+
+	namespace CRemoteClientManager
+	{
+		extern Pattern_t BroadcastAppStatus;
+		extern Pattern_t UpdateRemoteAppState;
+	}
+
 	namespace CSteamEngine
 	{
 		extern Pattern_t GetServerPipe;

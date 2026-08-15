@@ -18,6 +18,7 @@
 
 #include "libmem/libmem.h"
 
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
@@ -26,6 +27,7 @@
 #include <mutex>
 #include <pthread.h>
 #include <strings.h>
+#include <unordered_set>
 #include <unistd.h>
 #include <vector>
 
@@ -313,6 +315,244 @@ static void hkCMInterface_RecvPkt(CCMInterface* pCMInterface, CNetPacket* pNetPa
 	Hooks::CCMInterface_RecvPkt.tramp.fn(pCMInterface, pNetPacket);
 }
 
+static uint32_t hkRemoteClientProtoDecode(
+    CProtoBufMsgBase* pMsg,
+    void* pSource)
+{
+    const uint32_t ret =
+        Hooks::CRemoteClientProtoDecode.tramp.fn(pMsg, pSource);
+
+    if (!pMsg || !pMsg->__pBody)
+    {
+        return ret;
+    }
+
+    if (static_cast<unsigned int>(pMsg->getProtoBufType()) != 9502)
+    {
+        return ret;
+    }
+
+	const bool syncEnabled = g_config.syncRemoteAdditionalApps.get();
+
+    const auto* body =
+        reinterpret_cast<const uint8_t*>(pMsg->__pBody);
+
+    const int32_t count =
+        *reinterpret_cast<const int32_t*>(body + 0x0c);
+
+    const uintptr_t repAddress =
+        *reinterpret_cast<const uintptr_t*>(body + 0x14);
+
+    std::unordered_set<AppId_t> candidates;
+    auto* usr = g_pSteamEngine ? g_pSteamEngine->getUser() : nullptr;
+
+    const bool validStatus = count >= 0 && count < 100000 && repAddress;
+
+    if (validStatus)
+    {
+        const auto* rep =
+            reinterpret_cast<const uint8_t*>(repAddress);
+
+        for (int32_t i = 0; i < count; ++i)
+        {
+            const uintptr_t statusAddress =
+                *reinterpret_cast<const uintptr_t*>(
+                    rep + 4 + (i * sizeof(uintptr_t))
+                );
+
+            if (!statusAddress)
+            {
+                continue;
+            }
+
+            const auto* status =
+                reinterpret_cast<const uint8_t*>(statusAddress);
+
+            const uint32_t appId =
+                *reinterpret_cast<const uint32_t*>(status + 0x1c);
+
+            const uint32_t hasBits =
+                *reinterpret_cast<const uint32_t*>(status + 0x08);
+            const uint32_t appState =
+                *reinterpret_cast<const uint32_t*>(status + 0x20);
+
+            if (usr && hasBits == 0x1fc && appState == 0x4)
+            {
+                AppOwnershipInfo_t ownership {};
+                const bool ownershipCheck =
+                    usr->checkAppOwnership(appId, &ownership);
+
+                if (ownershipCheck && !ownership.ownsLicense)
+                {
+                    candidates.emplace(appId);
+                    LOG_DEBUG
+                    (
+                        "REMOTE CANDIDATE app=%u idx=%d has=0x%x "
+                        "state=0x%x owns=%u expired=%u release=%d sub=%d\n",
+                        appId,
+                        i,
+                        hasBits,
+                        appState,
+                        ownership.ownsLicense,
+                        ownership.licenseExpired,
+                        ownership.releaseState,
+                        ownership.subId
+                    );
+                }
+            }
+        }
+    }
+
+    //EMsg 9502 carries both complete app lists and small incremental updates,
+    //without a protobuf field that distinguishes them. Learn the size of the
+    //first complete list and require later replacement snapshots to remain in
+    //the same broad size range. This prevents count=1 updates from clearing all
+    //transient remote apps while still allowing normal list growth/shrinkage.
+    static std::atomic<int32_t> fullStatusEntryCount = 0;
+    const int32_t previousFullCount = fullStatusEntryCount.load();
+    const int32_t fullCountFloor = previousFullCount > 4
+        ? previousFullCount / 2
+        : 2;
+    const bool fullSnapshot =
+        validStatus
+        && count >= fullCountFloor;
+
+    if (fullSnapshot)
+    {
+        fullStatusEntryCount.store(count);
+    }
+
+    bool registered = false;
+    if (syncEnabled && fullSnapshot && usr)
+    {
+        registered = Apps::updateRemoteApps(candidates);
+    }
+
+	const int32_t clientSessionId =
+		pMsg->header && pMsg->header->has_client_sessionid()
+			? pMsg->header->client_sessionid()
+			: -1;
+	const uint64_t sourceJobId =
+		pMsg->header && pMsg->header->has_jobid_source()
+			? pMsg->header->jobid_source()
+			: 0;
+
+    LOG_DEBUG
+    (
+        "RemoteAppStatus RX count=%d candidates=%zu session=%d "
+        "sourceJob=%llu source=%p sync=%u full=%u fullCount=%d\n",
+        count,
+        candidates.size(),
+		clientSessionId,
+		static_cast<unsigned long long>(sourceJobId),
+        pSource,
+		syncEnabled,
+        fullSnapshot,
+        fullStatusEntryCount.load()
+    );
+
+    if (registered)
+    {
+        LOG_DEBUG("REMOTE PACKET REPLAY candidates=%zu\n", candidates.size());
+        Hooks::CRemoteClientProtoDecode.tramp.fn(pMsg, pSource);
+    }
+
+    return ret;
+}
+
+
+
+static bool hkRemoteClientManager_UpdateRemoteAppState(
+    void* pRemoteClient,
+    AppId_t appId,
+    uint32_t appState,
+    uint32_t flag,
+    void* pOut)
+{
+    const bool ret =
+        Hooks::CRemoteClientManager_UpdateRemoteAppState.tramp.fn(
+            pRemoteClient,
+            appId,
+            appState,
+            flag,
+            pOut
+        );
+
+    if (Apps::isRemoteApp(appId))
+    {
+        uint32_t outValue = 0;
+
+        if (pOut)
+        {
+            outValue = *reinterpret_cast<uint32_t*>(pOut);
+        }
+
+        LOG_DEBUG
+        (
+            "RemoteAppState app=%u state=0x%x flag=%u "
+            "ret=%u out=%p outValue=0x%x\n",
+            appId,
+            appState,
+            flag,
+            ret,
+            pOut,
+            outValue
+        );
+    }
+
+    return ret;
+}
+
+static std::atomic<void*> g_pRemoteClientManager = nullptr;
+
+static void hkRemoteClientManager_BroadcastAppStatus(void* pRemoteClientManager)
+{
+	const void* previous = g_pRemoteClientManager.exchange(pRemoteClientManager);
+	if (previous != pRemoteClientManager)
+	{
+		LOG_DEBUG("RemoteAppStatus TX manager=%p captured\n", pRemoteClientManager);
+	}
+
+	const bool pending = Apps::consumeRemoteAppBroadcastRequest();
+
+	Hooks::CRemoteClientManager_BroadcastAppStatus.tramp.fn(pRemoteClientManager);
+
+	if (pending)
+	{
+		LOG_DEBUG("REMOTE BROADCAST SATISFIED source=native manager=%p\n", pRemoteClientManager);
+	}
+}
+
+static void runRemoteAppBroadcast()
+{
+	if (!g_config.syncRemoteAdditionalApps.get())
+	{
+		Apps::consumeRemoteAppBroadcastRequest();
+		return;
+	}
+
+	if (!Apps::hasRemoteAppBroadcastRequest())
+	{
+		return;
+	}
+
+	void* pRemoteClientManager = g_pRemoteClientManager.load();
+	if (!pRemoteClientManager)
+	{
+		return;
+	}
+
+	//Atomically claim the request on Steam's IPC thread immediately before
+	//building the fresh status packet. A concurrent new request remains queued.
+	if (!Apps::consumeRemoteAppBroadcastRequest())
+	{
+		return;
+	}
+	LOG_DEBUG("REMOTE BROADCAST REFRESH manager=%p\n", pRemoteClientManager);
+	Hooks::CRemoteClientManager_BroadcastAppStatus.tramp.fn(pRemoteClientManager);
+}
+
+
 //I don't like forward declerations, but with the current style & hooks layout it's a necessity
 static CSteamId hkClientUser_GetSteamId(const CSteamId& steamId);
 
@@ -415,6 +655,7 @@ static uint32_t hkSteamEngine_ProcessIPCFrame(CSteamEngine* pSteamEngine, HSteam
 		//LOG_DEBUG("Out\n%s\n", MemHlp::hexdump(pBufOut->mem.base, pBufOut->offset).c_str());
 
 		Apps::runIPCFrame();
+		runRemoteAppBroadcast();
 		SLSAPI::runIPCFrame();
 	}
 	else
@@ -1160,6 +1401,10 @@ namespace Hooks
 
 	DetourHook<CCMInterface_RecvPkt_t> CCMInterface_RecvPkt;
 
+	DetourHook<CRemoteClientProtoDecode_t> CRemoteClientProtoDecode;
+	DetourHook<CRemoteClientManager_BroadcastAppStatus_t> CRemoteClientManager_BroadcastAppStatus;
+	DetourHook<CRemoteClientManager_UpdateRemoteAppState_t> CRemoteClientManager_UpdateRemoteAppState;
+
 	DetourHook<CSteamMatchmakingServers_GetServerDetails_t> CSteamMatchmakingServers_GetServerDetails;
 	DetourHook<CSteamMatchmakingServers_RequestInternetServerList_t> CSteamMatchmakingServers_RequestInternetServerList;
 
@@ -1298,6 +1543,24 @@ bool Hooks::setup()
 		//To lazy to move this for now. Doesn't really matter wheter we detour or vft hook
 		&& CCMInterface_RecvPkt.setup(VFTIndexes::CCMInterface::RecvPkt, hkCMInterface_RecvPkt)
 
+		&& CRemoteClientProtoDecode.setup
+		(
+			Patterns::CRemoteClient::DecodeAppStatus,
+			hkRemoteClientProtoDecode
+		)
+
+		&& CRemoteClientManager_BroadcastAppStatus.setup
+		(
+			Patterns::CRemoteClientManager::BroadcastAppStatus,
+			hkRemoteClientManager_BroadcastAppStatus
+		)
+
+		&& CRemoteClientManager_UpdateRemoteAppState.setup
+		(
+			Patterns::CRemoteClientManager::UpdateRemoteAppState,
+			hkRemoteClientManager_UpdateRemoteAppState
+		)
+
 		&& CSteamMatchmakingServers_GetServerDetails.setup(VFTIndexes::CSteamMatchmakingServers::GetServerDetails, hkSteamMatchmakingServers_GetServerDetails)
 		&& CSteamMatchmakingServers_RequestInternetServerList.setup(VFTIndexes::CSteamMatchmakingServers::RequestInternetServerList, hkSteamMatchmakingServers_RequestInternetServerList)
 
@@ -1332,6 +1595,10 @@ void Hooks::place()
 	CClientUnifiedServiceMethod_SendAndRecvMsg.place();
 
 	CCMInterface_RecvPkt.place();
+
+	CRemoteClientProtoDecode.place();
+	CRemoteClientManager_BroadcastAppStatus.place();
+	CRemoteClientManager_UpdateRemoteAppState.place();
 
 	CSteamEngine_ProcessIPCFrame.place();
 	CSteamEngine_SetAppIdForCurrentPipe.place();
@@ -1473,6 +1740,10 @@ void Hooks::remove()
 	CClientUnifiedServiceMethod_SendAndRecvMsg.remove();
 
 	CCMInterface_RecvPkt.remove();
+
+	CRemoteClientProtoDecode.remove();
+	CRemoteClientManager_BroadcastAppStatus.remove();
+	CRemoteClientManager_UpdateRemoteAppState.remove();
 
 	CSteamEngine_ProcessIPCFrame.remove();
 	CSteamEngine_SetAppIdForCurrentPipe.remove();

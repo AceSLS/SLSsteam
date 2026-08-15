@@ -37,6 +37,11 @@ AppIds:
 #It will get ignored in exclusion checks for the parent AppId
 AdditionalApps:
 
+#Synchronize AdditionalApps to currently connected Steam Remote Play clients.
+#The receiver keeps them in memory only; this never writes them into its config.yaml.
+#Experimental and disabled by default while RemoteClient compatibility is validated.
+SyncRemoteAdditionalApps: no
+
 #Extra Data for Dlcs belonging to a specific AppId. Only needed
 #when the App you're playing is hit by Steams 64 DLC limit
 DlcData:

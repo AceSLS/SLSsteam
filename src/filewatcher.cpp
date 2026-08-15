@@ -44,7 +44,10 @@ void* watchLoop(void* args)
 
 			auto path = watcher->fileFdMap[event->wd];
 			
-			if (!(event->mask & IN_CLOSE_WRITE))
+			//Editors and tools such as `sed -i` commonly save by renaming a
+			//temporary file over the original. Since we watch the parent directory,
+			//handle both direct writes and those atomic replacement saves.
+			if (!(event->mask & (IN_CLOSE_WRITE | IN_MOVED_TO)))
 			{
 				continue;
 			}
@@ -99,7 +102,12 @@ int CFileWatcher::addFile(const char* path)
 	//Watching seperate files does not seem to work very well, since the file descriptor becomes useless
 	//on some operations
 	const std::filesystem::path p(path);
-	int fd = inotify_add_watch(notifyFd, p.parent_path().c_str(), IN_CLOSE_WRITE);
+	int fd = inotify_add_watch
+	(
+		notifyFd,
+		p.parent_path().c_str(),
+		IN_CLOSE_WRITE | IN_MOVED_TO
+	);
 	if (fd == -1)
 	{
 		return fd;
