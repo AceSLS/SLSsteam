@@ -23,7 +23,9 @@ LogLevelFlags_t -> unsigned int \
 AppId_t -> uint32_t
 
 
-#### Useful exports
+#### Exports
+
+unpack_user_data(ptr: void*) -> void*: Unpacks a Lua UserData object and returns a pointer to the object it's pointing at. Use this to convert SLS.steamEngine to the real CSteamEngine pointer etc.
 
 If you want to manage memory malloc & free seem to work just fine. I still recommend using Plat_Alloc, Plat_Realloc & Plat_Free from libtier0_s.so instead.
 
@@ -195,5 +197,5 @@ registerCallback(name: string, function): Registers a callback, when it gets fir
 "SLSsteam::initialized": Fired when Steam has finished initializing CUser, making it safe to access (gets fired after each subsequent Lua reload aswell) \
 "SLSsteam::luaReload": Called right before SLSsteam deletes the current Lua state & recreates it. Use this to clean up your changes to memory (LuaHooks get cleaned up automatically)
 
-"Network::recvPkt": Fired when Steam receives a CNetPacket. Has 1 argument, the CNetPacket \
-"Network::sendPkt": Fired when Steam sends a CNetPacket. Has 1 argument, the CNetPacket
+"Network::recvPkt": Fired when Steam receives a CNetPacket. Has 1 argument, the CNetPacket UserData object. Use unpack_user_data to get it's pointer. Afterwards either parse it yourself or use something like lua-protobuf \
+"Network::sendPkt": Fired when Steam sends a CNetPacket. Has 1 argument, the CNetPacket UserData object. Use unpack_user_data to get it's pointer. Afterwards either parse it yourself or use something like lua-protobuf 

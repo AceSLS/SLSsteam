@@ -23,6 +23,7 @@ local ffi = require("ffi")
 
 ffi.cdef[[
 	void* place_lua_hook(const int, const void*);
+	void* unpack_user_data(const void*);
 
 	typedef void(*PostCallback_t)(void*, uint32_t, void*, uint32_t, uint32_t);
 	typedef bool(*IClientUser_BLoggedOn_t)(void*);
@@ -59,7 +60,7 @@ if not clientUserMapLoggedOn:init() then
 end
 
 -- IClientUser is subclass 1 of CUser
-local clientUserLoggedOn = VFTableInfo_t("5CUser", "BLoggedOn", clientUserMapLoggedOn.index)
+local clientUserLoggedOn = VFTableInfo_t("5CUser", "BLoggedOn", clientUserMapLoggedOn.index, 0)
 clientUserLoggedOn:init()
 
 Example.clientUserLoggedOn = ffi.cast("IClientUser_BLoggedOn_t", clientUserLoggedOn.ptr)
@@ -71,9 +72,12 @@ Example.initialized = function()
 	local clientUser = user:getClientUser()
 	local apps = user:getClientApps()
 
+	local pClientUser = ffi.C.unpack_user_data(clientUser)
+	log.debug("pClientUser: " .. tostring(pClientUser))
+
 	log.debug("IClientUser::BLoggedOn -> " .. tostring(clientUser:loggedOn())) -- SLS wrapped function call
 	-- This is just an example how to call arbitrary functions
-	log.debug("IClientUser::BLoggedOn -> " .. tostring(Example.clientUserLoggedOn(clientUser))) -- Raw function call
+	log.debug("IClientUser::BLoggedOn -> " .. tostring(Example.clientUserLoggedOn(pClientUser))) -- Raw function call
 
 	local function addappid(appId)
 		if user:isSubscribed(appId) then
