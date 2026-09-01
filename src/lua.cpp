@@ -37,6 +37,11 @@ extern void* place_lua_hook(const int index, const void* pTarget)
 	return hook->place();
 }
 
+extern void* unpack_user_data(const void* pData)
+{
+	return reinterpret_cast<const luabridge::detail::Userdata*>(pData)->getPointer();
+}
+
 namespace LuaConfig
 {
 	CConfig* get()

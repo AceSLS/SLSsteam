@@ -15,6 +15,7 @@
 
 
 extern "C" void* place_lua_hook(const int index, const void* pTarget);
+extern "C" void* unpack_user_data(const void* pData);
 
 namespace Lua
 {
