@@ -93,7 +93,7 @@ bool Updater::init()
 
 std::string Updater::getCacheFilePath()
 {
-	const auto path = g_config.getDir().append("/.updates.yaml");
+	const auto path = g_config.getDir().append(".updates.yaml");
 	return path;
 }
 
@@ -116,7 +116,7 @@ std::string Updater::loadFromCache()
 		return std::string();
 	}
 
-	LOG_DEBUG("Loading updates.ymal from disk!\n");
+	LOG_DEBUG("Loading updates.yaml from disk!\n");
 
 	std::ifstream fstream = std::ifstream(path.c_str());
 	std::ostringstream buf;
