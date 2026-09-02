@@ -100,10 +100,10 @@ extern place_lua_hook(const int index, const void* targetFn) -> void*: Used to s
 LuaHook(name: string, targetFunction: void*): Create new LuaHook \
 ~LuaHook(): Restores the original code the LuaHook overwrote \
 name -> string: Hook name, solely used for logging \
-fn -> lm_address_t: Target function address \
-hookFn -> lm_address_t: Hook function address \
-tramp -> lm_address_t: Trampoline address \
-size -> lm_address_t: Stolen bytes, taken away for creating the trampoline \
+fn -> void*: Target function address \
+hookFn -> void*: Hook function address \
+tramp -> void*: Trampoline address \
+size -> size_t: Stolen bytes, taken away for creating the trampoline \
 index -> int: Index of the hook used for place_lua_hook \
 place(): Place the hook \
 remove(): Remove the hook
