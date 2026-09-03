@@ -85,6 +85,24 @@ void Misc::recvMsg(CNetPacket *pkt)
 			break;
 		}
 
+		case k_EMsgClientLogOnResponse:
+		{
+			auto msg = pkt->deserializeBody<CMsgClientLogonResponse>();
+			if (msg.has_parental_setting_signature())
+			{
+				msg.clear_parental_setting_signature();
+				LOG_DEBUG("Cleared parental setting signature!\n");
+			}
+			if (msg.has_parental_settings())
+			{
+				msg.clear_parental_settings();
+				LOG_DEBUG("Cleared parental settings!\n");
+			}
+
+			pkt->serialize(msg);
+			break;
+		}
+
 		default:
 			break;
 	}

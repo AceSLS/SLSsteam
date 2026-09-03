@@ -9,6 +9,7 @@
 #include "protobufs/steammessages_clientserver_2.pb.h"
 #include "protobufs/steammessages_clientserver_appinfo.pb.h"
 #include "protobufs/steammessages_clientserver_friends.pb.h"
+#include "protobufs/steammessages_clientserver_login.pb.h"
 #include "protobufs/steammessages_clientserver_userstats.pb.h"
 #include "protobufs/steammessages_player.steamclient.pb.h"
 
