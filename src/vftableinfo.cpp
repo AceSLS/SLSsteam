@@ -382,7 +382,7 @@ void VFTIndexes::dump(const std::string& name, const std::map<std::string, unsig
 
 bool VFTIndexes::init()
 {
-	LOG_DEBUG("VFTIndexes::init()");
+	LOG_DEBUG("VFTIndexes::init()\n");
 
 	bool success = true;
 

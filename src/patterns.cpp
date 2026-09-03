@@ -31,7 +31,7 @@ bool Pattern_t::find()
 
 bool Patterns::init()
 {
-	LOG_DEBUG("Patterns::init()");
+	LOG_DEBUG("Patterns::init()\n");
 
 	bool found = true;
 
