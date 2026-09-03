@@ -53,7 +53,6 @@ Example.postCallbackHook = LuaHook("PostCalback", postCallbackPtr)
 Example.postCallbackTramp = ffi.cast("PostCallback_t", ffi.C.place_lua_hook(Example.postCallbackHook.index, Example.hkPostCallback))
 log.debug("Postcallback hooked!")
 
--- We cast to intptr_t since lua messes up the conversion to unsigned integer otherwise
 local clientUserMapLoggedOn = VFTableInfo_t("14IClientUserMap", "BLoggedOn")
 if not clientUserMapLoggedOn:init() then
 	log.notify("Failed to parse IClientUserMap!")
