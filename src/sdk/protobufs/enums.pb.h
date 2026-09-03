@@ -621,6 +621,29 @@ inline bool ESystemServiceState_Parse(
   return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<ESystemServiceState>(
     ESystemServiceState_descriptor(), name, value);
 }
+enum EBluetoothAudioPreference : int {
+  k_EBluetoothAudioPreference_Quality = 0,
+  k_EBluetoothAudioPreference_Latency = 1
+};
+bool EBluetoothAudioPreference_IsValid(int value);
+constexpr EBluetoothAudioPreference EBluetoothAudioPreference_MIN = k_EBluetoothAudioPreference_Quality;
+constexpr EBluetoothAudioPreference EBluetoothAudioPreference_MAX = k_EBluetoothAudioPreference_Latency;
+constexpr int EBluetoothAudioPreference_ARRAYSIZE = EBluetoothAudioPreference_MAX + 1;
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* EBluetoothAudioPreference_descriptor();
+template<typename T>
+inline const std::string& EBluetoothAudioPreference_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, EBluetoothAudioPreference>::value ||
+    ::std::is_integral<T>::value,
+    "Incorrect type passed to function EBluetoothAudioPreference_Name.");
+  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
+    EBluetoothAudioPreference_descriptor(), enum_t_value);
+}
+inline bool EBluetoothAudioPreference_Parse(
+    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, EBluetoothAudioPreference* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<EBluetoothAudioPreference>(
+    EBluetoothAudioPreference_descriptor(), name, value);
+}
 enum EGraphicsPerfOverlayLevel : int {
   k_EGraphicsPerfOverlayLevel_Hidden = 0,
   k_EGraphicsPerfOverlayLevel_Basic = 1,
@@ -1918,30 +1941,6 @@ inline bool EAppTestType_Parse(
   return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<EAppTestType>(
     EAppTestType_descriptor(), name, value);
 }
-enum EChildProcessQueryCommand : int {
-  k_EChildProcessQueryCommand_Invalid = 0,
-  k_EChildProcessQueryCommand_GpuTopology = 1,
-  k_EChildProcessQueryCommand_Max = 2
-};
-bool EChildProcessQueryCommand_IsValid(int value);
-constexpr EChildProcessQueryCommand EChildProcessQueryCommand_MIN = k_EChildProcessQueryCommand_Invalid;
-constexpr EChildProcessQueryCommand EChildProcessQueryCommand_MAX = k_EChildProcessQueryCommand_Max;
-constexpr int EChildProcessQueryCommand_ARRAYSIZE = EChildProcessQueryCommand_MAX + 1;
-
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* EChildProcessQueryCommand_descriptor();
-template<typename T>
-inline const std::string& EChildProcessQueryCommand_Name(T enum_t_value) {
-  static_assert(::std::is_same<T, EChildProcessQueryCommand>::value ||
-    ::std::is_integral<T>::value,
-    "Incorrect type passed to function EChildProcessQueryCommand_Name.");
-  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
-    EChildProcessQueryCommand_descriptor(), enum_t_value);
-}
-inline bool EChildProcessQueryCommand_Parse(
-    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, EChildProcessQueryCommand* value) {
-  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<EChildProcessQueryCommand>(
-    EChildProcessQueryCommand_descriptor(), name, value);
-}
 enum EChildProcessQueryExitCode : int {
   k_EChildProcessQueryExitCode_Success = 0,
   k_EChildProcessQueryExitCode_ErrorCommandline = -1,
@@ -2201,7 +2200,9 @@ enum EContentModerationSanction : int {
   k_EContentModerationSanction_Warned = 8,
   k_EContentModerationSanction_KickedFromGroup = 9,
   k_EContentModerationSanction_HarassmentBanned = 10,
-  k_EContentModerationSanction_MAX = 11
+  k_EContentModerationSanction_HarassmentStrike = 11,
+  k_EContentModerationSanction_Escalate = 12,
+  k_EContentModerationSanction_MAX = 13
 };
 bool EContentModerationSanction_IsValid(int value);
 constexpr EContentModerationSanction EContentModerationSanction_MIN = k_EContentModerationSanction_Invalid;
@@ -2333,7 +2334,11 @@ enum EContentReportReason : int {
   k_EContentReportReason_QuotesModeratedContent = 62,
   k_EContentReportReason_CredibleThreatOfViolence = 63,
   k_EContentReportReason_AutoCreatedOnModeration = 64,
-  k_EContentReportReason_MAX = 65
+  k_EContentReportReason_Piracy = 65,
+  k_EContentReportReason_ToSViolation = 66,
+  k_EContentReportReason_Miscategorized = 67,
+  k_EContentReportReason_BypassingProfanityFilter = 68,
+  k_EContentReportReason_MAX = 69
 };
 bool EContentReportReason_IsValid(int value);
 constexpr EContentReportReason EContentReportReason_MIN = k_EContentReportReason_Invalid;
@@ -2588,6 +2593,11 @@ template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::ESystemServiceState>() {
   return ::ESystemServiceState_descriptor();
 }
+template <> struct is_proto_enum< ::EBluetoothAudioPreference> : ::std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::EBluetoothAudioPreference>() {
+  return ::EBluetoothAudioPreference_descriptor();
+}
 template <> struct is_proto_enum< ::EGraphicsPerfOverlayLevel> : ::std::true_type {};
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::EGraphicsPerfOverlayLevel>() {
@@ -2822,11 +2832,6 @@ template <> struct is_proto_enum< ::EAppTestType> : ::std::true_type {};
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::EAppTestType>() {
   return ::EAppTestType_descriptor();
-}
-template <> struct is_proto_enum< ::EChildProcessQueryCommand> : ::std::true_type {};
-template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::EChildProcessQueryCommand>() {
-  return ::EChildProcessQueryCommand_descriptor();
 }
 template <> struct is_proto_enum< ::EChildProcessQueryExitCode> : ::std::true_type {};
 template <>
