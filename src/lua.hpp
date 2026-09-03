@@ -40,6 +40,8 @@ namespace Lua
 
 	void init(const bool fullReload = false);
 	void initLuaState();
+
+	bool fixPerms(const std::filesystem::path& path);
 	void onFileChange(const std::filesystem::path& path, const int eventMask);
 	bool runLua(const std::filesystem::path& path);
 

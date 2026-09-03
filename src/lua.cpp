@@ -296,12 +296,24 @@ void Lua::init(const bool fullReload)
 		}
 	}
 
+	if (!fixPerms(dir))
+	{
+		//No need to add LogLevelOnce, since FileWatcher isn't active yet
+		LOG_NOTIFYERROR("Failed to set appropiate permissions on the plugins directory!\nPlugins are disabled for this session");
+		return;
+	}
+
 	//Collect files inside of set since directory_iterator isn't sorted
 	auto files = std::set<std::filesystem::path>();
 	for (const auto& file : std::filesystem::directory_iterator { dir })
 	{
 		const auto path = std::filesystem::path(file);
 		if (path.extension() != ".lua")
+		{
+			continue;
+		}
+
+		if (!fixPerms(path))
 		{
 			continue;
 		}
@@ -504,6 +516,26 @@ void Lua::initLuaState()
 	{
 		lua_close(old);
 	}
+}
+
+bool Lua::fixPerms(const std::filesystem::path& path)
+{
+	const auto perms = std::filesystem::status(path).permissions();
+	if ((perms & (std::filesystem::perms::group_all | std::filesystem::perms::others_all)) != std::filesystem::perms::none)
+	{
+		try
+		{
+			std::filesystem::permissions(path, std::filesystem::perms::owner_all);
+			LOG_DEBUG("Fixed permissions for %s!\n", path.filename().c_str());
+		}
+		catch (...)
+		{
+			LOG_ERROR("Failed to set permissions on %s!\n", path.filename().c_str());
+			return false;
+		}
+	}
+
+	return true;
 }
 
 void Lua::onFileChange(const std::filesystem::path& path, __attribute__((unused)) const int eventMask)
