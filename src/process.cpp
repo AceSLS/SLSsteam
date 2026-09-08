@@ -572,7 +572,18 @@ std::unordered_set<std::filesystem::path> Process_t::getOpenFiles()
 
 std::filesystem::path Process_t::getRealExe()
 {
-	const auto linkTarget = std::filesystem::read_symlink(getPath("exe"));
+	std::filesystem::path linkTarget;
+
+	try
+	{
+		linkTarget = std::filesystem::read_symlink(getPath("exe"));
+	}
+	catch (...)
+	{
+		LOG_ERROR("Failed to follow exe link target for %u!\n", pid);
+		return "";
+	}
+
 	const auto targetName = linkTarget.filename();
 
 	if (targetName != "wine-preloader" && targetName != "wine64-preloader")
