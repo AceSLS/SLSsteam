@@ -161,11 +161,12 @@ bool CFileWatcher::start()
 {
 	try
 	{
-		watchThread = std::thread(&watchLoop, this);
 		running = true;
+		watchThread = std::thread(&watchLoop, this);
 	}
 	catch (...)
 	{
+		running = false;
 		LOG_ERROR("Failed to start watchThread!\n");
 	}
 
