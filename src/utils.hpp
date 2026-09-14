@@ -17,29 +17,36 @@ namespace Utils
 	template<typename T>
 	bool tryConvertToNumber(const char* str, T& out)
 	{
+		if (!isNumber(str))
+		{
+			return false;
+		}
+
 		if constexpr (std::is_same_v<T, int32_t>)
 		{
-			if (!isNumber(str))
-			{
-				return false;
-			}
-
 			out = std::stoi(str);
-			return true;
 		}
 
 		else if constexpr (std::is_same_v<T, uint32_t>)
 		{
-			if (!isNumber(str))
-			{
-				return false;
-			}
-
 			out = std::stoul(str);
-			return true;
 		}
 
-		//TODO: Add GCC error when compiling this path
-		return false;
+		else if constexpr (std::is_same_v<T, int64_t>)
+		{
+			out = std::stoll(str);
+		}
+
+		else if constexpr (std::is_same_v<T, uint64_t>)
+		{
+			out = std::stoull(str);
+		}
+
+		else
+		{
+			return false;
+		}
+
+		return true;
 	}
 }
