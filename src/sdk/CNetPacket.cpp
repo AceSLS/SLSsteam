@@ -1,6 +1,12 @@
 #include "CNetPacket.hpp"
 
 
+uint8_t g_packetsArray[MAX_PACKET_SIZE * MAX_PACKETS] { };
+uintptr_t g_packetsArrayOffset;
+
+std::mutex g_packetSerializeMutex;
+
+
 std::string CNetPacket::getProtoBufTypeName() const
 {
 	auto name = std::string("Unknown");
@@ -35,7 +41,10 @@ CMsgProtoBufHeader CNetPacket::deserializeHeader() const
 
 void CNetPacket::free()
 {
-	Steam::Plat_Free(body);
+	if (originalBody)
+	{
+		Steam::Plat_Free(originalBody);
+	}
 
 	size = 0;
 	body = nullptr;
