@@ -32,7 +32,7 @@ If you want to manage memory malloc & free seem to work just fine. I still recom
 
 #### curl:
 
-downloadString(url: string, timeout: int) ->: Download url as string with timeoUt \
+downloadString(url: string, timeout: int) ->: Download url as string with timeOut \
 downloadString(url: string, headers: string[], timeout: int) -> string: Download url as string with headers & timeOut
 
 
