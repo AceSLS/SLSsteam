@@ -94,6 +94,8 @@ public:
 			return;
 		}
 
+		const std::lock_guard lock(g_packetSerializeMutex);
+
 		const uintptr_t remainingSize = sizeof(g_packetsArray) - g_packetsArrayOffset;
 		if (newSize >= remainingSize)
 		{
@@ -101,7 +103,6 @@ public:
 			g_packetsArrayOffset = 0;
 		}
 
-		const std::lock_guard lock(g_packetSerializeMutex);
 		uint8_t* mem = &g_packetsArray[g_packetsArrayOffset];
 
 		if (header)
@@ -113,7 +114,7 @@ public:
 			}
 
 			CNetPacketBody* newBdy = reinterpret_cast<CNetPacketBody*>(mem);
-			newBdy->type = body->type;
+			newBdy->type = getType();
 			newBdy->headerSize = headerSize;
 		}
 		else
