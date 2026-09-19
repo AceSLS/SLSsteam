@@ -42,7 +42,7 @@ public:
 	CNetPacketBody* body;			//0x4
 	uint32_t size;					//0x8
 	int32_t refs;					//0xC
-	CNetPacketBody* originalBody;	//0x10
+	CNetPacketBody* originalBody;	//0x10 - Ref counted pointer
 	uint8_t __pad0x10[0xC];			//0x14
 	
 	constexpr bool isValid() const
@@ -130,7 +130,7 @@ public:
 
 		body = reinterpret_cast<CNetPacketBody*>(mem);
 		size = newSize;
-		//If I understand correctly Steam cleans up for us, that's why we crash when we free the oldBody ourself
+		//If I understand correctly Steam cleans up for us, that's why we crash when we free the originalBody ourself
 		//However the body we allocate doesn't get freed, so we just reuse a buffer for it
 
 		LOG_DEBUG("Serialized 0x%x into PACKETS_ARRAY at %u with size %u\n", getType(), g_packetsArrayOffset, newSize);
