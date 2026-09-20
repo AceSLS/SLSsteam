@@ -446,7 +446,7 @@ bool CELFExecutableFile::checkMagic()
 
 	if (fseek(file, 0, SEEK_SET) != 0)
 	{
-		LOG_CUSTOM(errorFlags, "Failed to seek to Magic!\n");
+		LOG_CUSTOM(errorFlags, "Failed to seek to magic!\n");
 		return false;
 	}
 
@@ -671,13 +671,6 @@ bool Process_t::init(const pid_t pid, const HSteamPipe pipeHandle)
 {
 	this->pid = pid;
 	this->pipeHandle = pipeHandle;
-
-	const auto serverPipe = g_pSteamEngine->getServerPipe(pipeHandle);
-	if (!serverPipe)
-	{
-		LOG_ERROR("ServerPipe for %p is null!\n", reinterpret_cast<void*>(pipeHandle));
-		return false;
-	}
 
 	exe = getRealExe();
 	if (!exe.string().size())

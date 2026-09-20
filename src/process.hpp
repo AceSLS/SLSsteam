@@ -81,16 +81,16 @@ public:
 
 struct Process_t
 {
-	pid_t pid;
-	std::filesystem::path exe;
-	std::vector<std::string> cmdLine;
-	std::string environ;
+	pid_t pid = -1;
+	std::filesystem::path exe = "";
+	std::vector<std::string> cmdLine = { };
+	std::string environ = "";
 
-	AppId_t appId;
-	HSteamPipe pipeHandle;
+	AppId_t appId = 0;
+	HSteamPipe pipeHandle = 0x0;
 
-	bool steamDRM;
-	bool denuvo;
+	bool steamDRM = false;
+	bool denuvo = false;
 
 	std::filesystem::path getPath(const char* fileName);
 	std::string readFile(const char* fileName);
