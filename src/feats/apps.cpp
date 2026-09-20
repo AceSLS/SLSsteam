@@ -616,7 +616,7 @@ void Apps::setConfigStoreString(const char* key, const char* value)
 
 	privateApps.clear();
 	str = str.substr(1, str.size() - 2); //[730,240,440,etc]
-	const auto split = Utils::strsplit(const_cast<char*>(str.c_str()), ",");
+	const auto split = Utils::strsplit(str, ",");
 
 	for (const auto& s : split)
 	{

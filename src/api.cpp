@@ -49,7 +49,7 @@ void SLSAPI::onFileChange(const std::filesystem::path& path, __attribute__((unus
 
 	fstream.close();
 
-	const auto cmds = Utils::strsplit(const_cast<char*>(content.c_str()), "\n");
+	const auto cmds = Utils::strsplit(content, "\n");
 	for (const auto& cmd : cmds)
 	{
 		parseCmd(cmd);
@@ -60,7 +60,7 @@ void SLSAPI::parseCmd(const std::string& cmd)
 {
 	LOG_DEBUG("API Running %s\n", cmd.c_str());
 
-	const auto split = Utils::strsplit(const_cast<char*>(cmd.c_str()), "|");
+	const auto split = Utils::strsplit(cmd, "|");
 
 	const std::lock_guard guard(cmdMutex);
 

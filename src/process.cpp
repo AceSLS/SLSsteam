@@ -680,7 +680,7 @@ bool Process_t::init(const pid_t pid, const HSteamPipe pipeHandle)
 			return false;
 		}
 
-		cmdLine = Utils::strsplit(const_cast<char*>(readFile("cmdline").c_str()), "\0");
+		cmdLine = Utils::strsplit(readFile("cmdline"), "\0");
 		environ = readFile("environ");
 
 		if (!environ.size())

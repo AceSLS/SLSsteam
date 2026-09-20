@@ -12,7 +12,7 @@ namespace Utils
 	int exec(const std::vector<std::string>& executableList, const std::vector<std::string>& args, std::string* stdOut);
 	bool isNumber(const char* str);
 	std::string getFileSHA256(const char* filePath);
-	std::vector<std::string> strsplit(char* str, const char* delimeter);
+	std::vector<std::string> strsplit(const std::string& str, const char* delimeter);
 
 	template<typename T>
 	bool tryConvertToNumber(const char* str, T& out)
