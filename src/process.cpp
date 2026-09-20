@@ -644,6 +644,12 @@ bool Process_t::analyse()
 	//So we check all of them
 	for (const auto& file : getOpenFiles())
 	{
+		//Don't reanalyse main exe (only affects wine games)
+		if (file == exeFile->path)
+		{
+			continue;
+		}
+
 		const auto executable = IExecutableFile::create(file, ELogLevel::k_ELogLevelDebug);
 		if (!executable)
 		{
