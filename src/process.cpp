@@ -68,6 +68,12 @@ bool IExecutableFile::hasSteamDRM()
 	if (last.name == ".bind")
 	{
 		const auto bytes = readSection(last);
+		if (!bytes.size())
+		{
+			LOG_ERROR("Section %s is empty!\n", last.name.c_str());
+			return false;
+		}
+
 		const double entropy = Utils::calculateEntropy(bytes);
 
 		LOG_DEBUG("%s has entropy of %f\n", last.name.c_str(), entropy);
@@ -565,17 +571,20 @@ std::unordered_set<std::filesystem::path> Process_t::getOpenFiles()
 	const auto maps = getPath("map_files");
 	for (const auto& file : std::filesystem::directory_iterator { maps })
 	{
+		auto path = std::filesystem::path(file);
+
 		//Afaik all files should be symlinks. But better safe than sorry
-		if (std::filesystem::is_symlink(file))
+		if (std::filesystem::is_symlink(path))
 		{
-			const auto path = std::filesystem::read_symlink(file).string();
-			files.emplace(path);
-		}
-		else
-		{
-			files.emplace(file);
+			path = std::filesystem::read_symlink(path);
 		}
 
+		if (!std::filesystem::is_regular_file(path))
+		{
+			continue;
+		}
+
+		files.emplace(path);
 	}
 
 	return files;
