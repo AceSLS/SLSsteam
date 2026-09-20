@@ -672,32 +672,39 @@ bool Process_t::init(const pid_t pid, const HSteamPipe pipeHandle)
 	this->pid = pid;
 	this->pipeHandle = pipeHandle;
 
-	exe = getRealExe();
-	if (!exe.string().size())
+	try
+	{
+		exe = getRealExe();
+		if (!exe.string().size())
+		{
+			return false;
+		}
+
+		cmdLine = Utils::strsplit(const_cast<char*>(readFile("cmdline").c_str()), "\0");
+		environ = readFile("environ");
+
+		if (!environ.size())
+		{
+			return false;
+		}
+
+		appId = getAppIdFromEnv();
+		if (!appId) //Will fail on steam process
+		{
+			return false;
+		}
+
+		if (!g_config.smartTickets.copy())
+		{
+			return true;
+		}
+
+		return analyse();
+	}
+	catch (...)
 	{
 		return false;
 	}
-
-	cmdLine = Utils::strsplit(const_cast<char*>(readFile("cmdline").c_str()), "\0");
-	environ = readFile("environ");
-
-	if (!environ.size())
-	{
-		return false;
-	}
-
-	appId = getAppIdFromEnv();
-	if (!appId) //Will fail on steam process
-	{
-		return false;
-	}
-
-	if (!g_config.smartTickets.copy())
-	{
-		return true;
-	}
-
-	return analyse();
 }
 
 std::unordered_map<HSteamPipe, Process_t> g_processMap = std::unordered_map<HSteamPipe, Process_t>();
