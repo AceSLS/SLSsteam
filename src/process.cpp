@@ -56,8 +56,13 @@ bool IExecutableFile::hasSteamDRM()
 	{
 		return false;
 	}
-	//SteamDRM appends .bind section with very high entropy (usually 7.9+)
 
+	if (!sections.size())
+	{
+		return false;
+	}
+
+	//SteamDRM appends .bind section with very high entropy (usually 7.9+)
 	const auto& last = sections.at(sections.size() - 1);
 
 	if (last.name == ".bind")
@@ -134,6 +139,12 @@ bool IExecutableFile::hasDenuvo()
 			}
 
 			const auto bytes = readSection(sec);
+			if (!bytes.size())
+			{
+				LOG_ERROR("Section %s is empty!\n", sec.name.c_str());
+				continue;;
+			}
+
 			const double entropy = Utils::calculateEntropy(bytes);
 
 			if (g_config.extendedLogging.copy())
@@ -286,8 +297,9 @@ bool CPortableExecutableFile::parseSections()
 			return false;
 		}
 
-		char name[SECTION_HEADER_NAME_SIZE];
-		strncpy(name, reinterpret_cast<char*>(sectHdr), sizeof(name));
+		char name[SECTION_HEADER_NAME_SIZE + 1] { }; //Zero allocate buffer for null termination
+		strncpy(name, reinterpret_cast<char*>(sectHdr), sizeof(name) - 1);
+		//snprintf(name, sizeof(name), "%s", reinterpret_cast<char*>(sectHdr));
 
 		const uint32_t rva = *reinterpret_cast<uint32_t*>(&sectHdr[0xC]);
 		const uint32_t size = *reinterpret_cast<uint32_t*>(&sectHdr[0x10]);
@@ -327,7 +339,7 @@ bool CELFExecutableFile::parseElf32Headers(const Elf32_Ehdr& hdr)
 		return false;
 	}
 
-	const Elf32_Shdr& strHdr = shdrs[hdr.e_shstrndx];
+	const Elf32_Shdr& strHdr = shdrs.at(hdr.e_shstrndx);
 	auto strSec = std::vector<char>();
 	strSec.resize(strHdr.sh_size);
 
@@ -353,7 +365,7 @@ bool CELFExecutableFile::parseElf32Headers(const Elf32_Ehdr& hdr)
 			continue;
 		}
 
-		const char* name = &strSec[shdr.sh_name];
+		const char* name = &strSec.at(shdr.sh_name);
 
 		if (g_config.extendedLogging.copy())
 		{
@@ -389,7 +401,7 @@ bool CELFExecutableFile::parseElf64Headers(const Elf64_Ehdr& hdr)
 		return false;
 	}
 
-	const Elf64_Shdr& strHdr = shdrs[hdr.e_shstrndx];
+	const Elf64_Shdr& strHdr = shdrs.at(hdr.e_shstrndx);
 	auto strSec = std::vector<char>();
 	strSec.resize(strHdr.sh_size);
 
@@ -415,7 +427,7 @@ bool CELFExecutableFile::parseElf64Headers(const Elf64_Ehdr& hdr)
 			continue;
 		}
 
-		const char* name = &strSec[shdr.sh_name];
+		const char* name = &strSec.at(shdr.sh_name);
 
 		if (g_config.extendedLogging.copy())
 		{
@@ -487,20 +499,19 @@ bool CELFExecutableFile::parseSections()
 		//Headers are the same till e_entry. The 64bit version is longer
 		//so we can just recast it
 		Elf32_Ehdr hdr32 = *reinterpret_cast<Elf32_Ehdr*>(&hdr64);
-		parseElf32Headers(hdr32);
+		return parseElf32Headers(hdr32);
 	}
 	else if (hdr64.e_ident[EI_CLASS] == ELFCLASS64 && hdr64.e_machine == ISA_AMD64)
 	{
 		LOG_DEBUG("Parsing as 64 bit file\n");
-		parseElf64Headers(hdr64);
+		return parseElf64Headers(hdr64);
 	}
 	else
 	{
 		LOG_CUSTOM(errorFlags, "Unknown ELFCLASS/e_machine %u | %u!\n", hdr64.e_ident[EI_CLASS], hdr64.e_machine);
-		return false;
 	}
 
-	return true;
+	return false;
 }
 
 std::filesystem::path Process_t::getPath(const char* fileName)
@@ -693,9 +704,7 @@ bool Process_t::init(const pid_t pid, const HSteamPipe pipeHandle)
 		return true;
 	}
 
-	analyse();
-
-	return true;
+	return analyse();
 }
 
 std::unordered_map<HSteamPipe, Process_t> g_processMap = std::unordered_map<HSteamPipe, Process_t>();

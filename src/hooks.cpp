@@ -503,9 +503,11 @@ static uint32_t hkSteamEngine_ProcessIPCFrame(CSteamEngine* pSteamEngine, HSteam
 	{
 		const auto serverPipe = g_pSteamEngine->getServerPipe(hPipe);
 		auto& proc = g_processMap[serverPipe->pipeHandle];
-		proc.init(serverPipe->pid, serverPipe->pipeHandle);
 
-		Ticket::connectPipe(hPipe);
+		if (proc.init(serverPipe->pid, serverPipe->pipeHandle))
+		{
+			Ticket::connectPipe(hPipe);
+		}
 	}
 
 	if (cmd == EIPCCmd::ClosePipe)
