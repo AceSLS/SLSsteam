@@ -5,3 +5,6 @@ bin
 obj
 releases
 zip
+
+src/config_default.hpp
+src/version.hpp
