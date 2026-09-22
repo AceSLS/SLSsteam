@@ -12,6 +12,7 @@
 #include "patterns.hpp"
 #include "update.hpp"
 #include "utils.hpp"
+#include "version.hpp"
 #include "vftableinfo.hpp"
 
 #include "libmem/libmem.h"
@@ -114,9 +115,9 @@ static void setup()
 		return;
 	}
 
-	CFileWatcher::installSigHandler();
+	LOG_INFO("SLSsteam (%s -> %s) loading in %s\n", BUILD_BRANCH, LAST_COMMIT_HASH, proc.name);
 
-	LOG_DEBUG("SLSsteam loading in %s\n", proc.name);
+	CFileWatcher::installSigHandler();
 
 	//Any release
 	cleanEnvVar("LD_AUDIT", "SLSsteam.so");

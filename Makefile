@@ -46,7 +46,7 @@ SLSSTEAMSO := bin/SLSsteam-$(FLAGSSHA).so
 objs := $(srcs:src/%.cpp=obj/$(FLAGSSHA)/%.o)
 deps := $(objs:%.o=%.d)
 
-audit-libs:
+audit-libs: embed-version #embed-version belongs to the SLSsteam.so target, yet we can't elegantly add it there. So it stays here for now
 	$(MAKE) -j $(JOBS) $(SLSSTEAMSO) library-inject
 	$(MAKE) link-bins
 
@@ -73,11 +73,8 @@ schema-grabber:
 ticket-grabber:
 	$(MAKE) -C tools/ticket-grabber
 
--include $(deps)
-obj/$(FLAGSSHA)/update.o: src/update.cpp res/version.txt
+embed-version:
 	$(shell ./embed-version.sh)
-	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -isysteminclude -MMD -MP -c $< -o $@
 
 -include $(deps)
 obj/$(FLAGSSHA)/config.o: src/config.cpp res/config.yaml
@@ -151,6 +148,7 @@ release: rebuild zips
 	link-bins \
 	schema-grabber \
 	ticket-grabber \
+	embed-version \
 	clean-libs \
 	clean-tools \
 	install \
