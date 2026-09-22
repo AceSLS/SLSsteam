@@ -91,7 +91,7 @@ public:
 	MTVariable<std::string> fakeName;
 	MTVariable<std::string> fakeEmail;
 	MTVariable<int32_t> fakeWalletBalance;
-	MTVariable<LogLevelFlags_t> logLevels;
+	MTVariable<LogLevelFlags_t> logLevels = 0xff;
 	MTVariable<bool> dumpInterfaceMaps;
 	MTVariable<bool> extendedLogging;
 

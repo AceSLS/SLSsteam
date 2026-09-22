@@ -17,11 +17,6 @@ public:
 		set(defaultInst());
 	}
 
-	MTVariable(const T instance)
-	{
-		set(instance);
-	}
-
 	MTVariable(const T& instance)
 	{
 		set(instance);
