@@ -644,7 +644,7 @@ static uint32_t hkSteamMatchmakingServers_RequestInternetServerList(void* pSteam
 }
 
 __attribute__((hot))
-static uint32_t hkUser_CheckAppOwnership(CUser* pUser, AppId_t appId, AppOwnershipInfo_t* pOwnershipInfo)
+static bool hkUser_CheckAppOwnership(CUser* pUser, AppId_t appId, AppOwnershipInfo_t* pOwnershipInfo)
 {
 	LOG_TRACE("Calling tramp\n");
 	const uint32_t ret = Hooks::CUser_CheckAppOwnership->tramp.fn(pUser, appId, pOwnershipInfo);
