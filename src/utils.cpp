@@ -185,7 +185,7 @@ std::string Utils::getFileSHA256(const char *filePath)
 	return sha256.str();
 }
 
-std::vector<std::string> Utils::strsplit(const std::string& str, const char *delimeter)
+std::vector<std::string> Utils::strsplit(const std::string& str, const std::string& delimeter)
 {
 	auto splits = std::vector<std::string>();
 
