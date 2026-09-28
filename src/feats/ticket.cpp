@@ -136,6 +136,11 @@ void Ticket::launchApp(const AppId_t appId)
 
 void Ticket::getEncryptedAppTicket(const AppId_t appId)
 {
+	if (!(g_config.smartTickets.copy() & CConfig::k_ESmartTicketsDenuvo))
+	{
+		return;
+	}
+
 	const SavedTicket* cached = Ticket::getCachedEncryptedTicket(appId);
 	if (!cached)
 	{
