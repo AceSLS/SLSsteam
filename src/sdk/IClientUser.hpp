@@ -21,5 +21,6 @@ public:
 		uint32_t* pSigSize
 	);
 
+	CSteamId getSteamId();
 	bool setLegacyCDKey(const AppId_t appId, const char* key);
 };

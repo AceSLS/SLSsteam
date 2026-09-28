@@ -389,9 +389,6 @@ static void hkCMInterface_RecvPkt(CCMInterface* pCMInterface, CNetPacket* pNetPa
 	Hooks::CCMInterface_RecvPkt->tramp.fn(pCMInterface, pNetPacket);
 }
 
-//I don't like forward declerations, but with the current style & hooks layout it's a necessity
-static CSteamId hkClientUser_GetSteamId(const CSteamId& steamId);
-
 static uint32_t hkSteamEngine_ProcessIPCFrame(CSteamEngine* pSteamEngine, HSteamPipe hPipe, CUtlBuffer* pBufIn, CUtlBuffer* pBufOut)
 {
 	if (!g_pSteamEngine)
@@ -460,34 +457,6 @@ static uint32_t hkSteamEngine_ProcessIPCFrame(CSteamEngine* pSteamEngine, HSteam
 		//mem + 0 : 1 = EIPCExitCode
 		//return values follow
 		const EIPCExitCode exitCode = *reinterpret_cast<EIPCExitCode*>(pBufOut->mem.base + 0);
-
-		//IClientUser::GetSteamID has been optimized to hell and back
-		//So to hook it we need a naked function hook that requires quite the
-		//complex logic to get the full steamId. So I made an exception for this function,
-		//since it seems to always get called from RunInterface anyway
-		//53                                      push    ebx
-		//8B 54 24 0C                             mov     edx, [esp+4+arg_4]
-		//8B 44 24 08                             mov     eax, [esp+4+arg_0]
-		//8B 9A B2 E8 FF FF                       mov     ebx, [edx-174Eh] //SteamId low
-		//8B 8A AE E8 FF FF                       mov     ecx, [edx-1752h] //SteamId high
-		//89 58 04                                mov     [eax+4], ebx
-		//89 08                                   mov     [eax], ecx
-		//                                        //Optimally inject here, grab eax, copy into g_currentSteamId
-		//5B                                      pop     ebx
-		//C2 04 00                                retn    4
-		if (interface == EIPCInterface::User && exitCode == EIPCExitCode::Success && function == 0xD6FC3200)
-		{
-			//Universe always set, steamId gets filled in after login
-			CSteamId* id = reinterpret_cast<CSteamId*>(pBufOut->mem.base + 1);
-
-			if (!g_currentSteamId.isSet() && id->isSet())
-			{
-				g_currentSteamId = CSteamId(id->steamId64);
-			}
-
-			*id = hkClientUser_GetSteamId(g_currentSteamId);
-		}
-
 		//LOG_DEBUG("Out\n%s\n", MemHlp::hexdump(pBufOut->mem.base, pBufOut->offset).c_str());
 
 		Apps::runIPCFrame();
@@ -1120,33 +1089,14 @@ static bool hkClientUser_GetLegacyCDKey(IClientUser* pClientUser, AppId_t appId,
 	return Hooks::IClientUser_GetLegacyCDKey->originalFn.fn(pClientUser, appId, pChKey, keySize);
 }
 
-static uint8_t hkClientUser_IsUserSubscribedAppInTicket(IClientUser* pClientUser, uint64_t steamId, AppId_t appId)
+static CSteamId hkClientUser_GetSteamId(IClientUser* pClientUser)
 {
-	LOG_TRACE("Calling original\n");
-	const uint8_t ticketState = Hooks::IClientUser_IsUserSubscribedAppInTicket->originalFn.fn(pClientUser, steamId, appId);
-	//LOG_ONCE("IClientUser::IsUserSubscribedAppInTicket(0x%x, %u, %u, %u, %u) -> %i\n", pClientUser, steamId, a2, a3, appId, ticketState);
-	//Don't log the steamId, protect users from themselves and stuff
-	LOG_ONCE
-	(
-		"%s(%p, %u) -> %i\n",
-
-		Hooks::IClientUser_IsUserSubscribedAppInTicket->name.c_str(),
-		reinterpret_cast<void*>(pClientUser),
-		appId,
-		ticketState
-	);
-	
-	if (DLC::userSubscribedInTicket(appId))
+	const auto steamId = Hooks::IClientUser_GetSteamId->originalFn.fn(pClientUser);
+	if (!g_currentSteamId.isSet())
 	{
-		//Owned and subscribed hehe :)
-		return 0;
+		g_currentSteamId = steamId;
 	}
 
-	return ticketState;
-}
-
-static CSteamId hkClientUser_GetSteamId(const CSteamId& steamId)
-{
 	const auto utils = g_pSteamEngine->getUtils();
 	if (!utils)
 	{
@@ -1207,6 +1157,31 @@ static CSteamId hkClientUser_GetSteamId(const CSteamId& steamId)
 	}
 
 	return ticket->steamId;
+}
+
+static uint8_t hkClientUser_IsUserSubscribedAppInTicket(IClientUser* pClientUser, uint64_t steamId, AppId_t appId)
+{
+	LOG_TRACE("Calling original\n");
+	const uint8_t ticketState = Hooks::IClientUser_IsUserSubscribedAppInTicket->originalFn.fn(pClientUser, steamId, appId);
+	//LOG_ONCE("IClientUser::IsUserSubscribedAppInTicket(0x%x, %u, %u, %u, %u) -> %i\n", pClientUser, steamId, a2, a3, appId, ticketState);
+	//Don't log the steamId, protect users from themselves and stuff
+	LOG_ONCE
+	(
+		"%s(%p, %u) -> %i\n",
+
+		Hooks::IClientUser_IsUserSubscribedAppInTicket->name.c_str(),
+		reinterpret_cast<void*>(pClientUser),
+		appId,
+		ticketState
+	);
+
+	if (DLC::userSubscribedInTicket(appId))
+	{
+		//Owned and subscribed hehe :)
+		return 0;
+	}
+
+	return ticketState;
 }
 
 static AppId_t hkClientUtils_GetAppId(IClientUtils* pClientUtils)
@@ -1350,6 +1325,7 @@ namespace Hooks
 	VFTHook<IClientUser_GetAppOwnershipTicketExtendedData_t>* IClientUser_GetAppOwnershipTicketExtendedData = nullptr;
 	VFTHook<IClientUser_GetEncryptedAppTicket_t>* IClientUser_GetEncryptedAppTicket = nullptr;
 	VFTHook<IClientUser_GetLegacyCDKey_t>* IClientUser_GetLegacyCDKey = nullptr;
+	VFTHook<IClientUser_GetSteamId_t>* IClientUser_GetSteamId = nullptr;
 	VFTHook<IClientUser_IsUserSubscribedAppInTicket_t>* IClientUser_IsUserSubscribedAppInTicket = nullptr;
 
 	VFTHook<IClientUtils_GetAppId_t>* IClientUtils_GetAppId = nullptr;
@@ -1567,6 +1543,7 @@ void Hooks::placeVFTHooks()
 		//since we load the encrypted ticket in the Networking layer. We just need this function to spoof our steamId once
 		Hooks::IClientUser_GetEncryptedAppTicket = new VFTHook(vft, VFTIndexes::IClientUser::GetEncryptedAppTicket, hkClientUser_GetEncryptedAppTicket);
 		Hooks::IClientUser_GetLegacyCDKey = new VFTHook(vft, VFTIndexes::IClientUser::GetLegacyCDKey, hkClientUser_GetLegacyCDKey);
+		Hooks::IClientUser_GetSteamId = new VFTHook(vft, VFTIndexes::IClientUser::GetSteamID, hkClientUser_GetSteamId);
 		Hooks::IClientUser_IsUserSubscribedAppInTicket = new VFTHook(vft, VFTIndexes::IClientUser::IsUserSubscribedAppInTicket, hkClientUser_IsUserSubscribedAppInTicket);
 
 		LOG_DEBUG("IClientUser->vft at %p\n", reinterpret_cast<void*>(vft.get()));
