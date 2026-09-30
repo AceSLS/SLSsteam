@@ -3,7 +3,7 @@
 HEADER_FILE="src/version.hpp"
 
 BRANCH="$(git branch | grep "\*" | cut -d " " -f 2)"
-LAST_COMMIT_HASH="$(git rev-parse --verify HEAD)"
+LAST_COMMIT_HASH="${GIT_COMMIT_HASH:-$(git rev-parse --verify HEAD)}"
 VERSION="$(cat "./res/version.txt")"
 
 EMBEDED_VERSION="$(cat "$HEADER_FILE")"
