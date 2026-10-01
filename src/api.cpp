@@ -60,7 +60,7 @@ void SLSAPI::parseCmd(const std::string& cmd)
 {
 	LOG_DEBUG("API Running %s\n", cmd.c_str());
 
-	const auto split = Utils::strsplit(cmd, "|");
+	const auto split = Utils::strsplit(cmd, "\\|");
 
 	const std::lock_guard guard(cmdMutex);
 
