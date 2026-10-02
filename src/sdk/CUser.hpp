@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IClientCompat.hpp"
 #include "types.hpp"
 
 #include <cstdint>
@@ -72,6 +73,7 @@ SDK_Class CUser
 public:
 	IClientAppManager* getAppManager();
 	IClientApps* getClientApps();
+	IClientCompat* getClientCompat();
 	IClientUser* getClientUser();
 
 	bool checkAppOwnership(const AppId_t appId, AppOwnershipInfo_t* pInfo);

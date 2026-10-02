@@ -176,10 +176,13 @@ void SLSAPI::init()
 
 void SLSAPI::runCompatOps()
 {
-	if (!g_pClientCompat)
+	const auto user = g_pSteamEngine->getUser();
+	if (!user)
 	{
 		return;
 	}
+
+	const auto compat = user->getClientCompat();
 
 	while (compatOps.size())
 	{
@@ -192,13 +195,13 @@ void SLSAPI::runCompatOps()
 				//We do not allocate anything, it'll just mess up
 				//Luckily the function allocates for us
 				CUtlVector<CUtlString> tools { };
-				g_pClientCompat->getCompatToolsForApp(op->appId, &tools);
+				compat->getCompatToolsForApp(op->appId, &tools);
 
 				std::ostringstream toolsSS;
 				for (size_t i = 0; i < tools.size; i++)
 				{
 					const char* name = tools.at(i)->get();
-					const char* displayName = g_pClientCompat->getDisplayName(name);
+					const char* displayName = compat->getDisplayName(name);
 
 					if (toolsSS.str().size() > 0)
 					{
@@ -216,14 +219,14 @@ void SLSAPI::runCompatOps()
 
 			case CompatOp_t::OpType::Get:
 			{
-				if (!g_pClientCompat->isCompatToolEnabled(op->appId))
+				if (!compat->isCompatToolEnabled(op->appId))
 				{
 					LOG_API("Get compatibility tool for %u: Compatibility tool is disabled!\n", op->appId);
 					break;
 				}
 
-				const char* name = g_pClientCompat->getCompatToolName(op->appId);
-				const char* displayName = g_pClientCompat->getDisplayName(name);
+				const char* name = compat->getCompatToolName(op->appId);
+				const char* displayName = compat->getDisplayName(name);
 
 				LOG_API("Get compatibility tool for %u: \"%s\" (%s)\n", op->appId, displayName, name);
 
@@ -233,7 +236,7 @@ void SLSAPI::runCompatOps()
 			case CompatOp_t::OpType::Set:
 			{
 				//Steam calls them with the same values
-				g_pClientCompat->specifyCompatTool(op->appId, op->tool.c_str(), "", 250);
+				compat->specifyCompatTool(op->appId, op->tool.c_str(), "", 250);
 				LOG_API("Set compatibility tool for %u to %s\n", op->appId, op->tool.c_str());
 
 				break;

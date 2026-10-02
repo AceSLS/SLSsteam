@@ -183,8 +183,6 @@ namespace Hooks
 
 	typedef bool(*CWebSocketConnection_BBuildAndAsyncSendFrame_t)(CWebSocketConnection*, EWebSocketConnectionSendType, void*, uint32_t);
 
-	typedef bool(*IClientCompat_BIsCompatLayerEnabled_t)(IClientCompat*);
-
 	typedef bool(*IClientConfigStore_SetString_t)(void*, uint32_t, const char*, const char*);
 
 	typedef uint32_t(*IClientFriends_GetFriendGamePlayed_t)(void*, uint64_t, GamePlayed_t*);
@@ -215,8 +213,6 @@ namespace Hooks
 	extern DetourHook<CUserAppManager_BuildDepotDependency_t>* CUserAppManager_BuildDepotDependency;
 
 	extern DetourHook<CWebSocketConnection_BBuildAndAsyncSendFrame_t>* CWebSocketConnection_BBuildAndAsyncSendFrame;
-
-	extern DetourHook<IClientCompat_BIsCompatLayerEnabled_t>* IClientCompat_BIsCompatLayerEnabled;
 
 	extern DetourHook<IClientConfigStore_SetString_t>* IClientConfigStore_SetString;
 

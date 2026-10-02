@@ -17,5 +17,3 @@ public:
 	//Set name to "" to unset
 	void specifyCompatTool(const AppId_t appId, const char* name, const char* config, int32_t priority);
 };
-
-extern IClientCompat* g_pClientCompat;

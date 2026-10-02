@@ -23,6 +23,12 @@ IClientApps* CUser::getClientApps()
 	return reinterpret_cast<IClientApps*>(this + offset);
 }
 
+IClientCompat* CUser::getClientCompat()
+{
+	const static lm_address_t offset = MemHlp::searchOffsetByTypeName(this, "14CCompatManager");
+	return reinterpret_cast<IClientCompat*>(this + offset);
+}
+
 IClientUser* CUser::getClientUser()
 {
 	const static lm_address_t offset = MemHlp::searchOffsetByTypeName(this, "5CUser");

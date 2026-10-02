@@ -60,5 +60,3 @@ void IClientCompat::specifyCompatTool(const AppId_t appId, const char* name, con
 		priority
 	);
 }
-
-IClientCompat* g_pClientCompat = nullptr;
