@@ -456,6 +456,10 @@ const char* MemHlp::getTypeName(const void* pClass)
 lm_address_t MemHlp::searchOffsetByTypeName(const void* pClass, const std::string& name)
 {
 	constexpr lm_address_t MAX_OFFSET = 0x10000;
+	lm_address_t offset = LM_ADDRESS_BAD;
+
+	const auto start = std::chrono::system_clock::now();
+
 	for (lm_address_t off = sizeof(off); off <= MAX_OFFSET; off++)
 	{
 		const lm_address_t addr = reinterpret_cast<lm_address_t>(pClass) + off;
@@ -468,10 +472,21 @@ lm_address_t MemHlp::searchOffsetByTypeName(const void* pClass, const std::strin
 
 		if (strcmp(typeName, name.c_str()) == 0)
 		{
-			LOG_DEBUG("%s offset is 0x%x\n", typeName, off);
-			return off;
+			offset = off;
+			break;
 		}
 	}
 
-	return LM_ADDRESS_BAD;
+	if (offset == LM_ADDRESS_BAD)
+	{
+		LOG_ERROR("Failed to find offset for %s!\n", name.c_str());
+	}
+	else
+	{
+		const auto end = std::chrono::system_clock::now();
+		const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+		LOG_DEBUG("Found offset for %s 0x%x in %llums\n", name.c_str(), offset, ms);
+	}
+
+	return offset;
 }
