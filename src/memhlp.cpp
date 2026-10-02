@@ -171,7 +171,7 @@ lm_address_t MemHlp::patternScan(const char* pattern, const lm_module_t& targetM
 
 			if (matches > 1)
 			{
-				LOG_DEBUG("Pattern %s found %i times at 0x%x!\n", pattern, matches, addr);
+				LOG_WARN("Pattern %s found %i times at 0x%x!\n", pattern, matches, addr);
 			}
 		}
 	}
@@ -185,7 +185,7 @@ lm_address_t MemHlp::searchSignature(const char* name, const char* signature, co
 	lm_address_t address = patternScan(signature, module);
 	if (address == LM_ADDRESS_BAD)
 	{
-		LOG_DEBUG("Unable to find signature for %s!\n", name);
+		LOG_ERROR("Unable to find signature for %s!\n", name);
 	}
 	else
 	{
@@ -224,7 +224,7 @@ lm_address_t MemHlp::getJmpTarget(const lm_address_t address)
 	lm_inst_t inst;
 	if (!LM_Disassemble(address, &inst)) //Should not happen if we land in a code section
 	{
-		LOG_DEBUG("Failed to disassemble code at 0x%x!", address);
+		LOG_ERROR("Failed to disassemble code at 0x%x!", address);
 		return LM_ADDRESS_BAD;
 	}
 
@@ -267,7 +267,7 @@ lm_address_t MemHlp::findPrologue(const lm_address_t address, const std::vector<
 		}
 	}
 
-	LOG_DEBUG("Unable to find prologue after going up 0x%x bytes!\n", scanSize);
+	LOG_ERROR("Unable to find prologue after going up 0x%x bytes!\n", scanSize);
 	return LM_ADDRESS_BAD;
 }
 
@@ -283,7 +283,7 @@ bool MemHlp::fixPICThunkCall(const char* name, const lm_address_t fn, const lm_a
 
 		if (!LM_Disassemble(startAddress, &inst))
 		{
-			LOG_DEBUG("Unable to dissassemble code at 0x%x\n", tramp + curTrampOffset);
+			LOG_ERROR("Unable to dissassemble code at 0x%x\n", tramp + curTrampOffset);
 			return false;
 		}
 		
@@ -304,7 +304,7 @@ bool MemHlp::fixPICThunkCall(const char* name, const lm_address_t fn, const lm_a
 		{
 			if (!LM_Disassemble(followAddress, &inst))
 			{
-				LOG_DEBUG("Unable to dissassemble code at 0x%x\n", followAddress);
+				LOG_ERROR("Unable to dissassemble code at 0x%x\n", followAddress);
 				return false;
 			}
 
@@ -350,7 +350,7 @@ bool MemHlp::fixPICThunkCall(const char* name, const lm_address_t fn, const lm_a
 
 		if (!LM_Assemble(newInstr, &inst))
 		{
-			LOG_DEBUG("Unable to assemble instruction %s!\n", newInstr);
+			LOG_ERROR("Unable to assemble instruction %s!\n", newInstr);
 			return false;
 		}
 
