@@ -48,7 +48,7 @@ lm_module_t* MemHlp::getModuleByAddress(const lm_address_t address, const bool u
 
 	if (!mods.size())
 	{
-		LM_EnumModules([](lm_module_t* mod, lm_void_t* args)
+		LM_EnumModules([](lm_module_t* mod, __attribute__((unused)) lm_void_t* args)
 		{
 			mods.emplace_back(*mod);
 			return LM_TRUE;
@@ -79,7 +79,7 @@ lm_segment_t MemHlp::getSegmentByAddress(const lm_address_t address, const bool 
 	{
 		segs.clear();
 
-		LM_EnumSegments([](lm_segment_t* seg, lm_void_t* args)
+		LM_EnumSegments([](lm_segment_t* seg, __attribute__((unused)) lm_void_t* args)
 		{
 			segs.emplace_back(*seg);
 			return LM_TRUE;
