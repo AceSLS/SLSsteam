@@ -13,19 +13,19 @@
 
 IClientAppManager* CUser::getAppManager()
 {
-	const static lm_address_t offset = *reinterpret_cast<lm_address_t*>(Patterns::CUser::m_OffsetUserAppManager.address + 2);
+	const static lm_address_t offset = MemHlp::searchOffsetByTypeName(this, "15CUserAppManager");
 	return reinterpret_cast<IClientAppManager*>(this + offset);
 }
 
 IClientApps* CUser::getClientApps()
 {
-	const static lm_address_t offset = *reinterpret_cast<lm_address_t*>(Patterns::CUser::m_OffsetUserAppInfo.address + 2);
+	const static lm_address_t offset = MemHlp::searchOffsetByTypeName(this, "12CUserAppInfo");
 	return reinterpret_cast<IClientApps*>(this + offset);
 }
 
 IClientUser* CUser::getClientUser()
 {
-	const static lm_address_t offset = *reinterpret_cast<lm_address_t*>(Patterns::CUser::m_OffsetClientUser.address + 1);
+	const static lm_address_t offset = MemHlp::searchOffsetByTypeName(this, "5CUser");
 	return reinterpret_cast<IClientUser*>(this + offset);
 }
 

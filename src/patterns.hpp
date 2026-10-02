@@ -45,7 +45,6 @@ namespace Patterns
 		extern Pattern_t GetServerPipe;
 		extern Pattern_t SetAppIdForCurrentPipe;
 		extern Pattern_t ProcessIPCFrame;
-		extern Pattern_t Offset_ClientUtils;
 		extern Pattern_t Offset_User;
 	}
 
@@ -63,9 +62,6 @@ namespace Patterns
 		extern Pattern_t PostCallbackToAppId;
 		extern Pattern_t SpawnGameId;
 		extern Pattern_t UpdateAppOwnershipTicket;
-		extern Pattern_t m_OffsetClientUser;
-		extern Pattern_t m_OffsetUserAppInfo;
-		extern Pattern_t m_OffsetUserAppManager;
 	}
 
 	namespace CUserAppManager

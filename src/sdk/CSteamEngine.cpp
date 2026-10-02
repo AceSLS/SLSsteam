@@ -177,7 +177,7 @@ IClientUtils* CSteamEngine::getUtils()
 		return nullptr;
 	}
 
-	const static lm_address_t offset = *reinterpret_cast<lm_address_t*>(Patterns::CSteamEngine::Offset_ClientUtils.address + 2);
+	const static lm_address_t offset = MemHlp::searchOffsetByTypeName(this, "12CSteamEngine");
 	return reinterpret_cast<IClientUtils*>(this + offset);
 }
 

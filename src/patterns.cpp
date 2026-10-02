@@ -113,12 +113,6 @@ namespace Patterns
 			SigFollowMode::PrologueUpwards,
 			std::vector<int16_t> { 0xC3, 0x81, -1, -1, -1, -1, 0xE8, 0x53, 0x56 }
 		};
-		Pattern_t Offset_ClientUtils
-		{
-			"CSteamEngine::m_ClientUtils",
-			"89 86 ? ? ? ? 8D 86 ? ? ? ? 89 44 24 ? 50 E8 ? ? ? ? 83 C4",
-			SigFollowMode::None
-		};
 		Pattern_t Offset_User
 		{
 			"CSteamEngine::m_pUser",
@@ -168,24 +162,6 @@ namespace Patterns
 			"52 57 89 DF FF 75",
 			SigFollowMode::PrologueUpwards,
 			std::vector<int16_t> { 0x53, 0x56, 0x57, 0xE5, 0x89, 0x55, -1, -1, -1, -1, 0x5, -1, -1, -1, -1, 0xE8 }
-		};
-		Pattern_t m_OffsetClientUser
-		{
-			"CUser::m_ClientUser",
-			"2D ? ? ? ? C7 44 24 ? ? ? ? ? 81 E1",
-			SigFollowMode::None
-		};
-		Pattern_t m_OffsetUserAppInfo
-		{
-			"CUser::m_UserAppInfo",
-			"8D 90 ? ? ? ? 8B 80 ? ? ? ? 6A ? 8D 4C 24",
-			SigFollowMode::None
-		};
-		Pattern_t m_OffsetUserAppManager
-		{
-			"CUser::m_UserAppmanager",
-			"8D 90 ? ? ? ? 8B 80 ? ? ? ? 68 ? ? ? ? 56",
-			SigFollowMode::None
 		};
 	}
 
