@@ -37,6 +37,66 @@ lm_module_t* MemHlp::getModule(const std::string& name)
 	return moduleMap.at(name).get();
 }
 
+lm_module_t* MemHlp::getModuleByAddress(const lm_address_t address, const bool useCached)
+{
+	static auto mods = std::vector<lm_module_t>();
+
+	if (!useCached)
+	{
+		mods.clear();
+	}
+
+	if (!mods.size())
+	{
+		LM_EnumModules([](lm_module_t* mod, lm_void_t* args)
+		{
+			mods.emplace_back(*mod);
+			return LM_TRUE;
+		}, nullptr);
+	}
+
+	for (const auto& mod : mods)
+	{
+		if (mod.base < address && mod.end > address)
+		{
+			return getModule(mod.name);
+		}
+	}
+
+	return nullptr;
+}
+
+lm_segment_t MemHlp::getSegmentByAddress(const lm_address_t address, const bool useCached)
+{
+	static auto segs = std::vector<lm_segment_t>();
+
+	if (!useCached)
+	{
+		segs.clear();
+	}
+
+	if (!segs.size())
+	{
+		segs.clear();
+
+		LM_EnumSegments([](lm_segment_t* seg, lm_void_t* args)
+		{
+			segs.emplace_back(*seg);
+			return LM_TRUE;
+		}, nullptr);
+	}
+
+	for (const auto& seg : segs)
+	{
+		if (seg.base < address && seg.end > address)
+		{
+			return seg;
+		}
+	}
+
+	return lm_segment_t();
+}
+
 std::vector<int16_t> MemHlp::patternToBytes(const char* pattern)
 {
 	auto bytes = std::vector<int16_t>();
@@ -358,9 +418,60 @@ std::string MemHlp::hexdump(const void* address, const size_t size)
 
 const char* MemHlp::getTypeName(const void* pClass)
 {
+	constexpr static auto isValid = [](const lm_address_t addr) -> bool
+	{
+		const auto mod = getModuleByAddress(addr);
+		if (!mod)
+		{
+			return false;
+		}
+
+		const auto seg = getSegmentByAddress(addr);
+		return seg.prot & LM_PROT_R;
+	};
+
 	const lm_address_t vft = *reinterpret_cast<const lm_address_t*>(pClass);
+	if (!isValid(vft))
+	{
+		return nullptr;
+	}
+
 	const lm_address_t typeInfo = *reinterpret_cast<const lm_address_t*>(vft - sizeof(lm_address_t));
+	if (!isValid(typeInfo))
+	{
+		return nullptr;
+	}
+
 	const char* name = *reinterpret_cast<const char**>(typeInfo + sizeof(lm_address_t));
+	const lm_segment_t seg = getSegmentByAddress(reinterpret_cast<lm_address_t>(name));
+
+	if (!(seg.prot & LM_PROT_R))
+	{
+		return nullptr;
+	}
 
 	return name;
+}
+
+lm_address_t MemHlp::searchOffsetByTypeName(const void* pClass, const std::string& name)
+{
+	constexpr lm_address_t MAX_OFFSET = 0x10000;
+	for (lm_address_t off = sizeof(off); off <= MAX_OFFSET; off++)
+	{
+		const lm_address_t addr = reinterpret_cast<lm_address_t>(pClass) + off;
+		const char* typeName = getTypeName(reinterpret_cast<void*>(addr));
+
+		if (!typeName)
+		{
+			continue;
+		}
+
+		if (strcmp(typeName, name.c_str()) == 0)
+		{
+			LOG_DEBUG("%s offset is 0x%x\n", typeName, off);
+			return off;
+		}
+	}
+
+	return LM_ADDRESS_BAD;
 }

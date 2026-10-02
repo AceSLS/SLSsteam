@@ -63,6 +63,8 @@ namespace MemHlp
 	}
 
 	lm_module_t* getModule(const std::string& name);
+	lm_module_t* getModuleByAddress(const lm_address_t address, const bool useCached = true);
+	lm_segment_t getSegmentByAddress(const lm_address_t address, const bool useCached = true);
 
 	std::vector<int16_t> patternToBytes(const char* pattern);
 	lm_address_t patternScan(const char* pattern, const lm_module_t& module);
@@ -86,6 +88,7 @@ namespace MemHlp
 	std::string hexdump(const void* address, const size_t size);
 
 	const char* getTypeName(const void* pClass);
+	lm_address_t searchOffsetByTypeName(const void* pClass, const std::string& name);
 	
 	template<typename tFN, typename ...Args>
 	constexpr auto callVFunc(const unsigned int index, void* thisPtr, Args... args)
