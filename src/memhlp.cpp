@@ -94,7 +94,7 @@ lm_segment_t MemHlp::getSegmentByAddress(const lm_address_t address, const bool 
 		}
 	}
 
-	return lm_segment_t();
+	return lm_segment_t { };
 }
 
 std::vector<int16_t> MemHlp::patternToBytes(const char* pattern)
