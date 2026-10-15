@@ -570,7 +570,7 @@ static bool hkWebSocketConnection_BBuildAndAsyncSendFrame(CWebSocketConnection* 
 				choke = Stealth::sendMsg(&packet);
 			}
 
-			bool success = false;
+			bool success = true;
 			if (!choke)
 			{
 				LOG_TRACE("Calling tramp\n");
