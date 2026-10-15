@@ -48,11 +48,6 @@ namespace Patterns
 		extern Pattern_t Offset_User;
 	}
 
-	namespace CWebSocketConnection
-	{
-		extern Pattern_t BBuildAndAsyncSendFrame;
-	}
-
 	namespace CUser
 	{
 		//TODO: Order & Convert old patterns
@@ -67,6 +62,11 @@ namespace Patterns
 	namespace CUserAppManager
 	{
 		extern Pattern_t BuildDepotDependency;
+	}
+
+	namespace CWebSocketConnection
+	{
+		extern Pattern_t BBuildAndAsyncSendFrame;
 	}
 
 	namespace IClientUtils

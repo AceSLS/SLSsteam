@@ -80,17 +80,6 @@ namespace Patterns
 		};
 	}
 
-	namespace CWebSocketConnection
-	{
-		Pattern_t BBuildAndAsyncSendFrame
-		{
-			"CWebSocketConnection::BBuildAndAsyncSendFrame",
-			"89 C6 85 D2 78",
-			SigFollowMode::PrologueUpwards,
-			std::vector<int16_t> { 0xE8, 0x57, 0xE5, 0x89, 0x55 }
-		};
-	}
-
 	namespace CSteamEngine
 	{
 		Pattern_t GetServerPipe
@@ -173,6 +162,17 @@ namespace Patterns
 			"CUserAppManager::BuildDepotDependency",
 			"E8 ? ? ? ? 83 C4 ? 84 C0 74 ? 8B 45 ? 85 C0 89 45",
 			SigFollowMode::Relative
+		};
+	}
+
+	namespace CWebSocketConnection
+	{
+		Pattern_t BBuildAndAsyncSendFrame
+		{
+			"CWebSocketConnection::BBuildAndAsyncSendFrame",
+			"89 C6 85 D2 78",
+			SigFollowMode::PrologueUpwards,
+			std::vector<int16_t> { 0xE8, 0x57, 0xE5, 0x89, 0x55 }
 		};
 	}
 
