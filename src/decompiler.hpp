@@ -64,9 +64,7 @@ namespace Decompiler
 	(
 		const lm_address_t begin,
 		std::unordered_map<lm_address_t, unsigned int>& references,
-		std::unordered_set<lm_address_t>& branchesTaken,
-		std::string& thunkReg,
-		lm_address_t& leaOffset
+		std::unordered_set<lm_address_t>& branchesTaken
 	);
 	
 	std::map<std::string, unsigned int> parseInterfaceMapBase(const char* interface);
