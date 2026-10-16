@@ -149,7 +149,8 @@ void CLog::__log(const LogLevelFlags_t flags, const char* file, const char* func
 
 	if (shouldNotify(flags) && notification.size() > 0)
 	{
-		system(notification.c_str());
+		//TODO: Fix
+		//system(notification.c_str());
 		debug(file, function, line, "system(\"%s\")\n", notification.c_str());
 	}
 
