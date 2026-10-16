@@ -11,6 +11,7 @@
 #include <cstring>
 #include <dlfcn.h>
 #include <elf.h>
+#include <regex>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -468,23 +469,20 @@ void Decompiler::parseModule(const lm_module_t &mod)
 void Decompiler::parseFunction(const lm_address_t begin, std::unordered_map<lm_address_t, unsigned int>& references)
 {
 	auto branchesTaken = std::unordered_set<lm_address_t>();
-	std::string thunkReg;
-	lm_address_t leaOffset = LM_ADDRESS_BAD;
-
-	__parseFunction(begin, references, branchesTaken, thunkReg, leaOffset);
+	__parseFunction(begin, references, branchesTaken);
 }
 
 void Decompiler::__parseFunction
 (
 	const lm_address_t begin,
 	std::unordered_map<lm_address_t, unsigned int>& references,
-	std::unordered_set<lm_address_t>& branchesTaken,
-	std::string& thunkReg,
-	lm_address_t& leaOffset
+	std::unordered_set<lm_address_t>& branchesTaken
 )
 {
 	lm_address_t addr = begin;
 	lm_inst_t instr;
+
+	unsigned int numCC = 0;
 
 	for (;;)
 	{
@@ -494,9 +492,25 @@ void Decompiler::__parseFunction
 			return;
 		}
 
-		//LOG_DEBUG("0x%x: %s %s\n", addr, instr.mnemonic, instr.op_str);
+		//LOG_DEBUG("0x%lx: %s %s\n", addr, instr.mnemonic, instr.op_str);
 
 		addr += instr.size;
+
+		//Shitty way to detect function boundaries
+		//TODO: Investigate wheter there is a better way
+		if (strcmp(instr.mnemonic, "int3") == 0)
+		{
+			numCC++;
+
+			if (numCC >= 3)
+			{
+				return;
+			}
+		}
+		else
+		{
+			numCC = 0;
+		}
 
 		if (instr.mnemonic[0] == 'j')
 		{
@@ -510,7 +524,7 @@ void Decompiler::__parseFunction
 
 			const bool taken = branchesTaken.contains(branch);
 
-			//LOG_DEBUG("Taking branch %s %s at 0x%x to 0x%x\n", instr.mnemonic, instr.op_str, instr.address, branch);
+			//LOG_DEBUG("%s branch %s %s at 0x%lx to 0x%lx\n", (taken ? "Taking" : "Skipping"), instr.mnemonic, instr.op_str, instr.address, branch);
 			branchesTaken.emplace(branch);
 
 			if (strcmp(instr.mnemonic, "jmp") == 0)
@@ -520,13 +534,14 @@ void Decompiler::__parseFunction
 				{
 					return;
 				}
+
 				addr = branch;
 			}
 			else
 			{
 				if (!taken)
 				{
-					__parseFunction(branch, references, branchesTaken, thunkReg, leaOffset);
+					__parseFunction(branch, references, branchesTaken);
 				}
 			}
 
@@ -540,44 +555,47 @@ void Decompiler::__parseFunction
 			return;
 		}
 
-		if (isPICThunk(instr, &thunkReg))
-		{
-			leaOffset = getLeaOffset(instr);
-			continue;
-		}
-
-		if (leaOffset == LM_ADDRESS_BAD)
-		{
-			continue;
-		}
-
 		if (strcmp(instr.mnemonic, "lea") != 0)
 		{
 			continue;
 		}
 
-		if (!strstr(instr.op_str, thunkReg.c_str()))
+		//TODO: 64-bits Optimize
+		const auto str = std::string(instr.op_str);
+		const auto re = std::regex(", \\[rip - 0x[0-9,a-f]+\\]");
+		std::smatch smatch;
+
+		//LOG_DEBUG("lea found at 0x%lx, %s %s\n", instr.address, instr.mnemonic, instr.op_str);
+
+		if (!std::regex_search(str, smatch, re))
 		{
 			continue;
 		}
 
-		lm_address_t targetAddr;
-		if (strstr(instr.op_str, "-"))
-		{
-			const lm_address_t offset = extractHexNum(instr.op_str);
-			targetAddr = leaOffset - offset;
-		}
-		else if (strstr(instr.op_str, "+"))
-		{
-			const lm_address_t offset = extractHexNum(instr.op_str);
-			targetAddr = leaOffset + offset;
-		}
-		else
-		{
-			continue;
-		}
+		lm_address_t targetAddr = (instr.address + instr.size) - extractHexNum(instr.op_str);
 
-		//LOG_DEBUG("Target addr for op 0x%x\n", targetAddr);
+		//if (!strstr(instr.op_str, thunkReg.c_str()))
+		//{
+		//	continue;
+		//}
+
+		//lm_address_t targetAddr;
+		//if (strstr(instr.op_str, "-"))
+		//{
+		//	const lm_address_t offset = extractHexNum(instr.op_str);
+		//	targetAddr = leaOffset - offset;
+		//}
+		//else if (strstr(instr.op_str, "+"))
+		//{
+		//	const lm_address_t offset = extractHexNum(instr.op_str);
+		//	targetAddr = leaOffset + offset;
+		//}
+		//else
+		//{
+		//	continue;
+		//}
+
+		//LOG_DEBUG("Target addr for op 0x%lx\n", targetAddr);
 
 		if (!strings.contains(targetAddr))
 		{
