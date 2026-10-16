@@ -14,8 +14,8 @@ enum EWebSocketConnectionSendType : uint32_t
 SDK_Class CWebSocketConnection
 {
 public:
-	bool buildAndAsyncSendFrame(const EWebSocketConnectionSendType type, void* data, const uint32_t dataSize);
-	bool buildAndAsyncSendFrameHk(const EWebSocketConnectionSendType type, void* data, const uint32_t dataSize);
+	bool buildAndAsyncSendFrame(const EWebSocketConnectionSendType type, void* data, const steamsize_t dataSize);
+	bool buildAndAsyncSendFrameHk(const EWebSocketConnectionSendType type, void* data, const steamsize_t dataSize);
 };
 
 extern CWebSocketConnection* g_pWebSocketConnection;

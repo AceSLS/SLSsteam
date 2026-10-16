@@ -91,21 +91,13 @@ SDK_Class CServerPipe
 {
 public:
 	IProcessPipe* internalPipe;			//0x0
-	IProcessPipe* singleProcessPipe;	//0x4
-	HSteamPipe pipeHandle;				//0x8
-	uint8_t __pad0xC[0x8];				//0xC
-	int32_t pid;						//0x14
-	int32_t threadId;					//0x18
-	CUtlString processName;				//0x1C - Was empty on the stuff I tried, maybe it's defunct on linux?
-	uint8_t __pad0x20[0x1];				//0x20
-	HSteamUser userHandle;				//0x21
-	uint8_t __pad0x25[0x7];				//0x25
-	void* queueCallbackMsg;				//0x2C
-	uint8_t __pad0x30[0x8];				//0x30
-	uint32_t numQueuedCallbacks;		//0x38
-	uint8_t __pad0x3C[0x14];			//0x3C
-	CUtlVector<void> debugText;			//0x50
-}; //0x60
+	IProcessPipe* singleProcessPipe;	//0x8
+	HSteamPipe pipeHandle;				//0x10
+	uint8_t __pad0xC[0xC];				//0x14
+	int32_t pid;						//0x20
+	int32_t threadId;					//0x24
+	CUtlString processName;				//0x28 - Was empty on the stuff I tried, maybe it's defunct on linux?
+};
 
 SDK_Class CSteamEngine
 {

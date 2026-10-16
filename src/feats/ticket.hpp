@@ -78,7 +78,7 @@ public:
 	//Hooks
 	void closePipe(const HSteamPipe pipe);
 	void connectPipe(const HSteamPipe pipe);
-	void launchApp(const AppId_t appId);
+	void launchApp(const GameId_t gameId);
 	void getEncryptedAppTicket(const AppId_t appId);
 	void getTicketOwnershipExtendedData(const AppId_t appId);
 

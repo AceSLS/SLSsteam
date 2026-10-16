@@ -299,7 +299,7 @@ bool CPortableExecutableFile::parseSections()
 
 		if (fread(sectHdr, sizeof(sectHdr), 1, file) < 1)
 		{
-			LOG_CUSTOM(errorFlags, "Failed to read section header %i!\n", i);
+			LOG_CUSTOM(errorFlags, "Failed to read section header %lu!\n", i);
 			return false;
 		}
 
