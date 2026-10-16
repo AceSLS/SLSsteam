@@ -124,7 +124,7 @@ std::string CLog::buildNotification(const LogLevelFlags_t flags, const char* msg
 	return notifySS.str();
 }
 
-void CLog::__log(const LogLevelFlags_t flags, const char* file, const char* function, const int line, const char* msg, const va_list& vArgs)
+void CLog::__log(const LogLevelFlags_t flags, const char* file, const char* function, const int line, const char* msg, va_list& vArgs)
 {
 	if (!(g_config.logLevels.copy() & flags))
 	{

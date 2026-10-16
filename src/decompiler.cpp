@@ -186,14 +186,14 @@ lm_address_t Decompiler::getLeaOffset(lm_inst_t& callInstr)
 	lm_inst_t nextInstr;
 	if (!LM_Disassemble(offset, &nextInstr))
 	{
-		LOG_DEBUG("Failed to disassemble next in getLeaOffset at 0x%x\n", offset);
+		LOG_DEBUG("Failed to disassemble next in getLeaOffset at 0x%lx\n", offset);
 		return LM_ADDRESS_BAD;
 	}
 
 	//Thunk is followed by 'add thunkReg, num'
 	if (strcmp(nextInstr.mnemonic, "add") != 0)
 	{
-		LOG_DEBUG("Failed to get lea offset at 0x%x, next instruction is not an add instruction!\n", offset);
+		LOG_DEBUG("Failed to get lea offset at 0x%lx, next instruction is not an add instruction!\n", offset);
 		return LM_ADDRESS_BAD;
 	}
 
@@ -201,7 +201,7 @@ lm_address_t Decompiler::getLeaOffset(lm_inst_t& callInstr)
 	auto split = Utils::strsplit(nextInstr.op_str, ",");
 	if (split[0] != thunkReg)
 	{
-		LOG_DEBUG("Failed to get lea offset at 0x%x, split[0] != thunkReg\n", callInstr.address);
+		LOG_DEBUG("Failed to get lea offset at 0x%lx, split[0] != thunkReg\n", callInstr.address);
 		return LM_ADDRESS_BAD;
 	}
 
@@ -260,7 +260,7 @@ bool Decompiler::isPICThunk(const lm_inst_t& callInstr, std::string* targetRegis
 	{
 		if (!LM_Disassemble(target, &instr))
 		{
-			LOG_DEBUG("Failed to disassemble 0x%x!\n", target);
+			LOG_DEBUG("Failed to disassemble 0x%lx!\n", target);
 			return false;
 		}
 
@@ -426,7 +426,7 @@ bool Decompiler::parseHeader(const lm_module_t& mod)
 
 	for (const auto& shdr : file.sections)
 	{
-		LOG_DEBUG("Section header name %s, address 0x%llx, offset 0x%llx\n", shdr.name.c_str(), shdr.rva, shdr.offset);
+		LOG_DEBUG("Section header name %s, address 0x%lx, offset 0x%lx\n", shdr.name.c_str(), shdr.rva, shdr.offset);
 
 		auto mapName = std::string(mod.name) + "::" + shdr.name;
 		sections[mapName] = shdr;
@@ -488,7 +488,7 @@ void Decompiler::__parseFunction
 	{
 		if (!LM_Disassemble(addr, &instr))
 		{
-			LOG_WARN("Failed to disassemble function 0x%x at 0x%x!\n", begin, addr);
+			LOG_WARN("Failed to disassemble function 0x%lx at 0x%lx!\n", begin, addr);
 			return;
 		}
 
@@ -518,7 +518,7 @@ void Decompiler::__parseFunction
 
 			if (!getRelativeTarget(instr, branch))
 			{
-				LOG_WARN("Failed to follow %s %s at 0x%x!\n", instr.mnemonic, instr.op_str, instr.address);
+				LOG_WARN("Failed to follow %s %s at 0x%lx!\n", instr.mnemonic, instr.op_str, instr.address);
 				return;
 			}
 

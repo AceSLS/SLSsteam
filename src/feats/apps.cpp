@@ -68,7 +68,7 @@ void Apps::buildDepotDependency(CUtlVector<DepotInfo_t>* depots, CUtlVector<Depo
 
 		if (depotBlacklist->contains(depot->depotId))
 		{
-			LOG_DEBUG("Removing %u with %llu\n", depot->depotId, depot->manifestId);
+			LOG_DEBUG("Removing %u with %lu\n", depot->depotId, depot->manifestId);
 			depots->swap(i, depots->size - 1);
 			depots->size--;
 		}
@@ -77,16 +77,16 @@ void Apps::buildDepotDependency(CUtlVector<DepotInfo_t>* depots, CUtlVector<Depo
 		{
 			const uint64_t oldId = depot->manifestId;
 			depot->manifestId = manifestOverrides->at(depot->depotId);
-			LOG_DEBUG("Overrode %u's manifest %llu with %llu\n", depot->depotId, oldId, depot->manifestId);
+			LOG_DEBUG("Overrode %u's manifest %lu with %lu\n", depot->depotId, oldId, depot->manifestId);
 		}
 
-		LOG_DEBUG("Depot %u for %u -> %llu\n", depot->depotId, depot->appId, depot->manifestId);
+		LOG_DEBUG("Depot %u for %u -> %lu\n", depot->depotId, depot->appId, depot->manifestId);
 	}
 
 	for (unsigned int i = 0; i < sharedDepots->size; i++)
 	{
 		const auto depot = sharedDepots->at(i);
-		LOG_DEBUG("Shared Depot %u for %u -> %llu\n", depot->depotId, depot->appId, depot->manifestId);
+		LOG_DEBUG("Shared Depot %u for %u -> %lu\n", depot->depotId, depot->appId, depot->manifestId);
 	}
 }
 
@@ -232,7 +232,7 @@ void Apps::getLegacyCDKey(const AppId_t appId)
 	}
 }
 
-void Apps::getSubscribedApps(AppId_t* appList, const size_t size, uint32_t& count)
+void Apps::getSubscribedApps(AppId_t* appList, const uint32_t size, uint32_t& count)
 {
 	const auto addedApps = g_config.addedAppIds.get();
 
@@ -296,7 +296,7 @@ void Apps::postAppLicensesChanged(const std::unordered_set<AppId_t>& apps)
 		cb.appsAdded |= 1llu << idx;
 		cb.remainingPackets = totalPackets;
 
-		LOG_DEBUG("AppLicensesChanged_t.apps[%u] -> %u (i -> %i, packets left -> %i, appsAdded %llu)\n", idx, cb.apps[idx], i, totalPackets, cb.appsAdded);
+		LOG_DEBUG("AppLicensesChanged_t.apps[%u] -> %u (i -> %i, packets left -> %i, appsAdded %lu)\n", idx, cb.apps[idx], i, totalPackets, cb.appsAdded);
 
 		if (idx + 1 >= AppLicensesChanged_t::MAX_APPS_PER_CALLBACK)
 		{
@@ -500,7 +500,7 @@ void Apps::sendGamesPlayed(CNetPacket* pkt)
 		// Leave the original shortcut title and 64-bit ID untouched.
 		if (gameId & GAME_TYPE_SHORTCUT)
 		{
-			LOG_DEBUG("Preserving non-Steam shortcut %llu\n", gameId);
+			LOG_DEBUG("Preserving non-Steam shortcut %lu\n", gameId);
 			continue;
 		}
 
@@ -538,7 +538,7 @@ void Apps::sendGamesPlayed(CNetPacket* pkt)
 
 		//msg->mutable_games_played(i)->ParseFromString(game.SerializeAsString());
 
-		LOG_DEBUG("Playing game %llu with flags %u & pid %u\n", gameId, game->game_flags(), game->process_id());
+		LOG_DEBUG("Playing game %lu with flags %u & pid %u\n", gameId, game->game_flags(), game->process_id());
 	}
 
 	if (msg.games_played_size() < 1)

@@ -114,7 +114,7 @@ void DetourHook<T>::place()
 
 	LOG_DEBUG
 	(
-		"Detour hooked %s (%p) with hook at 0x%x and tramp at 0x%x\n",
+		"Detour hooked %s (%p) with hook at 0x%lx and tramp at 0x%lx\n",
 		this->name.c_str(),
 		reinterpret_cast<void*>(this->originalFn.address),
 		this->hookFn.address,
@@ -154,7 +154,7 @@ void VFTHook<T>::place()
 
 	LOG_DEBUG
 	(
-		"VFT hooked %s (0x%x) with hook at 0x%x\n",
+		"VFT hooked %s (0x%lx) with hook at 0x%lx\n",
 		this->name.c_str(),
 		this->originalFn.address,
 		this->hookFn.address
@@ -218,7 +218,7 @@ Lua::Ptr_t LuaHook::place()
 	}
 
 	MemHlp::fixPICThunkCall(name.c_str(), fn, tramp);
-	LOG_DEBUG("Placed LuaHook %s from 0x%x to 0x%x\n", name.c_str(), fn, hookFn);
+	LOG_DEBUG("Placed LuaHook %s from 0x%lx to 0x%lx\n", name.c_str(), fn, hookFn);
 	return reinterpret_cast<void*>(tramp);
 }
 
@@ -730,7 +730,7 @@ static uint32_t hkUser_SpawnGameId
 
 	Apps::spawnGame(pGameId, newExe, newCmd);
 
-	LOG_DEBUG("Launching gameId %llu with cmd %s as %s\n", *pGameId, newExe.c_str(), newCmd.c_str());
+	LOG_DEBUG("Launching gameId %lu with cmd %s as %s\n", *pGameId, newExe.c_str(), newCmd.c_str());
 
 	const uint32_t ret = Hooks::CUser_SpawnGameId->tramp.fn
 	(

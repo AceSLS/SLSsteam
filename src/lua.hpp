@@ -75,7 +75,7 @@ namespace Lua
 			}
 		}
 
-		LOG_DEBUG("Fired %u from %u %s lua callbacks\n", calls, functions.size(), name);
+		LOG_DEBUG("Fired %u from %lu %s lua callbacks\n", calls, functions.size(), name);
 		return calls;
 	}
 

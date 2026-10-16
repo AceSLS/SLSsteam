@@ -29,7 +29,7 @@ lm_module_t* MemHlp::getModule(const std::string& name)
 		}
 		else
 		{
-			LOG_DEBUG("Module %s loaded at 0x%x with size 0x%x\n", mod.name, mod.base, mod.size);
+			LOG_DEBUG("Module %s loaded at 0x%lx with size 0x%lx\n", mod.name, mod.base, mod.size);
 			moduleMap[name] = std::make_unique<lm_module_t>(mod);
 		}
 	}
@@ -171,7 +171,7 @@ lm_address_t MemHlp::patternScan(const char* pattern, const lm_module_t& targetM
 
 			if (matches > 1)
 			{
-				LOG_WARN("Pattern %s found %i times at 0x%x!\n", pattern, matches, addr);
+				LOG_WARN("Pattern %s found %i times at 0x%lx!\n", pattern, matches, addr);
 			}
 		}
 	}
@@ -192,13 +192,13 @@ lm_address_t MemHlp::searchSignature(const char* name, const char* signature, co
 		switch (mode)
 		{
 			case SigFollowMode::Relative:
-				LOG_DEBUG("Resolving relative of %s at 0x%x\n", name, address);
+				LOG_DEBUG("Resolving relative of %s at 0x%lx\n", name, address);
 				address = MemHlp::getJmpTarget(address);
 				break;
 
 			case SigFollowMode::PrologueUpwards:
 			{
-				LOG_DEBUG("Searching function prologue of %s from 0x%x\n", name, address);
+				LOG_DEBUG("Searching function prologue of %s from 0x%lx\n", name, address);
 				auto bytes = std::vector<int16_t>();
 				for (unsigned int i = 0; i < extraDataSize; i++)
 				{
@@ -213,7 +213,7 @@ lm_address_t MemHlp::searchSignature(const char* name, const char* signature, co
 				break;
 		}
 
-		LOG_DEBUG("%s at 0x%x\n", name, address);
+		LOG_DEBUG("%s at 0x%lx\n", name, address);
 	}
 
 	return address;
@@ -224,7 +224,7 @@ lm_address_t MemHlp::getJmpTarget(const lm_address_t address)
 	lm_inst_t inst;
 	if (!LM_Disassemble(address, &inst)) //Should not happen if we land in a code section
 	{
-		LOG_ERROR("Failed to disassemble code at 0x%x!", address);
+		LOG_ERROR("Failed to disassemble code at 0x%lx!", address);
 		return LM_ADDRESS_BAD;
 	}
 
@@ -262,7 +262,7 @@ lm_address_t MemHlp::findPrologue(const lm_address_t address, const std::vector<
 		if (found)
 		{
 			lm_address_t prol = address - i - prologueBytes.size() + 1; //Add 1 byte back since bytesSize would be to big otherwise
-			LOG_DEBUG("Prologue found at 0x%x\n", prol);
+			LOG_DEBUG("Prologue found at 0x%lx\n", prol);
 			return prol;
 		}
 	}
@@ -283,12 +283,12 @@ bool MemHlp::fixPICThunkCall(const char* name, const lm_address_t fn, const lm_a
 
 		if (!LM_Disassemble(startAddress, &inst))
 		{
-			LOG_ERROR("Unable to dissassemble code at 0x%x\n", tramp + curTrampOffset);
+			LOG_ERROR("Unable to dissassemble code at 0x%lx\n", tramp + curTrampOffset);
 			return false;
 		}
 		
 		curTrampOffset += inst.size;
-		LOG_DEBUG("0x%x: %s %s\n", inst.address, inst.mnemonic, inst.op_str);
+		LOG_DEBUG("0x%lx: %s %s\n", inst.address, inst.mnemonic, inst.op_str);
 		
 		if (strcmp(inst.mnemonic, "call") != 0)
 		{
@@ -304,13 +304,13 @@ bool MemHlp::fixPICThunkCall(const char* name, const lm_address_t fn, const lm_a
 		{
 			if (!LM_Disassemble(followAddress, &inst))
 			{
-				LOG_ERROR("Unable to dissassemble code at 0x%x\n", followAddress);
+				LOG_ERROR("Unable to dissassemble code at 0x%lx\n", followAddress);
 				return false;
 			}
 
 			followAddress += inst.size;
 
-			LOG_DEBUG("0x%x: %s %s\n", inst.address, inst.mnemonic, inst.op_str);
+			LOG_DEBUG("0x%lx: %s %s\n", inst.address, inst.mnemonic, inst.op_str);
 
 			//Can not declare in switch statement
 			auto splits = std::vector<std::string>();
@@ -358,7 +358,7 @@ bool MemHlp::fixPICThunkCall(const char* name, const lm_address_t fn, const lm_a
 		LM_ProtMemory(startAddress, inst.size, LM_PROT_XRW, &oldProt);
 		LM_WriteMemory(startAddress, inst.bytes, inst.size);
 		LM_ProtMemory(startAddress, inst.size, oldProt, nullptr);
-		LOG_DEBUG("Replaced PIC thunk call for %s at 0x%x with %s\n", name, followAddress, newInstr);
+		LOG_DEBUG("Replaced PIC thunk call for %s at 0x%lx with %s\n", name, followAddress, newInstr);
 		return true;
 	}
 
@@ -485,7 +485,7 @@ lm_address_t MemHlp::searchOffsetByTypeName(const void* pClass, const std::strin
 	{
 		const auto end = std::chrono::system_clock::now();
 		const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-		LOG_DEBUG("Found offset for %s 0x%x in %llums\n", name.c_str(), offset, ms);
+		LOG_DEBUG("Found offset for %s 0x%lx in %lums\n", name.c_str(), offset, ms);
 	}
 
 	return offset;

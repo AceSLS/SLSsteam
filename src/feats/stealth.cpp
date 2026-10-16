@@ -30,7 +30,7 @@ uint32_t Stealth::sendAndRecvStoreUserStats2(CProtoBufMsgBase* send, CProtoBufMs
 	recvBdy->set_game_id(sendBdy->game_id());
 	recvBdy->set_stats_out_of_date(false);
 
-	LOG_DEBUG("Fake successfull stat upload for %llu\n", sendBdy->game_id());
+	LOG_DEBUG("Fake successfull stat upload for %lu\n", sendBdy->game_id());
 
 	return 769;
 }
@@ -59,7 +59,7 @@ bool Stealth::sendMsg(CNetPacket* pkt)
 					continue;
 				}
 
-				LOG_DEBUG("Cleared %llu from CMsgClientGamesPlayed!\n", game->game_id());
+				LOG_DEBUG("Cleared %lu from CMsgClientGamesPlayed!\n", game->game_id());
 				msg.mutable_games_played()->DeleteSubrange(i, 1);
 			}
 

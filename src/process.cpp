@@ -437,7 +437,7 @@ bool CELFExecutableFile::parseElf64Headers(const Elf64_Ehdr& hdr)
 
 		if (g_config.extendedLogging.copy())
 		{
-			LOG_DEBUG("Section header name %s, address 0x%llx, offset 0x%llx\n", name, shdr.sh_addr, shdr.sh_offset);
+			LOG_DEBUG("Section header name %s, address 0x%lx, offset 0x%lx\n", name, shdr.sh_addr, shdr.sh_offset);
 		}
 
 		sections.emplace_back(SectionHdr_t { name, shdr.sh_addr, shdr.sh_offset, shdr.sh_size });
@@ -675,7 +675,7 @@ bool Process_t::analyse()
 	}
 
 	const auto endTime = std::chrono::system_clock::now();
-	LOG_DEBUG("Analysed %s in %llums\n", exe.filename().c_str(), std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count());
+	LOG_DEBUG("Analysed %s in %lums\n", exe.filename().c_str(), std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count());
 	return true;
 }
 

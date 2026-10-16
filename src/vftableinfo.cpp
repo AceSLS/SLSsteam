@@ -72,7 +72,7 @@ bool VFTableInfo_t::init()
 	}
 
 	address = funcs.at(index);
-	LOG_DEBUG("%s at index %u, address 0x%x\n", getPrintName().c_str(), index, address);
+	LOG_DEBUG("%s at index %u, address 0x%lx\n", getPrintName().c_str(), index, address);
 	return true;
 }
 
