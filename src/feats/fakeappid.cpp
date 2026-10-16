@@ -224,7 +224,7 @@ void FakeAppIds::sendGamesPlayed(CNetPacket *pkt)
 			continue;
 		}
 
-		LOG_DEBUG("Setting %llu to %u\n", gameId, fakeAppId);
+		LOG_DEBUG("Setting %lu to %u\n", gameId, fakeAppId);
 		game->set_game_id(fakeAppId);
 	}
 

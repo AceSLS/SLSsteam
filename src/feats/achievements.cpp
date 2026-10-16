@@ -91,7 +91,7 @@ std::unordered_set<uint64_t> Achievements::getReviewersForGame(const AppId_t app
 		uint64_t steamId = std::stoull(steamIdMatch.str().c_str());
 		if (ownerBlacklist[appId].contains(steamId))
 		{
-			LOG_DEBUG("Skipping %llu for %u because it has failed before\n", steamId, appId);
+			LOG_DEBUG("Skipping %lu for %u because it has failed before\n", steamId, appId);
 			continue;
 		}
 
@@ -121,7 +121,7 @@ uint32_t Achievements::tryGetPlayerStats
 	const uint64_t steamId
 )
 {
-	LOG_DEBUG("CPlayer_GetUserStats_Request->set_steamid(%llu)\n", steamId);
+	LOG_DEBUG("CPlayer_GetUserStats_Request->set_steamid(%lu)\n", steamId);
 	send->set_steamid(steamId);
 	uint32_t res = serviceTransport->sendAndRecvMsg(serviceName, send, recv);
 
@@ -141,7 +141,7 @@ uint32_t Achievements::tryGetPlayerStats
 	recv->clear_stats();
 
 	preferredOwners[appId] = steamId;
-	LOG_DEBUG("Using steamId %llu for %u\n", steamId, appId);
+	LOG_DEBUG("Using steamId %lu for %u\n", steamId, appId);
 	return k_EResultOK;
 }
 
@@ -200,7 +200,7 @@ uint32_t Achievements::tryGetUserStats(CAPIJob* job, CProtoBufMsgBase* send, con
 {
 	const auto sendBdy = send->getBody<CMsgClientGetUserStats>();
 
-	LOG_DEBUG("CMsgClientGetUserStats->set_steam_id_for_user(%llu)\n", steamId);
+	LOG_DEBUG("CMsgClientGetUserStats->set_steam_id_for_user(%lu)\n", steamId);
 	sendBdy->set_steam_id_for_user(steamId);
 
 	const uint32_t ret = job->sendAndRecv(send, timeOut, recv, targetType);
@@ -227,7 +227,7 @@ uint32_t Achievements::tryGetUserStats(CAPIJob* job, CProtoBufMsgBase* send, con
 	recvBdy->clear_crc_stats();
 	recvBdy->clear_stats();
 
-	LOG_DEBUG("Using steamId %llu for %u\n", steamId, appId);
+	LOG_DEBUG("Using steamId %lu for %u\n", steamId, appId);
 	preferredOwners[appId] = steamId;
 	return ret;
 }

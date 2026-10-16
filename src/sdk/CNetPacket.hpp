@@ -80,7 +80,7 @@ public:
 
 		if (!mem)
 		{
-			LOG_ERROR("Failed to allocate new packet body with size %u!\n", newSize);
+			LOG_ERROR("Failed to allocate new packet body with size %lu!\n", newSize);
 			return;
 		}
 
