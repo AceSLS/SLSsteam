@@ -131,10 +131,17 @@ void CLog::__log(const LogLevelFlags_t flags, const char* file, const char* func
 		return;
 	}
 
-	const size_t size = vsnprintf(nullptr, 0, msg, vArgs) + 1; //Allocate one more byte for zero termination
+	va_list vArgsCpy;
+	va_copy(vArgsCpy, vArgs);
+	const size_t size = vsnprintf(nullptr, 0, msg, vArgsCpy) + 1; //Allocate one more byte for zero termination
+	va_end(vArgsCpy);
+
 	std::string formatted;
 	formatted.resize(size);
-	vsnprintf(formatted.data(), size, msg, vArgs);
+
+	va_copy(vArgsCpy, vArgs);
+	vsnprintf(formatted.data(), size, msg, vArgsCpy);
+	va_end(vArgsCpy);
 
 	//Notifications do not get a newline ending, so we add our own
 	//Use built string to check further down
@@ -194,32 +201,32 @@ void CLog::__log(const LogLevelFlags_t flags, const char* file, const char* func
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-void CLog::__trace(const char* file, const char* function, const int line, const char* msg, const va_list& vArgs)
+void CLog::__trace(const char* file, const char* function, const int line, const char* msg, va_list& vArgs)
 {
 #ifdef TRACE
 	__log(k_ELogLevelTrace, file, function, line, msg, vArgs);
 #endif
 }
-void CLog::__traceOnce(const char* file, const char* function, const int line, const char* msg, const va_list& vArgs)
+void CLog::__traceOnce(const char* file, const char* function, const int line, const char* msg, va_list& vArgs)
 {
 #ifdef TRACE
 	__log(k_ELogLevelTrace | k_ELogLevelOnce, file, function, line, msg, vArgs);
 #endif
 }
 
-void CLog::__once(const char* file, const char* function, const int line, const char* msg, const va_list& vArgs)
+void CLog::__once(const char* file, const char* function, const int line, const char* msg, va_list& vArgs)
 {
 #ifdef DEBUG
 	__log(k_ELogLevelOnce, file, function, line, msg, vArgs);
 #endif
 }
-void CLog::__debug(const char* file, const char* function, const int line, const char* msg, const va_list& vArgs)
+void CLog::__debug(const char* file, const char* function, const int line, const char* msg, va_list& vArgs)
 {
 #ifdef DEBUG
 	__log(k_ELogLevelDebug, file, function, line, msg, vArgs);
 #endif
 }
-void CLog::__debugOnce(const char* file, const char* function, const int line, const char* msg, const va_list& vArgs)
+void CLog::__debugOnce(const char* file, const char* function, const int line, const char* msg, va_list& vArgs)
 {
 #ifdef DEBUG
 	__log(k_ELogLevelDebug | k_ELogLevelOnce, file, function, line, msg, vArgs);

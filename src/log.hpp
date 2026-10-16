@@ -59,11 +59,11 @@ class CLog
 	void __log(const LogLevelFlags_t flags, const char* file, const char* function, const int line, const char* msg, va_list& vArgs);
 
 	//Calls to these will fully disappear from the release build
-	void __trace(const char* file, const char* function, const int line, const char* msg, const va_list& vArgs);
-	void __traceOnce(const char* file, const char* function, const int line, const char* msg, const va_list& vArgs);
-	void __once(const char* file, const char* function, const int line, const char* msg, const va_list& vArgs);
-	void __debug(const char* file, const char* function, const int line, const char* msg, const va_list& vArgs);
-	void __debugOnce(const char* file, const char* function, const int line, const char* msg, const va_list& vArgs);
+	void __trace(const char* file, const char* function, const int line, const char* msg, va_list& vArgs);
+	void __traceOnce(const char* file, const char* function, const int line, const char* msg, va_list& vArgs);
+	void __once(const char* file, const char* function, const int line, const char* msg, va_list& vArgs);
+	void __debug(const char* file, const char* function, const int line, const char* msg, va_list& vArgs);
+	void __debugOnce(const char* file, const char* function, const int line, const char* msg, va_list& vArgs);
 
 public:
 	std::string path;
