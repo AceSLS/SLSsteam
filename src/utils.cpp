@@ -164,25 +164,27 @@ bool Utils::isNumber(const char* str)
 
 std::string Utils::getFileSHA256(const char *filePath)
 {
-	std::ifstream fs(filePath, std::ios::binary);
-	if (!fs.is_open())
-	{
-		//TODO: Read more about error types in C++ :)
-		throw std::runtime_error("Unable to read file!");
-	}
+	//TODO: Fix
+	return "";
+	//std::ifstream fs(filePath, std::ios::binary);
+	//if (!fs.is_open())
+	//{
+	//	//TODO: Read more about error types in C++ :)
+	//	throw std::runtime_error("Unable to read file!");
+	//}
 
-	const auto bytes = std::vector<unsigned char>(std::istreambuf_iterator(fs), {});
-	unsigned char sha256Bytes[SHA256_DIGEST_LENGTH];
-	SHA256(bytes.data(), bytes.size(), sha256Bytes);
+	//const auto bytes = std::vector<unsigned char>(std::istreambuf_iterator(fs), {});
+	//unsigned char sha256Bytes[SHA256_DIGEST_LENGTH];
+	//SHA256(bytes.data(), bytes.size(), sha256Bytes);
 
-	std::ostringstream sha256;
-	for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
-	{
-		sha256 << std::hex << std::setw(2) << std::setfill('0') << (int)sha256Bytes[i];
-	}
+	//std::ostringstream sha256;
+	//for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+	//{
+	//	sha256 << std::hex << std::setw(2) << std::setfill('0') << (int)sha256Bytes[i];
+	//}
 
-	fs.close();
-	return sha256.str();
+	//fs.close();
+	//return sha256.str();
 }
 
 std::vector<std::string> Utils::strsplit(const std::string& str, const std::string& delimeter)
