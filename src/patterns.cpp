@@ -53,9 +53,9 @@ namespace Patterns
 	Pattern_t TraceIPC
 	{
 		"TraceIPC",
-		"0F 45 F8 85 ED",
+		"48 89 D7 C1 E8",
 		SigFollowMode::PrologueUpwards,
-		std::vector<int16_t> { 0x53, 0x56, 0x57, 0x55 }
+		std::vector<int16_t> { 0x55, 0x41, 0x56, 0x41, 0x57, 0x41 }
 	};
 
 	namespace CAPIJob
@@ -63,9 +63,9 @@ namespace Patterns
 		Pattern_t SendAndRecv
 		{
 			"CAPIJob::SendAndRecv",
-			"8B 7C 24 ? FF 76 ? FF 76",
+			"44 39 F0 0F 94 C0",
 			SigFollowMode::PrologueUpwards,
-			std::vector<int16_t> { 0x53, 0x56, 0x57, 0x55 }
+			std::vector<int16_t> { 0xF7, 0x89, 0x49, 0x57, 0x41 }
 		};
 	}
 
@@ -74,9 +74,9 @@ namespace Patterns
 		Pattern_t BParseResponseMessage
 		{
 			"CAppDataCache::BParseResponseMessage",
-			"8B 77 ? 39 46",
+			"41 89 F0 89 DA",
 			SigFollowMode::PrologueUpwards,
-			std::vector<int16_t> { 0x53, 0x56, 0x57, 0xE5, 0x89, 0x55, -1, -1, -1, -1, 05, -1, -1, -1, -1, 0xE8 }
+			std::vector<int16_t> { 0xE5, 0x89, 0x48, 0x55 }
 		};
 	}
 
@@ -85,27 +85,28 @@ namespace Patterns
 		Pattern_t GetServerPipe
 		{
 			"CSteamEngine::GetServerPipe",
-			"0F B7 CA 31 C0 3B 4B",
+			"0F B7 CE 31 D2",
 			SigFollowMode::PrologueUpwards,
-			std::vector<int16_t> { 0x53, 0x56, 0x57 }
+			std::vector<int16_t> { 0x2C, 0x74, 0xF6, 0x85 }
 		};
 		Pattern_t SetAppIdForCurrentPipe
 		{
 			"CSteamEngine::SetAppIdForCurrentPipe",
-			"E8 ? ? ? ? 83 C4 ? 8B 45 ? 85 C0 75 ? 31 FF",
-			SigFollowMode::Relative
+			"0F 43 C6 83 FB",
+			SigFollowMode::PrologueUpwards,
+			std::vector<int16_t> { 0x55, 0x41, 0x56, 0x41, 0x57, 0x41 }
 		};
 		Pattern_t ProcessIPCFrame
 		{
 			"CSteamEngine::ProcessIPCFrame",
-			"5E C3 FF 74 24",
+			"48 89 DA 44 89 E6 5B",
 			SigFollowMode::PrologueUpwards,
-			std::vector<int16_t> { 0xC3, 0x81, -1, -1, -1, -1, 0xE8, 0x53, 0x56 }
+			std::vector<int16_t> { 0xCD, 0x89, 0x49, 0x55, 0x41 }
 		};
 		Pattern_t Offset_User
 		{
 			"CSteamEngine::m_pUser",
-			"8B 80 ? ? ? ? FF 75 ? ? ? ? 56 FF 75",
+			"4C 03 A5 ? ? ? ? 48 89 DF 4C 89 E2 E8 ? ? ? ? 49 8B 74 24",
 			SigFollowMode::None
 		};
 	}
@@ -115,43 +116,43 @@ namespace Patterns
 		Pattern_t CheckAppOwnership
 		{
 			"CUser::CheckAppOwnership",
-			"0F 94 C2 08 51",
+			"48 89 E8 31 ED",
 			SigFollowMode::PrologueUpwards,
-			std::vector<int16_t> { 0x53, 0x56, 0x57, 0xE5, 0x89, 0x55, -1, -1, -1, -1, 0x5, -1, -1, -1, -1, 0xE8 }
+			std::vector<int16_t> { 0xD6, 0x89, 0x49, 0x56, 0x41, 0x57, 0x41 }
 		};
 		Pattern_t GetSubscribedApps
 		{
 			"CUser::GetSubscribedApps",
-			"89 75 ? 0F 29 45",
+			"EB ? 41 8B 50",
 			SigFollowMode::PrologueUpwards,
-			std::vector<int16_t> { 0x56, 0x57, 0xE5, 0x89, 0x55 }
+			std::vector<int16_t> { 0x55, 0x41, 0x56, 0x41, 0x57, 0x41 }
 		};
 		Pattern_t PostCallback
 		{
 			"CUser::PostCallback",
-			"E8 ? ? ? ? 8B 75 ? 89 D8",
+			"E8 ? ? ? ? 4D 8B AE",
 			SigFollowMode::Relative
 		};
 		Pattern_t PostCallbackToAppId
 		{
 			"CUser::PostCallbackToAppId",
-			"84 C0 0F 45 F8 89 F8",
+			"44 3B 69 ? 41 89 C5",
 			MemHlp::SigFollowMode::PrologueUpwards,
-			std::vector<int16_t> { 0xE8, 0x53, 0x56, 0x57, 0x55 }
+			std::vector<int16_t> { 0x55, 0x41, 0x56, 0x41, 0x57, 0x41 }
 		};
 		Pattern_t SpawnGameId
 		{
 			"CUser::SpawnGameId",
-			"84 C9 0F 45 45",
+			"31 C0 41 80 78",
 			SigFollowMode::PrologueUpwards,
-			std::vector<int16_t> { 0x53, 0x56, 0x57, 0xE5, 0x89, 0x55, -1, -1, -1, -1, 0x5, -1, -1, -1, -1, 0xE8 }
+			std::vector<int16_t> { 0xE5, 0x89, 0x48, 0x55 }
 		};
 		Pattern_t UpdateAppOwnershipTicket
 		{
 			"CUser::UpdateAppOwnershipTicket",
-			"52 57 89 DF FF 75",
+			"41 89 CD 83 FD",
 			SigFollowMode::PrologueUpwards,
-			std::vector<int16_t> { 0x53, 0x56, 0x57, 0xE5, 0x89, 0x55, -1, -1, -1, -1, 0x5, -1, -1, -1, -1, 0xE8 }
+			std::vector<int16_t> { 0x55, 0x41, 0x56, 0x41, 0x57, 0x41 }
 		};
 	}
 
@@ -160,8 +161,9 @@ namespace Patterns
 		Pattern_t BuildDepotDependency
 		{
 			"CUserAppManager::BuildDepotDependency",
-			"E8 ? ? ? ? 83 C4 ? 84 C0 74 ? 8B 45 ? 85 C0 89 45",
-			SigFollowMode::Relative
+			"4D 85 FF 88 44 24",
+			SigFollowMode::PrologueUpwards,
+			std::vector<int16_t> { 0xCF, 0x89, 0x4D, 0x57, 0x41 }
 		};
 	}
 
@@ -170,9 +172,9 @@ namespace Patterns
 		Pattern_t BBuildAndAsyncSendFrame
 		{
 			"CWebSocketConnection::BBuildAndAsyncSendFrame",
-			"89 C6 85 D2 78",
+			"45 31 F6 83 7F",
 			SigFollowMode::PrologueUpwards,
-			std::vector<int16_t> { 0xE8, 0x57, 0xE5, 0x89, 0x55 }
+			std::vector<int16_t> { 0x55, 0x41, 0x56, 0x41, 0x57, 0x41 }
 		};
 	}
 
@@ -181,7 +183,7 @@ namespace Patterns
 		Pattern_t Offset_GetPipeIndex
 		{
 			"IClientUtils::m_PipeIndex",
-			"8B 91 ? ? ? ? 83 F8 FF 74 ? 8B 89 ? ? ? ? EB ? ? ? ? 8B 00 83 F8 FF 74 ? 8D 04 ? 8D 04 ? 3B 50",
+			"8B B7 ? ? ? ? 64 48 8B 1C 25 ? ? ? ? 48 89 5C 24 ? 48 89 FB 48 81 EF",
 			SigFollowMode::None,
 		};
 	}
