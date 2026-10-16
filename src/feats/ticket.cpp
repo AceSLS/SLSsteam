@@ -227,17 +227,22 @@ void Ticket::getTicketOwnershipExtendedData(const AppId_t appId)
 	oneTimeSteamIdSpoof[appId] = cached->steamId;
 }
 
-void Ticket::launchApp(const AppId_t appId)
+void Ticket::launchApp(const GameId_t gameId)
 {
-	auto ticket = getCachedTicket(appId, ETicketType::AppOwnershipTicket);
+	if (gameId & GAME_TYPE_SHORTCUT)
+	{
+		return;
+	}
+
+	auto ticket = getCachedTicket(gameId, ETicketType::AppOwnershipTicket);
 	if (!ticket)
 	{
 		return;
 	}
 
 	//Replacing this call with an injected GetAppOwnershipTicketResponse is possible, but breaks in offline mode so we don't do that
-	g_pSteamEngine->getUser(0)->updateAppOwnershipTicket(appId, reinterpret_cast<void*>(ticket->ticket.data()), ticket->ticket.size());
-	LOG_DEBUG("Force loaded AppOwnershipTicket for %i\n", appId);
+	g_pSteamEngine->getUser(0)->updateAppOwnershipTicket(gameId, reinterpret_cast<void*>(ticket->ticket.data()), ticket->ticket.size());
+	LOG_DEBUG("Force loaded AppOwnershipTicket for %lu\n", gameId);
 }
 
 void Ticket::recvAppTicket(const CNetPacket* pkt)

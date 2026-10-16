@@ -66,7 +66,7 @@ uint32_t DLC::getDlcCount(const AppId_t appId)
 	return 0;
 }
 
-bool DLC::getDlcDataByIndex(const AppId_t appId, const unsigned int index, AppId_t* dlcId, bool* available, char* dlcName, size_t& dlcNameLen)
+bool DLC::getDlcDataByIndex(const AppId_t appId, const uint32_t index, AppId_t* dlcId, bool* available, char* dlcName, steamsize_t& dlcNameLen)
 {
 	if (!dlcId || !available || !dlcName)
 	{

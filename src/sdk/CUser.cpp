@@ -51,15 +51,15 @@ bool CUser::isSubscribed(const AppId_t appId)
 	return info.ownsLicense && !info.licenseExpired;
 }
 
-void CUser::postCallback(const ECallbackType type, void* pCallback, const uint32_t callbackSize)
+void CUser::postCallback(const ECallbackType type, void* pCallback, const steamsize_t callbackSize)
 {
-	const static auto fn = reinterpret_cast<void(*)(void*, ECallbackType, void*, uint32_t, uint32_t)>(Patterns::CUser::PostCallback.address);
+	const static auto fn = reinterpret_cast<void(*)(void*, ECallbackType, void*, steamsize_t, uint32_t)>(Patterns::CUser::PostCallback.address);
 	fn(this, type, pCallback, callbackSize, 0);
 }
 
-void CUser::updateAppOwnershipTicket(const AppId_t appId, void* pTicket, const uint32_t len)
+void CUser::updateAppOwnershipTicket(const AppId_t appId, void* pTicket, const steamsize_t len)
 {
-	const static auto fn = reinterpret_cast<void(*)(void*, uint32_t, void*, uint32_t)>(Patterns::CUser::UpdateAppOwnershipTicket.address);
+	const static auto fn = reinterpret_cast<void(*)(void*, uint32_t, void*, steamsize_t)>(Patterns::CUser::UpdateAppOwnershipTicket.address);
 	fn(this, appId, pTicket, len);
 
 	//Dunno if this achieves anything, but the client does it so we do too

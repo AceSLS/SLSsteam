@@ -53,14 +53,14 @@
 //Function 64 -> 18IClientTimelineMap
 //Function 79 -> 20IClientRemotePlayMap
 //Function 14 -> 15IClientUtilsMap
-SDK_Class CSteamClient;
+//SDK_Class CSteamClient;
 
-template<typename T>
-SDK_Class InterfaceMapBase
-{
-	void* vft; 					//0x0
-	HSteamUser userHandle;		//0x4
-	HSteamPipe pipeHandle;		//0x8
-	uint8_t __pad0xC[0x4];		//0xC
-	CSteamClient* steamClient;	//0x10
-};
+//template<typename T>
+//SDK_Class InterfaceMapBase
+//{
+//	void* vft; 					//0x0
+//	HSteamUser userHandle;		//0x4
+//	HSteamPipe pipeHandle;		//0x8
+//	uint8_t __pad0xC[0x4];		//0xC
+//	CSteamClient* steamClient;	//0x10
+//};

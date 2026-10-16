@@ -529,7 +529,7 @@ static AppId_t hkSteamEngine_SetAppIdForCurrentPipe(CSteamEngine* pSteamEngine, 
 	return ret;
 }
 
-static bool hkWebSocketConnection_BBuildAndAsyncSendFrame(CWebSocketConnection* pWebSocketConnection, EWebSocketConnectionSendType type, void* pData, uint32_t dataSize)
+static bool hkWebSocketConnection_BBuildAndAsyncSendFrame(CWebSocketConnection* pWebSocketConnection, EWebSocketConnectionSendType type, void* pData, steamsize_t dataSize)
 {
 	if (type == k_EWebSocketConnectionSendRaw)
 	{
@@ -682,7 +682,7 @@ static uint32_t hkUser_GetSubscribedApps(CUser* pUser, AppId_t* pAppList, uint32
 	return count;
 }
 
-static uint32_t hkUser_PostCallbackToAppId(CUser* pUser, AppId_t appId, uint32_t type, void* pCallback, uint32_t callbackSize)
+static uint32_t hkUser_PostCallbackToAppId(CUser* pUser, AppId_t appId, ECallbackType type, void* pCallback, steamsize_t callbackSize)
 {
 	const AppId_t fakeAppId = FakeAppIds::getFakeAppId(appId);
 	if (fakeAppId)
@@ -701,7 +701,7 @@ static uint32_t hkUser_PostCallbackToAppId(CUser* pUser, AppId_t appId, uint32_t
 		Hooks::CUser_PostCallbackToAppId->name.c_str(),
 		reinterpret_cast<void*>(pUser),
 		appId,
-		type,
+		static_cast<uint32_t>(type),
 		pCallback,
 		callbackSize,
 		ret
@@ -796,13 +796,13 @@ static bool hkClientAppManager_BCanRemotePlayTogether(IClientAppManager* pAppMan
 	return true;
 }
 
-static void* hkClientAppManager_LaunchApp(IClientAppManager* pAppManager, AppId_t* pAppId, void* a2, void* a3, void* a4)
+static void* hkClientAppManager_LaunchApp(IClientAppManager* pAppManager, GameId_t* pAppId, uint32_t a2, uint32_t a3, const char* a4)
 {
 	if (pAppId)
 	{
 		LOG_ONCE
 		(
-			"%s(%p, %u, %p, %p, %p)\n",
+			"%s(%p, %lu, %u, %u, %p)\n",
 
 			Hooks::IClientAppManager_LaunchApp->name.c_str(),
 			reinterpret_cast<void*>(pAppManager),
@@ -844,7 +844,7 @@ static bool hkClientAppManager_IsAppDlcInstalled(IClientAppManager* pAppManager,
 	return ret;
 }
 
-static bool hkClientAppManager_BIsDlcEnabled(IClientAppManager* pAppManager, AppId_t appId, AppId_t dlcId, void* a3)
+static bool hkClientAppManager_BIsDlcEnabled(IClientAppManager* pAppManager, AppId_t appId, AppId_t dlcId, bool* a3)
 {
 	LOG_TRACE("Calling original\n");
 
@@ -857,7 +857,7 @@ static bool hkClientAppManager_BIsDlcEnabled(IClientAppManager* pAppManager, App
 		reinterpret_cast<void*>(pAppManager),
 		appId,
 		dlcId,
-		a3,
+		reinterpret_cast<void*>(a3),
 		ret
 	);
 
@@ -874,11 +874,11 @@ static bool hkClientAppManager_GetUpdateInfo(IClientAppManager* pAppManager, App
 {
 	LOG_TRACE("Calling original\n");
 
-	const bool success = Hooks::IClientAppManager_GetAppUpdateInfo->originalFn.fn(pAppManager, appId, a2);
+	const bool success = Hooks::IClientAppManager_GetUpdateInfo->originalFn.fn(pAppManager, appId, a2);
 	LOG_ONCE
 	(
 		"%s(%p, %u, %p) -> %i\n",
-		Hooks::IClientAppManager_GetAppUpdateInfo->name.c_str(),
+		Hooks::IClientAppManager_GetUpdateInfo->name.c_str(),
 		reinterpret_cast<void*>(pAppManager),
 		appId,
 		reinterpret_cast<void*>(a2),
@@ -906,7 +906,7 @@ static bool hkClientAppManager_GetAppStateInfo(IClientAppManager* pAppManager, A
 	return success;
 }
 
-static unsigned int hkClientApps_GetDLCCount(IClientApps* pClientApps, AppId_t appId)
+static uint32_t hkClientApps_GetDLCCount(IClientApps* pClientApps, AppId_t appId)
 {
 	LOG_TRACE("Calling original\n");
 
@@ -930,7 +930,7 @@ static unsigned int hkClientApps_GetDLCCount(IClientApps* pClientApps, AppId_t a
 	return count;
 }
 
-static bool hkClientApps_GetDLCDataByIndex(IClientApps* pClientApps, AppId_t appId, int dlcIndex, AppId_t* pDlcId, bool* pIsAvailable, char* pChDlcName, size_t dlcNameLen)
+static bool hkClientApps_GetDLCDataByIndex(IClientApps* pClientApps, AppId_t appId, uint32_t dlcIndex, AppId_t* pDlcId, bool* pIsAvailable, char* pChDlcName, steamsize_t dlcNameLen)
 {
 	LOG_TRACE("Calling original\n");
 	//Preserve original call to populate stuff
@@ -1080,7 +1080,7 @@ static uint32_t hkClientUser_GetAppOwnershipTicketExtendedData
 	return size;
 }
 
-static bool hkClientUser_GetEncryptedAppTicket(IClientUser* pClientUser, void* pTicket, uint32_t ticketSize, uint32_t* pTicketSize)
+static bool hkClientUser_GetEncryptedAppTicket(IClientUser* pClientUser, void* pTicket, steamsize_t ticketSize, steamsize_t* pTicketSize)
 {
 	LOG_TRACE("Calling original\n");
 	const bool success = Hooks::IClientUser_GetEncryptedAppTicket->originalFn.fn(pClientUser, pTicket, ticketSize, pTicketSize);
@@ -1105,7 +1105,7 @@ static bool hkClientUser_GetEncryptedAppTicket(IClientUser* pClientUser, void* p
 	return success;
 }
 
-static bool hkClientUser_GetLegacyCDKey(IClientUser* pClientUser, AppId_t appId, char* pChKey, uint32_t keySize)
+static bool hkClientUser_GetLegacyCDKey(IClientUser* pClientUser, AppId_t appId, char* pChKey, steamsize_t keySize)
 {
 	Apps::getLegacyCDKey(appId);
 
@@ -1322,7 +1322,7 @@ namespace Hooks
 
 	VFTHook<IClientAppManager_BCanRemotePlayTogether_t>* IClientAppManager_BCanRemotePlayTogether = nullptr;
 	VFTHook<IClientAppManager_BIsDlcEnabled_t>* IClientAppManager_BIsDlcEnabled = nullptr;
-	VFTHook<IClientAppManager_GetAppUpdateInfo_t>* IClientAppManager_GetAppUpdateInfo = nullptr;
+	VFTHook<IClientAppManager_GetUpdateInfo_t>* IClientAppManager_GetUpdateInfo = nullptr;
 	VFTHook<IClientAppManager_GetAppStateInfo_t>* IClientAppManager_GetAppStateInfo = nullptr;
 	VFTHook<IClientAppManager_LaunchApp_t>* IClientAppManager_LaunchApp = nullptr;
 	VFTHook<IClientAppManager_IsAppDlcInstalled_t>* IClientAppManager_IsAppDlcInstalled = nullptr;
@@ -1493,7 +1493,7 @@ void Hooks::placeVFTHooks()
 
 		Hooks::IClientAppManager_BCanRemotePlayTogether = new VFTHook(vft, VFTIndexes::IClientAppManager::BCanRemotePlayTogether, hkClientAppManager_BCanRemotePlayTogether);
 		Hooks::IClientAppManager_BIsDlcEnabled = new VFTHook(vft, VFTIndexes::IClientAppManager::BIsDlcEnabled, hkClientAppManager_BIsDlcEnabled);
-		Hooks::IClientAppManager_GetAppUpdateInfo = new VFTHook(vft, VFTIndexes::IClientAppManager::GetUpdateInfo, hkClientAppManager_GetUpdateInfo);
+		Hooks::IClientAppManager_GetUpdateInfo = new VFTHook(vft, VFTIndexes::IClientAppManager::GetUpdateInfo, hkClientAppManager_GetUpdateInfo);
 		Hooks::IClientAppManager_GetAppStateInfo = new VFTHook(vft, VFTIndexes::IClientAppManager::GetAppStateInfo, hkClientAppManager_GetAppStateInfo);
 		Hooks::IClientAppManager_LaunchApp = new VFTHook(vft, VFTIndexes::IClientAppManager::LaunchApp, hkClientAppManager_LaunchApp);
 		Hooks::IClientAppManager_IsAppDlcInstalled = new VFTHook(vft, VFTIndexes::IClientAppManager::IsAppDlcInstalled, hkClientAppManager_IsAppDlcInstalled);

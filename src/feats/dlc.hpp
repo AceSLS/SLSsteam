@@ -16,5 +16,5 @@ namespace DLC
 	bool userSubscribedInTicket(const AppId_t appId);
 
 	uint32_t getDlcCount(const AppId_t appId);
-	bool getDlcDataByIndex(const AppId_t appId, const unsigned int index, AppId_t* dlcId, bool* available, char* dlcName, size_t& dlcNameLen);
+	bool getDlcDataByIndex(const AppId_t appId, const uint32_t index, AppId_t* dlcId, bool* available, char* dlcName, steamsize_t& dlcNameLen);
 }

@@ -227,15 +227,15 @@ void SLSAPI::runInstallOps()
 		{
 			case LibraryOp_t::OpType::Dump:
 			{
-				const size_t num = appManager->getNumLibraryFolders();
+				const uint32_t num = appManager->getNumLibraryFolders();
 				char pathBuf[0x1000]; //Same size steam passes
 				char labelBuf[0x80]; //Same size steam passes
 				
 				std::ostringstream outSS;
-				for (size_t i = 0; i < num; i++)
+				for (uint32_t i = 0; i < num; i++)
 				{
-					size_t pathLen = appManager->getLibraryFolderPath(i, pathBuf, sizeof(pathBuf));
-					size_t labelLen = appManager->getLibraryFolderLabel(i, labelBuf, sizeof(labelBuf));
+					uint32_t pathLen = appManager->getLibraryFolderPath(i, pathBuf, sizeof(pathBuf));
+					uint32_t labelLen = appManager->getLibraryFolderLabel(i, labelBuf, sizeof(labelBuf));
 
 					if (labelLen)
 					{

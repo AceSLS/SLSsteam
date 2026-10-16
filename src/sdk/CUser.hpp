@@ -33,8 +33,9 @@ SDK_Struct AppLicensesChanged_t
 	uint32_t remainingPackets;				//0x4
 	uint32_t count;							//0x8
 	AppId_t apps[MAX_APPS_PER_CALLBACK];	//0xC
-	uint64_t appsAdded;						//0x10C
-}; //0x114
+	uint8_t __pad0x10C[0x4];				//0x10C
+	uint64_t appsAdded;						//0x110
+}; //0x118
 
 SDK_Struct AppOwnershipInfo_t {
     AppId_t subId;
@@ -79,6 +80,6 @@ public:
 	bool checkAppOwnership(const AppId_t appId, AppOwnershipInfo_t* pInfo);
 	bool isSubscribed(const AppId_t appId);
 
-	void postCallback(const ECallbackType type, void* pCallback, const uint32_t callbackSize);
-	void updateAppOwnershipTicket(const AppId_t appId, void* pTicket, const uint32_t len);
+	void postCallback(const ECallbackType type, void* pCallback, const steamsize_t callbackSize);
+	void updateAppOwnershipTicket(const AppId_t appId, void* pTicket, const steamsize_t len);
 };

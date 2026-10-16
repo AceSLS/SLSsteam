@@ -9,7 +9,7 @@
 
 using EAppType = EProtoAppType;
 
-enum EAppInfoSection
+enum EAppInfoSection : uint32_t
 {
 	k_EAppInfoSectionUnknown = 0x0,
 	k_EAppInfoSectionAll = 0x1,
@@ -36,7 +36,7 @@ enum EAppInfoSection
 
 SDK_Struct AppStateInfo_t
 {
-    EAppReleaseState releaseState;			//0x0
+    EAppReleaseState releaseStuint32_tate;			//0x0
     EAppOwnershipFlags ownershipFlags;	//0x4
     uint8_t __pad0x8[0x4];				//0x8
     uint32_t ownerAccountId;			//0xC
@@ -51,8 +51,8 @@ SDK_Struct AppStateInfo_t
 SDK_Class IClientApps
 {
 public:
-	int32_t getAppData(const AppId_t appId, const char* name, const char* pChOut, const uint32_t outSize);
-	uint32_t getAppDataSection(const AppId_t appId, const EAppInfoSection section, const char* pChOut, const uint32_t outSize);
-	bool requestAppInfoUpdate(const AppId_t* appIds, const uint32_t numAppIds);
+	int32_t getAppData(const AppId_t appId, const char* name, const char* pChOut, const steamsize_t outSize);
+	uint32_t getAppDataSection(const AppId_t appId, const EAppInfoSection section, const char* pChOut, const steamsize_t outSize);
+	bool requestAppInfoUpdate(const AppId_t* appIds, const steamsize_t numAppIds);
 	EAppType getAppType(const AppId_t appId);
 };

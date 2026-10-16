@@ -176,12 +176,12 @@ namespace Hooks
 
 	typedef bool(*CUser_CheckAppOwnership_t)(CUser*, AppId_t, AppOwnershipInfo_t*);
 	typedef uint32_t(*CUser_GetSubscribedApps_t)(CUser*, AppId_t*, uint32_t, uint8_t);
-	typedef uint32_t(*CUser_PostCallbackToAppId_t)(CUser*, AppId_t, uint32_t, void*, uint32_t);
+	typedef uint32_t(*CUser_PostCallbackToAppId_t)(CUser*, AppId_t, ECallbackType, void*, steamsize_t);
 	typedef uint32_t(*CUser_SpawnGameId_t)(void*, const char*, const char*, const char*, GameId_t*, const char*, int32_t, int32_t, int32_t, int32_t, void*);
 
 	typedef bool(*CUserAppManager_BuildDepotDependency_t)(IClientAppManager*, AppId_t, void*, CUtlVector<DepotInfo_t>*, CUtlVector<DepotInfo_t>*, void*, uint32_t*, bool*);
 
-	typedef bool(*CWebSocketConnection_BBuildAndAsyncSendFrame_t)(CWebSocketConnection*, EWebSocketConnectionSendType, void*, uint32_t);
+	typedef bool(*CWebSocketConnection_BBuildAndAsyncSendFrame_t)(CWebSocketConnection*, EWebSocketConnectionSendType, void*, steamsize_t);
 
 	typedef bool(*IClientConfigStore_SetString_t)(void*, uint32_t, const char*, const char*);
 
@@ -220,21 +220,21 @@ namespace Hooks
 
 	extern DetourHook<IClientRemoteStorage_IsCloudEnabledForApp_t>* IClientRemoteStorage_IsCloudEnabledForApp;
 
-	typedef unsigned int(*IClientApps_GetDLCCount_t)(IClientApps*, AppId_t);
-	typedef bool(*IClientApps_GetDLCDataByIndex_t)(IClientApps*, AppId_t, int, AppId_t*, bool*, char*, size_t);
+	typedef uint32_t(*IClientApps_GetDLCCount_t)(IClientApps*, AppId_t);
+	typedef bool(*IClientApps_GetDLCDataByIndex_t)(IClientApps*, AppId_t, uint32_t, AppId_t*, bool*, char*, steamsize_t);
 
 	typedef bool(*IClientAppManager_BCanRemotePlayTogether_t)(IClientAppManager*, AppId_t);
-	typedef bool(*IClientAppManager_BIsDlcEnabled_t)(IClientAppManager*, AppId_t, AppId_t, void*);
-	typedef bool(*IClientAppManager_GetAppUpdateInfo_t)(IClientAppManager*, AppId_t, uint32_t*);
+	typedef bool(*IClientAppManager_BIsDlcEnabled_t)(IClientAppManager*, AppId_t, AppId_t, bool*);
+	typedef bool(*IClientAppManager_GetUpdateInfo_t)(IClientAppManager*, AppId_t, uint32_t*);
 	typedef bool(*IClientAppManager_GetAppStateInfo_t)(IClientAppManager*, AppId_t, AppStateInfo_t*);
-	typedef void*(*IClientAppManager_LaunchApp_t)(IClientAppManager*, AppId_t*, void*, void*, void*);
+	typedef void*(*IClientAppManager_LaunchApp_t)(IClientAppManager*, GameId_t*, uint32_t, uint32_t, const char*);
 	typedef bool(*IClientAppManager_IsAppDlcInstalled_t)(IClientAppManager*, AppId_t, AppId_t);
 
 	typedef bool(*IClientUser_BLoggedOn_t)(IClientUser*);
 	typedef uint32_t(*IClientUser_BUpdateAppOwnershipTicket_t)(IClientUser*, AppId_t, bool);
 	typedef uint32_t(*IClientUser_GetAppOwnershipTicketExtendedData_t)(IClientUser*, uint32_t, void*, uint32_t, uint32_t*, uint32_t*, uint32_t*, uint32_t*);
-	typedef bool(*IClientUser_GetEncryptedAppTicket_t)(IClientUser*, void*, uint32_t, uint32_t*);
-	typedef bool(*IClientUser_GetLegacyCDKey_t)(IClientUser*, AppId_t, char*, uint32_t);
+	typedef bool(*IClientUser_GetEncryptedAppTicket_t)(IClientUser*, void*, steamsize_t, steamsize_t*);
+	typedef bool(*IClientUser_GetLegacyCDKey_t)(IClientUser*, AppId_t, char*, steamsize_t);
 	typedef CSteamId(*IClientUser_GetSteamId_t)(IClientUser*);
 	typedef uint8_t(*IClientUser_IsUserSubscribedAppInTicket_t)(IClientUser*, uint64_t, AppId_t);
 
@@ -243,7 +243,7 @@ namespace Hooks
 
 	extern VFTHook<IClientAppManager_BCanRemotePlayTogether_t>* IClientAppManager_BCanRemotePlayTogether;
 	extern VFTHook<IClientAppManager_BIsDlcEnabled_t>* IClientAppManager_BIsDlcEnabled;
-	extern VFTHook<IClientAppManager_GetAppUpdateInfo_t>* IClientAppManager_GetAppUpdateInfo;
+	extern VFTHook<IClientAppManager_GetUpdateInfo_t>* IClientAppManager_GetUpdateInfo;
 	extern VFTHook<IClientAppManager_GetAppStateInfo_t>* IClientAppManager_GetAppStateInfo;
 	extern VFTHook<IClientAppManager_LaunchApp_t>* IClientAppManager_LaunchApp;
 	extern VFTHook<IClientAppManager_IsAppDlcInstalled_t>* IClientAppManager_IsAppDlcInstalled;

@@ -16,6 +16,8 @@ typedef int32_t ENetPacket;
 typedef uint32_t HSteamPipe;
 typedef uint32_t HSteamUser;
 
+typedef uint32_t steamsize_t;
+
 constexpr uint64_t GAME_TYPE_SHORTCUT = 0x2000000ULL;
 
 constexpr ENetPacket INVALID_NETPACKET_TYPE = -1;

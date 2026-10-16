@@ -13,9 +13,9 @@ template<typename T>
 SDK_Class CUtlMemory
 {
 public:
-	T* base;
-	uint32_t alloc;
-	uint32_t growSize;
+	T* base;			//0x0
+	uint32_t alloc;		//0x8
+	uint32_t growSize;	//0xC
 
 	CUtlMemory()
 	{
@@ -53,7 +53,7 @@ public:
 		base = reinterpret_cast<T*>(mem);
 		return true;
 	}
-};
+}; //0x10
 
 SDK_Class CUtlBuffer
 {
@@ -62,89 +62,90 @@ SDK_Class CUtlBuffer
 
 public:
 	CUtlMemory<uint8_t> mem;			//0x0
-	int32_t get;						//0xC
-	int32_t put;						//0x10
-	int32_t offset;						//0x14
-	uint32_t flags;						//0x18
-	CUtlBuffer_Function1_t fn1C;		//0x1C
-	int32_t field20;					//0x20
-	CUtlBuffer_Resize_t resizeFn;		//0x24
-	int32_t field28;					//0x28
+	int32_t get;						//0x10
+	int32_t put;						//0x14
+	int32_t offset;						//0x18
+	uint32_t flags;						//0x1C
+	CUtlBuffer_Function1_t fn0x20;		//0x20
+	void* __pad0x28;					//0x28
+	CUtlBuffer_Resize_t resizeFn;		//0x30
+	void* __pad0x38;					//0x38
 
 	bool resize(const size_t newSize);
-}; //0x2C
+}; //0x40
 
 
-template<typename T, typename T2>
-SDK_Class CUtlRBTree
-{
-public:
-	struct Element_t
-	{
-		int32_t leftIndex;			//0x0
-		int32_t rightIndex;			//0x4
-		uint8_t __pad0x0[0x8];		//0x8
-		T key;						//0x10
-		T2* value;					//0x14
-	}; //0x18
-
-	uint8_t __pad0x0[0x14];		//0x0
-	int32_t rootNodeIndex;		//0x14
-	uint32_t allocated;			//0x18
-	uint8_t __pad0x1C[0x4];		//0x1C
-	uint32_t size;				//0x20
-	uint8_t __pad0x24[0x4];		//0x24
-	Element_t* elements;		//0x28
-
-	Element_t* find(const T key)
-	{
-		int32_t index = rootNodeIndex;
-
-		for (;;)
-		{
-			const auto node = &elements[index];
-
-			if (node->key == key)
-			{
-				return node;
-			}
-
-			if (key > node->key)
-			{
-				index = node->rightIndex;
-			}
-			else
-			{
-				index = node->leftIndex;
-			}
-
-			if (index == -1)
-			{
-				break;
-			}
-		}
-
-		return nullptr;
-	}
-};
-
-template<typename T, typename T2>
-SDK_Class CUtlMap
-{
-public:
-	CUtlRBTree<T, T2> tree;		//0x0
-
-	T2* at(size_t key)
-	{
-		const auto node = tree.find(key);
-		if (node)
-		{
-			return node->value;
-		}
-
-		return nullptr;
-	}
-};
+//TODO: Update to 64 bits
+//template<typename T, typename T2>
+//SDK_Class CUtlRBTree
+//{
+//public:
+//	struct Element_t
+//	{
+//		int32_t leftIndex;			//0x0
+//		int32_t rightIndex;			//0x4
+//		uint8_t __pad0x0[0x8];		//0x8
+//		T key;						//0x10
+//		T2* value;					//0x14
+//	}; //0x18
+//
+//	uint8_t __pad0x0[0x14];		//0x0
+//	int32_t rootNodeIndex;		//0x14
+//	uint32_t allocated;			//0x18
+//	uint8_t __pad0x1C[0x4];		//0x1C
+//	uint32_t size;				//0x20
+//	uint8_t __pad0x24[0x4];		//0x24
+//	Element_t* elements;		//0x28
+//
+//	Element_t* find(const T key)
+//	{
+//		int32_t index = rootNodeIndex;
+//
+//		for (;;)
+//		{
+//			const auto node = &elements[index];
+//
+//			if (node->key == key)
+//			{
+//				return node;
+//			}
+//
+//			if (key > node->key)
+//			{
+//				index = node->rightIndex;
+//			}
+//			else
+//			{
+//				index = node->leftIndex;
+//			}
+//
+//			if (index == -1)
+//			{
+//				break;
+//			}
+//		}
+//
+//		return nullptr;
+//	}
+//};
+//
+//template<typename T, typename T2>
+//SDK_Class CUtlMap
+//{
+//public:
+//	CUtlRBTree<T, T2> tree;		//0x0
+//
+//	T2* at(size_t key)
+//	{
+//		const auto node = tree.find(key);
+//		if (node)
+//		{
+//			return node->value;
+//		}
+//
+//		return nullptr;
+//	}
+//};
 
 //Null terminated wrapper
 SDK_Class CUtlString

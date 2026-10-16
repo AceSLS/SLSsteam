@@ -156,7 +156,7 @@ CServerPipe* CSteamEngine::getServerPipe(const HSteamPipe pipe)
 
 CUser* CSteamEngine::getUser(const uint32_t index)
 {
-	const static auto offset = *reinterpret_cast<lm_address_t*>(Patterns::CSteamEngine::Offset_User.address + 3);
+	const static auto offset = *reinterpret_cast<int32_t*>(Patterns::CSteamEngine::Offset_User.address + 3); //Offset is only 4 bytes
 	const auto vec = reinterpret_cast<const CUtlVector<CUser*>*>(this + offset);
 	if (index >= vec->size)
 	{
@@ -166,8 +166,8 @@ CUser* CSteamEngine::getUser(const uint32_t index)
 	return *(&vec->mem.base[index * 2] + 1);
 
 	//const auto ppUserMap = *reinterpret_cast<uint8_t**>(this + offset);
-	//const auto ppUser = ppUserMap + index * 8;
-	//return *reinterpret_cast<CUser**>(ppUser + 4);
+	//const auto ppUser = ppUserMap + index * 16;
+	//return *reinterpret_cast<CUser**>(ppUser + 8);
 }
 
 IClientUtils* CSteamEngine::getUtils()

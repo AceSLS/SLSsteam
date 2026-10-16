@@ -41,10 +41,10 @@ SDK_Struct DepotInfo_t
 SDK_Class IClientAppManager
 {
 public:
-	uint32_t getNumLibraryFolders();
-	uint32_t getLibraryFolderLabel(const uint32_t index, char* pChLabel, const uint32_t labelSize);
-	uint32_t getLibraryFolderPath(const uint32_t index, char* pChPath, const uint32_t pathSize);
 	EAppState getAppInstallState(const AppId_t appId);
+	uint32_t getLibraryFolderLabel(const uint32_t index, char* pChLabel, const uint32_t labelSize);
+	uint32_t getLibraryFolderPath(const uint32_t index, char* pChPath, const steamsize_t pathSize);
+	uint32_t getNumLibraryFolders();
 	bool installApp(const AppId_t appId, const uint32_t libraryIndex);
 	uint32_t uninstallApp(const AppId_t appId);
 };
