@@ -89,10 +89,10 @@ static void unload()
 
 //TODO: Remove when unload() works properly since it should not be needed anymore after that
 static bool setupSuccess = false;
+static lm_process_t proc { };
 
 static void setup()
 {
-	lm_process_t proc {};
 	if (!LM_GetProcess(&proc))
 	{
 		unload();
@@ -106,6 +106,28 @@ static void setup()
 		return;
 	}
 
+	//Since we can't statically link everything and some distros seem to respect LD_LIBRARY_PATH
+	//more or less than mine does we just force append those
+	//Hopefully this won't mess anything else up
+	//auto ldLibPath = std::string(getenv("LD_LIBRARY_PATH"));
+	//ldLibPath.append("/usr/lib:/usr/lib32");
+	//setenv("LD_LIBRARY_PATH", ldLibPath.c_str(), true);
+
+	setupSuccess = true;
+}
+
+static void load()
+{
+	if (!setupSuccess)
+	{
+		return;
+	}
+
+	if (!g_modSteamClient || !g_modSteamUI || !g_modTier0)
+	{
+		return;
+	}
+
 	g_pLog = std::unique_ptr<CLog>(CLog::createDefaultLog());
 	//Won't happen, log throws a runtime exception when creation fails.
 	//But just in case I decide to refactor one day
@@ -115,7 +137,7 @@ static void setup()
 		return;
 	}
 
-	LOG_INFO("SLSsteam (%s -> %s) loading in %s\n", BUILD_BRANCH, LAST_COMMIT_HASH, proc.name);
+	LOG_INFO("SLSsteam (%s -> %s) loading in %s (%u)\n", BUILD_BRANCH, LAST_COMMIT_HASH, proc.name, proc.pid);
 
 	CFileWatcher::installSigHandler();
 
@@ -135,29 +157,7 @@ static void setup()
 		return;
 	}
 
-	//Since we can't statically link everything and some distros seem to respect LD_LIBRARY_PATH
-	//more or less than mine does we just force append those
-	//Hopefully this won't mess anything else up
-	auto ldLibPath = std::string(getenv("LD_LIBRARY_PATH"));
-	ldLibPath.append("/usr/lib:/usr/lib32");
-	setenv("LD_LIBRARY_PATH", ldLibPath.c_str(), true);
-
 	Updater::init();
-
-	setupSuccess = true;
-}
-
-static void load()
-{
-	if (!setupSuccess)
-	{
-		return;
-	}
-
-	if (!g_modSteamClient || !g_modSteamUI || !g_modTier0)
-	{
-		return;
-	}
 
 	const auto path = std::filesystem::path(g_modSteamClient->path);
 	const auto dir = path.parent_path();
@@ -245,7 +245,7 @@ unsigned int la_version(unsigned int)
 char* la_objsearch(const char* name, __attribute__((unused)) uintptr_t* cookie, __attribute__((unused)) unsigned int flag)
 {
 	const auto nameStr = std::string(name);
-	if (nameStr.ends_with("crashhandler.so"))
+	if (nameStr.ends_with("/crashhandler.so"))
 	{
 		LOG_ONCE("Prevented crashhandler from loading\n");
 		return nullptr;
