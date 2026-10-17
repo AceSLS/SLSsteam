@@ -1007,6 +1007,9 @@ class CMsgProtoBufHeader PROTOBUF_FINAL :
     kDebugSourceFieldNumber = 34,
     kWgTokenFieldNumber = 39,
     kWebuiAuthKeyFieldNumber = 40,
+    kWgMsgTraceTokenFieldNumber = 49,
+    kWgMsgTraceStatusFieldNumber = 51,
+    kBrowserapiSiteFieldNumber = 53,
     kRoutingGcFieldNumber = 37,
     kSteamidFieldNumber = 1,
     kClientSessionidFieldNumber = 2,
@@ -1028,6 +1031,11 @@ class CMsgProtoBufHeader PROTOBUF_FINAL :
     kSessionDispositionFieldNumber = 38,
     kAdminRequestSpoofingSteamidFieldNumber = 43,
     kTraceTagFieldNumber = 45,
+    kWgMsgTraceFlagsFieldNumber = 46,
+    kWgMsgTraceInstanceFieldNumber = 47,
+    kWgMsgTraceSteamidFieldNumber = 50,
+    kWgMsgTraceGidFieldNumber = 48,
+    kTraceFlagsFieldNumber = 52,
     kTimeoutMsFieldNumber = 33,
     kJobidSourceFieldNumber = 10,
     kJobidTargetFieldNumber = 11,
@@ -1179,6 +1187,66 @@ class CMsgProtoBufHeader PROTOBUF_FINAL :
   const std::string& _internal_webui_auth_key() const;
   void _internal_set_webui_auth_key(const std::string& value);
   std::string* _internal_mutable_webui_auth_key();
+  public:
+
+  // optional string wg_msg_trace_token = 49;
+  bool has_wg_msg_trace_token() const;
+  private:
+  bool _internal_has_wg_msg_trace_token() const;
+  public:
+  void clear_wg_msg_trace_token();
+  const std::string& wg_msg_trace_token() const;
+  void set_wg_msg_trace_token(const std::string& value);
+  void set_wg_msg_trace_token(std::string&& value);
+  void set_wg_msg_trace_token(const char* value);
+  void set_wg_msg_trace_token(const char* value, size_t size);
+  std::string* mutable_wg_msg_trace_token();
+  std::string* release_wg_msg_trace_token();
+  void set_allocated_wg_msg_trace_token(std::string* wg_msg_trace_token);
+  private:
+  const std::string& _internal_wg_msg_trace_token() const;
+  void _internal_set_wg_msg_trace_token(const std::string& value);
+  std::string* _internal_mutable_wg_msg_trace_token();
+  public:
+
+  // optional string wg_msg_trace_status = 51;
+  bool has_wg_msg_trace_status() const;
+  private:
+  bool _internal_has_wg_msg_trace_status() const;
+  public:
+  void clear_wg_msg_trace_status();
+  const std::string& wg_msg_trace_status() const;
+  void set_wg_msg_trace_status(const std::string& value);
+  void set_wg_msg_trace_status(std::string&& value);
+  void set_wg_msg_trace_status(const char* value);
+  void set_wg_msg_trace_status(const char* value, size_t size);
+  std::string* mutable_wg_msg_trace_status();
+  std::string* release_wg_msg_trace_status();
+  void set_allocated_wg_msg_trace_status(std::string* wg_msg_trace_status);
+  private:
+  const std::string& _internal_wg_msg_trace_status() const;
+  void _internal_set_wg_msg_trace_status(const std::string& value);
+  std::string* _internal_mutable_wg_msg_trace_status();
+  public:
+
+  // optional string browserapi_site = 53;
+  bool has_browserapi_site() const;
+  private:
+  bool _internal_has_browserapi_site() const;
+  public:
+  void clear_browserapi_site();
+  const std::string& browserapi_site() const;
+  void set_browserapi_site(const std::string& value);
+  void set_browserapi_site(std::string&& value);
+  void set_browserapi_site(const char* value);
+  void set_browserapi_site(const char* value, size_t size);
+  std::string* mutable_browserapi_site();
+  std::string* release_browserapi_site();
+  void set_allocated_browserapi_site(std::string* browserapi_site);
+  private:
+  const std::string& _internal_browserapi_site() const;
+  void _internal_set_browserapi_site(const std::string& value);
+  std::string* _internal_mutable_browserapi_site();
   public:
 
   // optional .CMsgGCRoutingProtoBufHeader routing_gc = 37;
@@ -1459,6 +1527,71 @@ class CMsgProtoBufHeader PROTOBUF_FINAL :
   void _internal_set_trace_tag(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
+  // optional uint32 wg_msg_trace_flags = 46;
+  bool has_wg_msg_trace_flags() const;
+  private:
+  bool _internal_has_wg_msg_trace_flags() const;
+  public:
+  void clear_wg_msg_trace_flags();
+  ::PROTOBUF_NAMESPACE_ID::uint32 wg_msg_trace_flags() const;
+  void set_wg_msg_trace_flags(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_wg_msg_trace_flags() const;
+  void _internal_set_wg_msg_trace_flags(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // optional uint32 wg_msg_trace_instance = 47;
+  bool has_wg_msg_trace_instance() const;
+  private:
+  bool _internal_has_wg_msg_trace_instance() const;
+  public:
+  void clear_wg_msg_trace_instance();
+  ::PROTOBUF_NAMESPACE_ID::uint32 wg_msg_trace_instance() const;
+  void set_wg_msg_trace_instance(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_wg_msg_trace_instance() const;
+  void _internal_set_wg_msg_trace_instance(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // optional fixed64 wg_msg_trace_steamid = 50;
+  bool has_wg_msg_trace_steamid() const;
+  private:
+  bool _internal_has_wg_msg_trace_steamid() const;
+  public:
+  void clear_wg_msg_trace_steamid();
+  ::PROTOBUF_NAMESPACE_ID::uint64 wg_msg_trace_steamid() const;
+  void set_wg_msg_trace_steamid(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_wg_msg_trace_steamid() const;
+  void _internal_set_wg_msg_trace_steamid(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // optional uint32 wg_msg_trace_gid = 48;
+  bool has_wg_msg_trace_gid() const;
+  private:
+  bool _internal_has_wg_msg_trace_gid() const;
+  public:
+  void clear_wg_msg_trace_gid();
+  ::PROTOBUF_NAMESPACE_ID::uint32 wg_msg_trace_gid() const;
+  void set_wg_msg_trace_gid(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_wg_msg_trace_gid() const;
+  void _internal_set_wg_msg_trace_gid(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // optional uint32 trace_flags = 52;
+  bool has_trace_flags() const;
+  private:
+  bool _internal_has_trace_flags() const;
+  public:
+  void clear_trace_flags();
+  ::PROTOBUF_NAMESPACE_ID::uint32 trace_flags() const;
+  void set_trace_flags(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_trace_flags() const;
+  void _internal_set_trace_flags(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
   // optional int32 timeout_ms = 33 [default = -1];
   bool has_timeout_ms() const;
   private:
@@ -1584,7 +1717,7 @@ class CMsgProtoBufHeader PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<2> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 > forward_to_sysid_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int32 > exclude_client_sessionids_;
@@ -1593,6 +1726,9 @@ class CMsgProtoBufHeader PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr debug_source_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr wg_token_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr webui_auth_key_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr wg_msg_trace_token_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr wg_msg_trace_status_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr browserapi_site_;
   ::CMsgGCRoutingProtoBufHeader* routing_gc_;
   ::PROTOBUF_NAMESPACE_ID::uint64 steamid_;
   ::PROTOBUF_NAMESPACE_ID::int32 client_sessionid_;
@@ -1614,6 +1750,11 @@ class CMsgProtoBufHeader PROTOBUF_FINAL :
   int session_disposition_;
   ::PROTOBUF_NAMESPACE_ID::uint64 admin_request_spoofing_steamid_;
   ::PROTOBUF_NAMESPACE_ID::uint64 trace_tag_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 wg_msg_trace_flags_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 wg_msg_trace_instance_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 wg_msg_trace_steamid_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 wg_msg_trace_gid_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 trace_flags_;
   ::PROTOBUF_NAMESPACE_ID::int32 timeout_ms_;
   ::PROTOBUF_NAMESPACE_ID::uint64 jobid_source_;
   ::PROTOBUF_NAMESPACE_ID::uint64 jobid_target_;
@@ -8047,7 +8188,7 @@ inline void CMsgGCRoutingProtoBufHeader::set_dst_gc_dir_index(::PROTOBUF_NAMESPA
 
 // optional fixed64 steamid = 1;
 inline bool CMsgProtoBufHeader::_internal_has_steamid() const {
-  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  bool value = (_has_bits_[0] & 0x00000200u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_steamid() const {
@@ -8055,7 +8196,7 @@ inline bool CMsgProtoBufHeader::has_steamid() const {
 }
 inline void CMsgProtoBufHeader::clear_steamid() {
   steamid_ = PROTOBUF_ULONGLONG(0);
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint64 CMsgProtoBufHeader::_internal_steamid() const {
   return steamid_;
@@ -8065,7 +8206,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint64 CMsgProtoBufHeader::steamid() const {
   return _internal_steamid();
 }
 inline void CMsgProtoBufHeader::_internal_set_steamid(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000200u;
   steamid_ = value;
 }
 inline void CMsgProtoBufHeader::set_steamid(::PROTOBUF_NAMESPACE_ID::uint64 value) {
@@ -8075,7 +8216,7 @@ inline void CMsgProtoBufHeader::set_steamid(::PROTOBUF_NAMESPACE_ID::uint64 valu
 
 // optional int32 client_sessionid = 2;
 inline bool CMsgProtoBufHeader::_internal_has_client_sessionid() const {
-  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  bool value = (_has_bits_[0] & 0x00000400u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_client_sessionid() const {
@@ -8083,7 +8224,7 @@ inline bool CMsgProtoBufHeader::has_client_sessionid() const {
 }
 inline void CMsgProtoBufHeader::clear_client_sessionid() {
   client_sessionid_ = 0;
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 CMsgProtoBufHeader::_internal_client_sessionid() const {
   return client_sessionid_;
@@ -8093,7 +8234,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 CMsgProtoBufHeader::client_sessionid() con
   return _internal_client_sessionid();
 }
 inline void CMsgProtoBufHeader::_internal_set_client_sessionid(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000400u;
   client_sessionid_ = value;
 }
 inline void CMsgProtoBufHeader::set_client_sessionid(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -8103,7 +8244,7 @@ inline void CMsgProtoBufHeader::set_client_sessionid(::PROTOBUF_NAMESPACE_ID::in
 
 // optional uint32 routing_appid = 3;
 inline bool CMsgProtoBufHeader::_internal_has_routing_appid() const {
-  bool value = (_has_bits_[0] & 0x00000100u) != 0;
+  bool value = (_has_bits_[0] & 0x00000800u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_routing_appid() const {
@@ -8111,7 +8252,7 @@ inline bool CMsgProtoBufHeader::has_routing_appid() const {
 }
 inline void CMsgProtoBufHeader::clear_routing_appid() {
   routing_appid_ = 0u;
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::_internal_routing_appid() const {
   return routing_appid_;
@@ -8121,7 +8262,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::routing_appid() const
   return _internal_routing_appid();
 }
 inline void CMsgProtoBufHeader::_internal_set_routing_appid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000800u;
   routing_appid_ = value;
 }
 inline void CMsgProtoBufHeader::set_routing_appid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -8131,7 +8272,7 @@ inline void CMsgProtoBufHeader::set_routing_appid(::PROTOBUF_NAMESPACE_ID::uint3
 
 // optional fixed64 jobid_source = 10 [default = 18446744073709551615];
 inline bool CMsgProtoBufHeader::_internal_has_jobid_source() const {
-  bool value = (_has_bits_[0] & 0x08000000u) != 0;
+  bool value = (_has_bits_[1] & 0x00000008u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_jobid_source() const {
@@ -8139,7 +8280,7 @@ inline bool CMsgProtoBufHeader::has_jobid_source() const {
 }
 inline void CMsgProtoBufHeader::clear_jobid_source() {
   jobid_source_ = PROTOBUF_ULONGLONG(18446744073709551615);
-  _has_bits_[0] &= ~0x08000000u;
+  _has_bits_[1] &= ~0x00000008u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint64 CMsgProtoBufHeader::_internal_jobid_source() const {
   return jobid_source_;
@@ -8149,7 +8290,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint64 CMsgProtoBufHeader::jobid_source() const 
   return _internal_jobid_source();
 }
 inline void CMsgProtoBufHeader::_internal_set_jobid_source(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _has_bits_[0] |= 0x08000000u;
+  _has_bits_[1] |= 0x00000008u;
   jobid_source_ = value;
 }
 inline void CMsgProtoBufHeader::set_jobid_source(::PROTOBUF_NAMESPACE_ID::uint64 value) {
@@ -8159,7 +8300,7 @@ inline void CMsgProtoBufHeader::set_jobid_source(::PROTOBUF_NAMESPACE_ID::uint64
 
 // optional fixed64 jobid_target = 11 [default = 18446744073709551615];
 inline bool CMsgProtoBufHeader::_internal_has_jobid_target() const {
-  bool value = (_has_bits_[0] & 0x10000000u) != 0;
+  bool value = (_has_bits_[1] & 0x00000010u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_jobid_target() const {
@@ -8167,7 +8308,7 @@ inline bool CMsgProtoBufHeader::has_jobid_target() const {
 }
 inline void CMsgProtoBufHeader::clear_jobid_target() {
   jobid_target_ = PROTOBUF_ULONGLONG(18446744073709551615);
-  _has_bits_[0] &= ~0x10000000u;
+  _has_bits_[1] &= ~0x00000010u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint64 CMsgProtoBufHeader::_internal_jobid_target() const {
   return jobid_target_;
@@ -8177,7 +8318,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint64 CMsgProtoBufHeader::jobid_target() const 
   return _internal_jobid_target();
 }
 inline void CMsgProtoBufHeader::_internal_set_jobid_target(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _has_bits_[0] |= 0x10000000u;
+  _has_bits_[1] |= 0x00000010u;
   jobid_target_ = value;
 }
 inline void CMsgProtoBufHeader::set_jobid_target(::PROTOBUF_NAMESPACE_ID::uint64 value) {
@@ -8260,7 +8401,7 @@ inline void CMsgProtoBufHeader::set_allocated_target_job_name(std::string* targe
 
 // optional int32 seq_num = 24;
 inline bool CMsgProtoBufHeader::_internal_has_seq_num() const {
-  bool value = (_has_bits_[0] & 0x00002000u) != 0;
+  bool value = (_has_bits_[0] & 0x00010000u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_seq_num() const {
@@ -8268,7 +8409,7 @@ inline bool CMsgProtoBufHeader::has_seq_num() const {
 }
 inline void CMsgProtoBufHeader::clear_seq_num() {
   seq_num_ = 0;
-  _has_bits_[0] &= ~0x00002000u;
+  _has_bits_[0] &= ~0x00010000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 CMsgProtoBufHeader::_internal_seq_num() const {
   return seq_num_;
@@ -8278,7 +8419,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 CMsgProtoBufHeader::seq_num() const {
   return _internal_seq_num();
 }
 inline void CMsgProtoBufHeader::_internal_set_seq_num(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00002000u;
+  _has_bits_[0] |= 0x00010000u;
   seq_num_ = value;
 }
 inline void CMsgProtoBufHeader::set_seq_num(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -8288,7 +8429,7 @@ inline void CMsgProtoBufHeader::set_seq_num(::PROTOBUF_NAMESPACE_ID::int32 value
 
 // optional int32 eresult = 13 [default = 2];
 inline bool CMsgProtoBufHeader::_internal_has_eresult() const {
-  bool value = (_has_bits_[0] & 0x20000000u) != 0;
+  bool value = (_has_bits_[1] & 0x00000020u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_eresult() const {
@@ -8296,7 +8437,7 @@ inline bool CMsgProtoBufHeader::has_eresult() const {
 }
 inline void CMsgProtoBufHeader::clear_eresult() {
   eresult_ = 2;
-  _has_bits_[0] &= ~0x20000000u;
+  _has_bits_[1] &= ~0x00000020u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 CMsgProtoBufHeader::_internal_eresult() const {
   return eresult_;
@@ -8306,7 +8447,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 CMsgProtoBufHeader::eresult() const {
   return _internal_eresult();
 }
 inline void CMsgProtoBufHeader::_internal_set_eresult(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x20000000u;
+  _has_bits_[1] |= 0x00000020u;
   eresult_ = value;
 }
 inline void CMsgProtoBufHeader::set_eresult(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -8389,7 +8530,7 @@ inline void CMsgProtoBufHeader::set_allocated_error_message(std::string* error_m
 
 // optional uint32 auth_account_flags = 16;
 inline bool CMsgProtoBufHeader::_internal_has_auth_account_flags() const {
-  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  bool value = (_has_bits_[0] & 0x00001000u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_auth_account_flags() const {
@@ -8397,7 +8538,7 @@ inline bool CMsgProtoBufHeader::has_auth_account_flags() const {
 }
 inline void CMsgProtoBufHeader::clear_auth_account_flags() {
   auth_account_flags_ = 0u;
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00001000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::_internal_auth_account_flags() const {
   return auth_account_flags_;
@@ -8407,7 +8548,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::auth_account_flags() 
   return _internal_auth_account_flags();
 }
 inline void CMsgProtoBufHeader::_internal_set_auth_account_flags(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00001000u;
   auth_account_flags_ = value;
 }
 inline void CMsgProtoBufHeader::set_auth_account_flags(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -8417,7 +8558,7 @@ inline void CMsgProtoBufHeader::set_auth_account_flags(::PROTOBUF_NAMESPACE_ID::
 
 // optional uint32 token_source = 22;
 inline bool CMsgProtoBufHeader::_internal_has_token_source() const {
-  bool value = (_has_bits_[0] & 0x00001000u) != 0;
+  bool value = (_has_bits_[0] & 0x00008000u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_token_source() const {
@@ -8425,7 +8566,7 @@ inline bool CMsgProtoBufHeader::has_token_source() const {
 }
 inline void CMsgProtoBufHeader::clear_token_source() {
   token_source_ = 0u;
-  _has_bits_[0] &= ~0x00001000u;
+  _has_bits_[0] &= ~0x00008000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::_internal_token_source() const {
   return token_source_;
@@ -8435,7 +8576,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::token_source() const 
   return _internal_token_source();
 }
 inline void CMsgProtoBufHeader::_internal_set_token_source(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00001000u;
+  _has_bits_[0] |= 0x00008000u;
   token_source_ = value;
 }
 inline void CMsgProtoBufHeader::set_token_source(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -8445,7 +8586,7 @@ inline void CMsgProtoBufHeader::set_token_source(::PROTOBUF_NAMESPACE_ID::uint32
 
 // optional bool admin_spoofing_user = 23;
 inline bool CMsgProtoBufHeader::_internal_has_admin_spoofing_user() const {
-  bool value = (_has_bits_[0] & 0x00020000u) != 0;
+  bool value = (_has_bits_[0] & 0x00100000u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_admin_spoofing_user() const {
@@ -8453,7 +8594,7 @@ inline bool CMsgProtoBufHeader::has_admin_spoofing_user() const {
 }
 inline void CMsgProtoBufHeader::clear_admin_spoofing_user() {
   admin_spoofing_user_ = false;
-  _has_bits_[0] &= ~0x00020000u;
+  _has_bits_[0] &= ~0x00100000u;
 }
 inline bool CMsgProtoBufHeader::_internal_admin_spoofing_user() const {
   return admin_spoofing_user_;
@@ -8463,7 +8604,7 @@ inline bool CMsgProtoBufHeader::admin_spoofing_user() const {
   return _internal_admin_spoofing_user();
 }
 inline void CMsgProtoBufHeader::_internal_set_admin_spoofing_user(bool value) {
-  _has_bits_[0] |= 0x00020000u;
+  _has_bits_[0] |= 0x00100000u;
   admin_spoofing_user_ = value;
 }
 inline void CMsgProtoBufHeader::set_admin_spoofing_user(bool value) {
@@ -8473,7 +8614,7 @@ inline void CMsgProtoBufHeader::set_admin_spoofing_user(bool value) {
 
 // optional int32 transport_error = 17 [default = 1];
 inline bool CMsgProtoBufHeader::_internal_has_transport_error() const {
-  bool value = (_has_bits_[0] & 0x40000000u) != 0;
+  bool value = (_has_bits_[1] & 0x00000040u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_transport_error() const {
@@ -8481,7 +8622,7 @@ inline bool CMsgProtoBufHeader::has_transport_error() const {
 }
 inline void CMsgProtoBufHeader::clear_transport_error() {
   transport_error_ = 1;
-  _has_bits_[0] &= ~0x40000000u;
+  _has_bits_[1] &= ~0x00000040u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 CMsgProtoBufHeader::_internal_transport_error() const {
   return transport_error_;
@@ -8491,7 +8632,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 CMsgProtoBufHeader::transport_error() cons
   return _internal_transport_error();
 }
 inline void CMsgProtoBufHeader::_internal_set_transport_error(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x40000000u;
+  _has_bits_[1] |= 0x00000040u;
   transport_error_ = value;
 }
 inline void CMsgProtoBufHeader::set_transport_error(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -8501,7 +8642,7 @@ inline void CMsgProtoBufHeader::set_transport_error(::PROTOBUF_NAMESPACE_ID::int
 
 // optional uint64 messageid = 18 [default = 18446744073709551615];
 inline bool CMsgProtoBufHeader::_internal_has_messageid() const {
-  bool value = (_has_bits_[0] & 0x80000000u) != 0;
+  bool value = (_has_bits_[1] & 0x00000080u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_messageid() const {
@@ -8509,7 +8650,7 @@ inline bool CMsgProtoBufHeader::has_messageid() const {
 }
 inline void CMsgProtoBufHeader::clear_messageid() {
   messageid_ = PROTOBUF_ULONGLONG(18446744073709551615);
-  _has_bits_[0] &= ~0x80000000u;
+  _has_bits_[1] &= ~0x00000080u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint64 CMsgProtoBufHeader::_internal_messageid() const {
   return messageid_;
@@ -8519,7 +8660,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint64 CMsgProtoBufHeader::messageid() const {
   return _internal_messageid();
 }
 inline void CMsgProtoBufHeader::_internal_set_messageid(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _has_bits_[0] |= 0x80000000u;
+  _has_bits_[1] |= 0x00000080u;
   messageid_ = value;
 }
 inline void CMsgProtoBufHeader::set_messageid(::PROTOBUF_NAMESPACE_ID::uint64 value) {
@@ -8529,7 +8670,7 @@ inline void CMsgProtoBufHeader::set_messageid(::PROTOBUF_NAMESPACE_ID::uint64 va
 
 // optional uint32 publisher_group_id = 19;
 inline bool CMsgProtoBufHeader::_internal_has_publisher_group_id() const {
-  bool value = (_has_bits_[0] & 0x00000400u) != 0;
+  bool value = (_has_bits_[0] & 0x00002000u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_publisher_group_id() const {
@@ -8537,7 +8678,7 @@ inline bool CMsgProtoBufHeader::has_publisher_group_id() const {
 }
 inline void CMsgProtoBufHeader::clear_publisher_group_id() {
   publisher_group_id_ = 0u;
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00002000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::_internal_publisher_group_id() const {
   return publisher_group_id_;
@@ -8547,7 +8688,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::publisher_group_id() 
   return _internal_publisher_group_id();
 }
 inline void CMsgProtoBufHeader::_internal_set_publisher_group_id(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00002000u;
   publisher_group_id_ = value;
 }
 inline void CMsgProtoBufHeader::set_publisher_group_id(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -8557,7 +8698,7 @@ inline void CMsgProtoBufHeader::set_publisher_group_id(::PROTOBUF_NAMESPACE_ID::
 
 // optional uint32 sysid = 20;
 inline bool CMsgProtoBufHeader::_internal_has_sysid() const {
-  bool value = (_has_bits_[0] & 0x00000800u) != 0;
+  bool value = (_has_bits_[0] & 0x00004000u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_sysid() const {
@@ -8565,7 +8706,7 @@ inline bool CMsgProtoBufHeader::has_sysid() const {
 }
 inline void CMsgProtoBufHeader::clear_sysid() {
   sysid_ = 0u;
-  _has_bits_[0] &= ~0x00000800u;
+  _has_bits_[0] &= ~0x00004000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::_internal_sysid() const {
   return sysid_;
@@ -8575,7 +8716,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::sysid() const {
   return _internal_sysid();
 }
 inline void CMsgProtoBufHeader::_internal_set_sysid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00004000u;
   sysid_ = value;
 }
 inline void CMsgProtoBufHeader::set_sysid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -8585,7 +8726,7 @@ inline void CMsgProtoBufHeader::set_sysid(::PROTOBUF_NAMESPACE_ID::uint32 value)
 
 // optional uint32 webapi_key_id = 25;
 inline bool CMsgProtoBufHeader::_internal_has_webapi_key_id() const {
-  bool value = (_has_bits_[0] & 0x00004000u) != 0;
+  bool value = (_has_bits_[0] & 0x00020000u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_webapi_key_id() const {
@@ -8593,7 +8734,7 @@ inline bool CMsgProtoBufHeader::has_webapi_key_id() const {
 }
 inline void CMsgProtoBufHeader::clear_webapi_key_id() {
   webapi_key_id_ = 0u;
-  _has_bits_[0] &= ~0x00004000u;
+  _has_bits_[0] &= ~0x00020000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::_internal_webapi_key_id() const {
   return webapi_key_id_;
@@ -8603,7 +8744,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::webapi_key_id() const
   return _internal_webapi_key_id();
 }
 inline void CMsgProtoBufHeader::_internal_set_webapi_key_id(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00004000u;
+  _has_bits_[0] |= 0x00020000u;
   webapi_key_id_ = value;
 }
 inline void CMsgProtoBufHeader::set_webapi_key_id(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -8613,7 +8754,7 @@ inline void CMsgProtoBufHeader::set_webapi_key_id(::PROTOBUF_NAMESPACE_ID::uint3
 
 // optional bool is_from_external_source = 26;
 inline bool CMsgProtoBufHeader::_internal_has_is_from_external_source() const {
-  bool value = (_has_bits_[0] & 0x00040000u) != 0;
+  bool value = (_has_bits_[0] & 0x00200000u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_is_from_external_source() const {
@@ -8621,7 +8762,7 @@ inline bool CMsgProtoBufHeader::has_is_from_external_source() const {
 }
 inline void CMsgProtoBufHeader::clear_is_from_external_source() {
   is_from_external_source_ = false;
-  _has_bits_[0] &= ~0x00040000u;
+  _has_bits_[0] &= ~0x00200000u;
 }
 inline bool CMsgProtoBufHeader::_internal_is_from_external_source() const {
   return is_from_external_source_;
@@ -8631,7 +8772,7 @@ inline bool CMsgProtoBufHeader::is_from_external_source() const {
   return _internal_is_from_external_source();
 }
 inline void CMsgProtoBufHeader::_internal_set_is_from_external_source(bool value) {
-  _has_bits_[0] |= 0x00040000u;
+  _has_bits_[0] |= 0x00200000u;
   is_from_external_source_ = value;
 }
 inline void CMsgProtoBufHeader::set_is_from_external_source(bool value) {
@@ -8688,7 +8829,7 @@ CMsgProtoBufHeader::mutable_forward_to_sysid() {
 
 // optional uint32 cm_sysid = 28;
 inline bool CMsgProtoBufHeader::_internal_has_cm_sysid() const {
-  bool value = (_has_bits_[0] & 0x00008000u) != 0;
+  bool value = (_has_bits_[0] & 0x00040000u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_cm_sysid() const {
@@ -8696,7 +8837,7 @@ inline bool CMsgProtoBufHeader::has_cm_sysid() const {
 }
 inline void CMsgProtoBufHeader::clear_cm_sysid() {
   cm_sysid_ = 0u;
-  _has_bits_[0] &= ~0x00008000u;
+  _has_bits_[0] &= ~0x00040000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::_internal_cm_sysid() const {
   return cm_sysid_;
@@ -8706,7 +8847,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::cm_sysid() const {
   return _internal_cm_sysid();
 }
 inline void CMsgProtoBufHeader::_internal_set_cm_sysid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00008000u;
+  _has_bits_[0] |= 0x00040000u;
   cm_sysid_ = value;
 }
 inline void CMsgProtoBufHeader::set_cm_sysid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -8716,7 +8857,7 @@ inline void CMsgProtoBufHeader::set_cm_sysid(::PROTOBUF_NAMESPACE_ID::uint32 val
 
 // optional uint32 launcher_type = 31 [default = 0];
 inline bool CMsgProtoBufHeader::_internal_has_launcher_type() const {
-  bool value = (_has_bits_[0] & 0x00010000u) != 0;
+  bool value = (_has_bits_[0] & 0x00080000u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_launcher_type() const {
@@ -8724,7 +8865,7 @@ inline bool CMsgProtoBufHeader::has_launcher_type() const {
 }
 inline void CMsgProtoBufHeader::clear_launcher_type() {
   launcher_type_ = 0u;
-  _has_bits_[0] &= ~0x00010000u;
+  _has_bits_[0] &= ~0x00080000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::_internal_launcher_type() const {
   return launcher_type_;
@@ -8734,7 +8875,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::launcher_type() const
   return _internal_launcher_type();
 }
 inline void CMsgProtoBufHeader::_internal_set_launcher_type(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00010000u;
+  _has_bits_[0] |= 0x00080000u;
   launcher_type_ = value;
 }
 inline void CMsgProtoBufHeader::set_launcher_type(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -8744,7 +8885,7 @@ inline void CMsgProtoBufHeader::set_launcher_type(::PROTOBUF_NAMESPACE_ID::uint3
 
 // optional uint32 realm = 32 [default = 0];
 inline bool CMsgProtoBufHeader::_internal_has_realm() const {
-  bool value = (_has_bits_[0] & 0x00100000u) != 0;
+  bool value = (_has_bits_[0] & 0x00800000u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_realm() const {
@@ -8752,7 +8893,7 @@ inline bool CMsgProtoBufHeader::has_realm() const {
 }
 inline void CMsgProtoBufHeader::clear_realm() {
   realm_ = 0u;
-  _has_bits_[0] &= ~0x00100000u;
+  _has_bits_[0] &= ~0x00800000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::_internal_realm() const {
   return realm_;
@@ -8762,7 +8903,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::realm() const {
   return _internal_realm();
 }
 inline void CMsgProtoBufHeader::_internal_set_realm(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00100000u;
+  _has_bits_[0] |= 0x00800000u;
   realm_ = value;
 }
 inline void CMsgProtoBufHeader::set_realm(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -8772,7 +8913,7 @@ inline void CMsgProtoBufHeader::set_realm(::PROTOBUF_NAMESPACE_ID::uint32 value)
 
 // optional int32 timeout_ms = 33 [default = -1];
 inline bool CMsgProtoBufHeader::_internal_has_timeout_ms() const {
-  bool value = (_has_bits_[0] & 0x04000000u) != 0;
+  bool value = (_has_bits_[1] & 0x00000004u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_timeout_ms() const {
@@ -8780,7 +8921,7 @@ inline bool CMsgProtoBufHeader::has_timeout_ms() const {
 }
 inline void CMsgProtoBufHeader::clear_timeout_ms() {
   timeout_ms_ = -1;
-  _has_bits_[0] &= ~0x04000000u;
+  _has_bits_[1] &= ~0x00000004u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 CMsgProtoBufHeader::_internal_timeout_ms() const {
   return timeout_ms_;
@@ -8790,7 +8931,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 CMsgProtoBufHeader::timeout_ms() const {
   return _internal_timeout_ms();
 }
 inline void CMsgProtoBufHeader::_internal_set_timeout_ms(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x04000000u;
+  _has_bits_[1] |= 0x00000004u;
   timeout_ms_ = value;
 }
 inline void CMsgProtoBufHeader::set_timeout_ms(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -8873,7 +9014,7 @@ inline void CMsgProtoBufHeader::set_allocated_debug_source(std::string* debug_so
 
 // optional uint32 debug_source_string_index = 35;
 inline bool CMsgProtoBufHeader::_internal_has_debug_source_string_index() const {
-  bool value = (_has_bits_[0] & 0x00400000u) != 0;
+  bool value = (_has_bits_[0] & 0x02000000u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_debug_source_string_index() const {
@@ -8881,7 +9022,7 @@ inline bool CMsgProtoBufHeader::has_debug_source_string_index() const {
 }
 inline void CMsgProtoBufHeader::clear_debug_source_string_index() {
   debug_source_string_index_ = 0u;
-  _has_bits_[0] &= ~0x00400000u;
+  _has_bits_[0] &= ~0x02000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::_internal_debug_source_string_index() const {
   return debug_source_string_index_;
@@ -8891,7 +9032,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::debug_source_string_i
   return _internal_debug_source_string_index();
 }
 inline void CMsgProtoBufHeader::_internal_set_debug_source_string_index(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00400000u;
+  _has_bits_[0] |= 0x02000000u;
   debug_source_string_index_ = value;
 }
 inline void CMsgProtoBufHeader::set_debug_source_string_index(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -8901,7 +9042,7 @@ inline void CMsgProtoBufHeader::set_debug_source_string_index(::PROTOBUF_NAMESPA
 
 // optional uint64 token_id = 36;
 inline bool CMsgProtoBufHeader::_internal_has_token_id() const {
-  bool value = (_has_bits_[0] & 0x00200000u) != 0;
+  bool value = (_has_bits_[0] & 0x01000000u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_token_id() const {
@@ -8909,7 +9050,7 @@ inline bool CMsgProtoBufHeader::has_token_id() const {
 }
 inline void CMsgProtoBufHeader::clear_token_id() {
   token_id_ = PROTOBUF_ULONGLONG(0);
-  _has_bits_[0] &= ~0x00200000u;
+  _has_bits_[0] &= ~0x01000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint64 CMsgProtoBufHeader::_internal_token_id() const {
   return token_id_;
@@ -8919,7 +9060,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint64 CMsgProtoBufHeader::token_id() const {
   return _internal_token_id();
 }
 inline void CMsgProtoBufHeader::_internal_set_token_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _has_bits_[0] |= 0x00200000u;
+  _has_bits_[0] |= 0x01000000u;
   token_id_ = value;
 }
 inline void CMsgProtoBufHeader::set_token_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
@@ -8929,7 +9070,7 @@ inline void CMsgProtoBufHeader::set_token_id(::PROTOBUF_NAMESPACE_ID::uint64 val
 
 // optional .CMsgGCRoutingProtoBufHeader routing_gc = 37;
 inline bool CMsgProtoBufHeader::_internal_has_routing_gc() const {
-  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  bool value = (_has_bits_[0] & 0x00000100u) != 0;
   PROTOBUF_ASSUME(!value || routing_gc_ != nullptr);
   return value;
 }
@@ -8938,7 +9079,7 @@ inline bool CMsgProtoBufHeader::has_routing_gc() const {
 }
 inline void CMsgProtoBufHeader::clear_routing_gc() {
   if (routing_gc_ != nullptr) routing_gc_->Clear();
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline const ::CMsgGCRoutingProtoBufHeader& CMsgProtoBufHeader::_internal_routing_gc() const {
   const ::CMsgGCRoutingProtoBufHeader* p = routing_gc_;
@@ -8956,14 +9097,14 @@ inline void CMsgProtoBufHeader::unsafe_arena_set_allocated_routing_gc(
   }
   routing_gc_ = routing_gc;
   if (routing_gc) {
-    _has_bits_[0] |= 0x00000020u;
+    _has_bits_[0] |= 0x00000100u;
   } else {
-    _has_bits_[0] &= ~0x00000020u;
+    _has_bits_[0] &= ~0x00000100u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:CMsgProtoBufHeader.routing_gc)
 }
 inline ::CMsgGCRoutingProtoBufHeader* CMsgProtoBufHeader::release_routing_gc() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000100u;
   ::CMsgGCRoutingProtoBufHeader* temp = routing_gc_;
   routing_gc_ = nullptr;
   if (GetArena() != nullptr) {
@@ -8973,13 +9114,13 @@ inline ::CMsgGCRoutingProtoBufHeader* CMsgProtoBufHeader::release_routing_gc() {
 }
 inline ::CMsgGCRoutingProtoBufHeader* CMsgProtoBufHeader::unsafe_arena_release_routing_gc() {
   // @@protoc_insertion_point(field_release:CMsgProtoBufHeader.routing_gc)
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000100u;
   ::CMsgGCRoutingProtoBufHeader* temp = routing_gc_;
   routing_gc_ = nullptr;
   return temp;
 }
 inline ::CMsgGCRoutingProtoBufHeader* CMsgProtoBufHeader::_internal_mutable_routing_gc() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000100u;
   if (routing_gc_ == nullptr) {
     auto* p = CreateMaybeMessage<::CMsgGCRoutingProtoBufHeader>(GetArena());
     routing_gc_ = p;
@@ -9002,9 +9143,9 @@ inline void CMsgProtoBufHeader::set_allocated_routing_gc(::CMsgGCRoutingProtoBuf
       routing_gc = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, routing_gc, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000020u;
+    _has_bits_[0] |= 0x00000100u;
   } else {
-    _has_bits_[0] &= ~0x00000020u;
+    _has_bits_[0] &= ~0x00000100u;
   }
   routing_gc_ = routing_gc;
   // @@protoc_insertion_point(field_set_allocated:CMsgProtoBufHeader.routing_gc)
@@ -9012,7 +9153,7 @@ inline void CMsgProtoBufHeader::set_allocated_routing_gc(::CMsgGCRoutingProtoBuf
 
 // optional .CMsgProtoBufHeader.ESessionDisposition session_disposition = 38 [default = k_ESessionDispositionNormal];
 inline bool CMsgProtoBufHeader::_internal_has_session_disposition() const {
-  bool value = (_has_bits_[0] & 0x00800000u) != 0;
+  bool value = (_has_bits_[0] & 0x04000000u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_session_disposition() const {
@@ -9020,7 +9161,7 @@ inline bool CMsgProtoBufHeader::has_session_disposition() const {
 }
 inline void CMsgProtoBufHeader::clear_session_disposition() {
   session_disposition_ = 0;
-  _has_bits_[0] &= ~0x00800000u;
+  _has_bits_[0] &= ~0x04000000u;
 }
 inline ::CMsgProtoBufHeader_ESessionDisposition CMsgProtoBufHeader::_internal_session_disposition() const {
   return static_cast< ::CMsgProtoBufHeader_ESessionDisposition >(session_disposition_);
@@ -9031,7 +9172,7 @@ inline ::CMsgProtoBufHeader_ESessionDisposition CMsgProtoBufHeader::session_disp
 }
 inline void CMsgProtoBufHeader::_internal_set_session_disposition(::CMsgProtoBufHeader_ESessionDisposition value) {
   assert(::CMsgProtoBufHeader_ESessionDisposition_IsValid(value));
-  _has_bits_[0] |= 0x00800000u;
+  _has_bits_[0] |= 0x04000000u;
   session_disposition_ = value;
 }
 inline void CMsgProtoBufHeader::set_session_disposition(::CMsgProtoBufHeader_ESessionDisposition value) {
@@ -9234,7 +9375,7 @@ CMsgProtoBufHeader::mutable_exclude_client_sessionids() {
 
 // optional fixed64 admin_request_spoofing_steamid = 43;
 inline bool CMsgProtoBufHeader::_internal_has_admin_request_spoofing_steamid() const {
-  bool value = (_has_bits_[0] & 0x01000000u) != 0;
+  bool value = (_has_bits_[0] & 0x08000000u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_admin_request_spoofing_steamid() const {
@@ -9242,7 +9383,7 @@ inline bool CMsgProtoBufHeader::has_admin_request_spoofing_steamid() const {
 }
 inline void CMsgProtoBufHeader::clear_admin_request_spoofing_steamid() {
   admin_request_spoofing_steamid_ = PROTOBUF_ULONGLONG(0);
-  _has_bits_[0] &= ~0x01000000u;
+  _has_bits_[0] &= ~0x08000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint64 CMsgProtoBufHeader::_internal_admin_request_spoofing_steamid() const {
   return admin_request_spoofing_steamid_;
@@ -9252,7 +9393,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint64 CMsgProtoBufHeader::admin_request_spoofin
   return _internal_admin_request_spoofing_steamid();
 }
 inline void CMsgProtoBufHeader::_internal_set_admin_request_spoofing_steamid(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _has_bits_[0] |= 0x01000000u;
+  _has_bits_[0] |= 0x08000000u;
   admin_request_spoofing_steamid_ = value;
 }
 inline void CMsgProtoBufHeader::set_admin_request_spoofing_steamid(::PROTOBUF_NAMESPACE_ID::uint64 value) {
@@ -9262,7 +9403,7 @@ inline void CMsgProtoBufHeader::set_admin_request_spoofing_steamid(::PROTOBUF_NA
 
 // optional bool is_valveds = 44;
 inline bool CMsgProtoBufHeader::_internal_has_is_valveds() const {
-  bool value = (_has_bits_[0] & 0x00080000u) != 0;
+  bool value = (_has_bits_[0] & 0x00400000u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_is_valveds() const {
@@ -9270,7 +9411,7 @@ inline bool CMsgProtoBufHeader::has_is_valveds() const {
 }
 inline void CMsgProtoBufHeader::clear_is_valveds() {
   is_valveds_ = false;
-  _has_bits_[0] &= ~0x00080000u;
+  _has_bits_[0] &= ~0x00400000u;
 }
 inline bool CMsgProtoBufHeader::_internal_is_valveds() const {
   return is_valveds_;
@@ -9280,7 +9421,7 @@ inline bool CMsgProtoBufHeader::is_valveds() const {
   return _internal_is_valveds();
 }
 inline void CMsgProtoBufHeader::_internal_set_is_valveds(bool value) {
-  _has_bits_[0] |= 0x00080000u;
+  _has_bits_[0] |= 0x00400000u;
   is_valveds_ = value;
 }
 inline void CMsgProtoBufHeader::set_is_valveds(bool value) {
@@ -9290,7 +9431,7 @@ inline void CMsgProtoBufHeader::set_is_valveds(bool value) {
 
 // optional fixed64 trace_tag = 45;
 inline bool CMsgProtoBufHeader::_internal_has_trace_tag() const {
-  bool value = (_has_bits_[0] & 0x02000000u) != 0;
+  bool value = (_has_bits_[0] & 0x10000000u) != 0;
   return value;
 }
 inline bool CMsgProtoBufHeader::has_trace_tag() const {
@@ -9298,7 +9439,7 @@ inline bool CMsgProtoBufHeader::has_trace_tag() const {
 }
 inline void CMsgProtoBufHeader::clear_trace_tag() {
   trace_tag_ = PROTOBUF_ULONGLONG(0);
-  _has_bits_[0] &= ~0x02000000u;
+  _has_bits_[0] &= ~0x10000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint64 CMsgProtoBufHeader::_internal_trace_tag() const {
   return trace_tag_;
@@ -9308,12 +9449,371 @@ inline ::PROTOBUF_NAMESPACE_ID::uint64 CMsgProtoBufHeader::trace_tag() const {
   return _internal_trace_tag();
 }
 inline void CMsgProtoBufHeader::_internal_set_trace_tag(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _has_bits_[0] |= 0x02000000u;
+  _has_bits_[0] |= 0x10000000u;
   trace_tag_ = value;
 }
 inline void CMsgProtoBufHeader::set_trace_tag(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_set_trace_tag(value);
   // @@protoc_insertion_point(field_set:CMsgProtoBufHeader.trace_tag)
+}
+
+// optional uint32 wg_msg_trace_flags = 46;
+inline bool CMsgProtoBufHeader::_internal_has_wg_msg_trace_flags() const {
+  bool value = (_has_bits_[0] & 0x20000000u) != 0;
+  return value;
+}
+inline bool CMsgProtoBufHeader::has_wg_msg_trace_flags() const {
+  return _internal_has_wg_msg_trace_flags();
+}
+inline void CMsgProtoBufHeader::clear_wg_msg_trace_flags() {
+  wg_msg_trace_flags_ = 0u;
+  _has_bits_[0] &= ~0x20000000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::_internal_wg_msg_trace_flags() const {
+  return wg_msg_trace_flags_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::wg_msg_trace_flags() const {
+  // @@protoc_insertion_point(field_get:CMsgProtoBufHeader.wg_msg_trace_flags)
+  return _internal_wg_msg_trace_flags();
+}
+inline void CMsgProtoBufHeader::_internal_set_wg_msg_trace_flags(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x20000000u;
+  wg_msg_trace_flags_ = value;
+}
+inline void CMsgProtoBufHeader::set_wg_msg_trace_flags(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_wg_msg_trace_flags(value);
+  // @@protoc_insertion_point(field_set:CMsgProtoBufHeader.wg_msg_trace_flags)
+}
+
+// optional uint32 wg_msg_trace_instance = 47;
+inline bool CMsgProtoBufHeader::_internal_has_wg_msg_trace_instance() const {
+  bool value = (_has_bits_[0] & 0x40000000u) != 0;
+  return value;
+}
+inline bool CMsgProtoBufHeader::has_wg_msg_trace_instance() const {
+  return _internal_has_wg_msg_trace_instance();
+}
+inline void CMsgProtoBufHeader::clear_wg_msg_trace_instance() {
+  wg_msg_trace_instance_ = 0u;
+  _has_bits_[0] &= ~0x40000000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::_internal_wg_msg_trace_instance() const {
+  return wg_msg_trace_instance_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::wg_msg_trace_instance() const {
+  // @@protoc_insertion_point(field_get:CMsgProtoBufHeader.wg_msg_trace_instance)
+  return _internal_wg_msg_trace_instance();
+}
+inline void CMsgProtoBufHeader::_internal_set_wg_msg_trace_instance(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x40000000u;
+  wg_msg_trace_instance_ = value;
+}
+inline void CMsgProtoBufHeader::set_wg_msg_trace_instance(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_wg_msg_trace_instance(value);
+  // @@protoc_insertion_point(field_set:CMsgProtoBufHeader.wg_msg_trace_instance)
+}
+
+// optional uint32 wg_msg_trace_gid = 48;
+inline bool CMsgProtoBufHeader::_internal_has_wg_msg_trace_gid() const {
+  bool value = (_has_bits_[1] & 0x00000001u) != 0;
+  return value;
+}
+inline bool CMsgProtoBufHeader::has_wg_msg_trace_gid() const {
+  return _internal_has_wg_msg_trace_gid();
+}
+inline void CMsgProtoBufHeader::clear_wg_msg_trace_gid() {
+  wg_msg_trace_gid_ = 0u;
+  _has_bits_[1] &= ~0x00000001u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::_internal_wg_msg_trace_gid() const {
+  return wg_msg_trace_gid_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::wg_msg_trace_gid() const {
+  // @@protoc_insertion_point(field_get:CMsgProtoBufHeader.wg_msg_trace_gid)
+  return _internal_wg_msg_trace_gid();
+}
+inline void CMsgProtoBufHeader::_internal_set_wg_msg_trace_gid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[1] |= 0x00000001u;
+  wg_msg_trace_gid_ = value;
+}
+inline void CMsgProtoBufHeader::set_wg_msg_trace_gid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_wg_msg_trace_gid(value);
+  // @@protoc_insertion_point(field_set:CMsgProtoBufHeader.wg_msg_trace_gid)
+}
+
+// optional string wg_msg_trace_token = 49;
+inline bool CMsgProtoBufHeader::_internal_has_wg_msg_trace_token() const {
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline bool CMsgProtoBufHeader::has_wg_msg_trace_token() const {
+  return _internal_has_wg_msg_trace_token();
+}
+inline void CMsgProtoBufHeader::clear_wg_msg_trace_token() {
+  wg_msg_trace_token_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline const std::string& CMsgProtoBufHeader::wg_msg_trace_token() const {
+  // @@protoc_insertion_point(field_get:CMsgProtoBufHeader.wg_msg_trace_token)
+  return _internal_wg_msg_trace_token();
+}
+inline void CMsgProtoBufHeader::set_wg_msg_trace_token(const std::string& value) {
+  _internal_set_wg_msg_trace_token(value);
+  // @@protoc_insertion_point(field_set:CMsgProtoBufHeader.wg_msg_trace_token)
+}
+inline std::string* CMsgProtoBufHeader::mutable_wg_msg_trace_token() {
+  // @@protoc_insertion_point(field_mutable:CMsgProtoBufHeader.wg_msg_trace_token)
+  return _internal_mutable_wg_msg_trace_token();
+}
+inline const std::string& CMsgProtoBufHeader::_internal_wg_msg_trace_token() const {
+  return wg_msg_trace_token_.Get();
+}
+inline void CMsgProtoBufHeader::_internal_set_wg_msg_trace_token(const std::string& value) {
+  _has_bits_[0] |= 0x00000020u;
+  wg_msg_trace_token_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void CMsgProtoBufHeader::set_wg_msg_trace_token(std::string&& value) {
+  _has_bits_[0] |= 0x00000020u;
+  wg_msg_trace_token_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:CMsgProtoBufHeader.wg_msg_trace_token)
+}
+inline void CMsgProtoBufHeader::set_wg_msg_trace_token(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000020u;
+  wg_msg_trace_token_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:CMsgProtoBufHeader.wg_msg_trace_token)
+}
+inline void CMsgProtoBufHeader::set_wg_msg_trace_token(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000020u;
+  wg_msg_trace_token_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:CMsgProtoBufHeader.wg_msg_trace_token)
+}
+inline std::string* CMsgProtoBufHeader::_internal_mutable_wg_msg_trace_token() {
+  _has_bits_[0] |= 0x00000020u;
+  return wg_msg_trace_token_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* CMsgProtoBufHeader::release_wg_msg_trace_token() {
+  // @@protoc_insertion_point(field_release:CMsgProtoBufHeader.wg_msg_trace_token)
+  if (!_internal_has_wg_msg_trace_token()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000020u;
+  return wg_msg_trace_token_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void CMsgProtoBufHeader::set_allocated_wg_msg_trace_token(std::string* wg_msg_trace_token) {
+  if (wg_msg_trace_token != nullptr) {
+    _has_bits_[0] |= 0x00000020u;
+  } else {
+    _has_bits_[0] &= ~0x00000020u;
+  }
+  wg_msg_trace_token_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), wg_msg_trace_token,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:CMsgProtoBufHeader.wg_msg_trace_token)
+}
+
+// optional fixed64 wg_msg_trace_steamid = 50;
+inline bool CMsgProtoBufHeader::_internal_has_wg_msg_trace_steamid() const {
+  bool value = (_has_bits_[0] & 0x80000000u) != 0;
+  return value;
+}
+inline bool CMsgProtoBufHeader::has_wg_msg_trace_steamid() const {
+  return _internal_has_wg_msg_trace_steamid();
+}
+inline void CMsgProtoBufHeader::clear_wg_msg_trace_steamid() {
+  wg_msg_trace_steamid_ = PROTOBUF_ULONGLONG(0);
+  _has_bits_[0] &= ~0x80000000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 CMsgProtoBufHeader::_internal_wg_msg_trace_steamid() const {
+  return wg_msg_trace_steamid_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 CMsgProtoBufHeader::wg_msg_trace_steamid() const {
+  // @@protoc_insertion_point(field_get:CMsgProtoBufHeader.wg_msg_trace_steamid)
+  return _internal_wg_msg_trace_steamid();
+}
+inline void CMsgProtoBufHeader::_internal_set_wg_msg_trace_steamid(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _has_bits_[0] |= 0x80000000u;
+  wg_msg_trace_steamid_ = value;
+}
+inline void CMsgProtoBufHeader::set_wg_msg_trace_steamid(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_wg_msg_trace_steamid(value);
+  // @@protoc_insertion_point(field_set:CMsgProtoBufHeader.wg_msg_trace_steamid)
+}
+
+// optional string wg_msg_trace_status = 51;
+inline bool CMsgProtoBufHeader::_internal_has_wg_msg_trace_status() const {
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  return value;
+}
+inline bool CMsgProtoBufHeader::has_wg_msg_trace_status() const {
+  return _internal_has_wg_msg_trace_status();
+}
+inline void CMsgProtoBufHeader::clear_wg_msg_trace_status() {
+  wg_msg_trace_status_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline const std::string& CMsgProtoBufHeader::wg_msg_trace_status() const {
+  // @@protoc_insertion_point(field_get:CMsgProtoBufHeader.wg_msg_trace_status)
+  return _internal_wg_msg_trace_status();
+}
+inline void CMsgProtoBufHeader::set_wg_msg_trace_status(const std::string& value) {
+  _internal_set_wg_msg_trace_status(value);
+  // @@protoc_insertion_point(field_set:CMsgProtoBufHeader.wg_msg_trace_status)
+}
+inline std::string* CMsgProtoBufHeader::mutable_wg_msg_trace_status() {
+  // @@protoc_insertion_point(field_mutable:CMsgProtoBufHeader.wg_msg_trace_status)
+  return _internal_mutable_wg_msg_trace_status();
+}
+inline const std::string& CMsgProtoBufHeader::_internal_wg_msg_trace_status() const {
+  return wg_msg_trace_status_.Get();
+}
+inline void CMsgProtoBufHeader::_internal_set_wg_msg_trace_status(const std::string& value) {
+  _has_bits_[0] |= 0x00000040u;
+  wg_msg_trace_status_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void CMsgProtoBufHeader::set_wg_msg_trace_status(std::string&& value) {
+  _has_bits_[0] |= 0x00000040u;
+  wg_msg_trace_status_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:CMsgProtoBufHeader.wg_msg_trace_status)
+}
+inline void CMsgProtoBufHeader::set_wg_msg_trace_status(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000040u;
+  wg_msg_trace_status_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:CMsgProtoBufHeader.wg_msg_trace_status)
+}
+inline void CMsgProtoBufHeader::set_wg_msg_trace_status(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000040u;
+  wg_msg_trace_status_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:CMsgProtoBufHeader.wg_msg_trace_status)
+}
+inline std::string* CMsgProtoBufHeader::_internal_mutable_wg_msg_trace_status() {
+  _has_bits_[0] |= 0x00000040u;
+  return wg_msg_trace_status_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* CMsgProtoBufHeader::release_wg_msg_trace_status() {
+  // @@protoc_insertion_point(field_release:CMsgProtoBufHeader.wg_msg_trace_status)
+  if (!_internal_has_wg_msg_trace_status()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000040u;
+  return wg_msg_trace_status_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void CMsgProtoBufHeader::set_allocated_wg_msg_trace_status(std::string* wg_msg_trace_status) {
+  if (wg_msg_trace_status != nullptr) {
+    _has_bits_[0] |= 0x00000040u;
+  } else {
+    _has_bits_[0] &= ~0x00000040u;
+  }
+  wg_msg_trace_status_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), wg_msg_trace_status,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:CMsgProtoBufHeader.wg_msg_trace_status)
+}
+
+// optional uint32 trace_flags = 52;
+inline bool CMsgProtoBufHeader::_internal_has_trace_flags() const {
+  bool value = (_has_bits_[1] & 0x00000002u) != 0;
+  return value;
+}
+inline bool CMsgProtoBufHeader::has_trace_flags() const {
+  return _internal_has_trace_flags();
+}
+inline void CMsgProtoBufHeader::clear_trace_flags() {
+  trace_flags_ = 0u;
+  _has_bits_[1] &= ~0x00000002u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::_internal_trace_flags() const {
+  return trace_flags_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 CMsgProtoBufHeader::trace_flags() const {
+  // @@protoc_insertion_point(field_get:CMsgProtoBufHeader.trace_flags)
+  return _internal_trace_flags();
+}
+inline void CMsgProtoBufHeader::_internal_set_trace_flags(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[1] |= 0x00000002u;
+  trace_flags_ = value;
+}
+inline void CMsgProtoBufHeader::set_trace_flags(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_trace_flags(value);
+  // @@protoc_insertion_point(field_set:CMsgProtoBufHeader.trace_flags)
+}
+
+// optional string browserapi_site = 53;
+inline bool CMsgProtoBufHeader::_internal_has_browserapi_site() const {
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  return value;
+}
+inline bool CMsgProtoBufHeader::has_browserapi_site() const {
+  return _internal_has_browserapi_site();
+}
+inline void CMsgProtoBufHeader::clear_browserapi_site() {
+  browserapi_site_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline const std::string& CMsgProtoBufHeader::browserapi_site() const {
+  // @@protoc_insertion_point(field_get:CMsgProtoBufHeader.browserapi_site)
+  return _internal_browserapi_site();
+}
+inline void CMsgProtoBufHeader::set_browserapi_site(const std::string& value) {
+  _internal_set_browserapi_site(value);
+  // @@protoc_insertion_point(field_set:CMsgProtoBufHeader.browserapi_site)
+}
+inline std::string* CMsgProtoBufHeader::mutable_browserapi_site() {
+  // @@protoc_insertion_point(field_mutable:CMsgProtoBufHeader.browserapi_site)
+  return _internal_mutable_browserapi_site();
+}
+inline const std::string& CMsgProtoBufHeader::_internal_browserapi_site() const {
+  return browserapi_site_.Get();
+}
+inline void CMsgProtoBufHeader::_internal_set_browserapi_site(const std::string& value) {
+  _has_bits_[0] |= 0x00000080u;
+  browserapi_site_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void CMsgProtoBufHeader::set_browserapi_site(std::string&& value) {
+  _has_bits_[0] |= 0x00000080u;
+  browserapi_site_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:CMsgProtoBufHeader.browserapi_site)
+}
+inline void CMsgProtoBufHeader::set_browserapi_site(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000080u;
+  browserapi_site_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:CMsgProtoBufHeader.browserapi_site)
+}
+inline void CMsgProtoBufHeader::set_browserapi_site(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000080u;
+  browserapi_site_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:CMsgProtoBufHeader.browserapi_site)
+}
+inline std::string* CMsgProtoBufHeader::_internal_mutable_browserapi_site() {
+  _has_bits_[0] |= 0x00000080u;
+  return browserapi_site_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* CMsgProtoBufHeader::release_browserapi_site() {
+  // @@protoc_insertion_point(field_release:CMsgProtoBufHeader.browserapi_site)
+  if (!_internal_has_browserapi_site()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000080u;
+  return browserapi_site_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void CMsgProtoBufHeader::set_allocated_browserapi_site(std::string* browserapi_site) {
+  if (browserapi_site != nullptr) {
+    _has_bits_[0] |= 0x00000080u;
+  } else {
+    _has_bits_[0] &= ~0x00000080u;
+  }
+  browserapi_site_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), browserapi_site,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:CMsgProtoBufHeader.browserapi_site)
 }
 
 // uint32 ip = 15;

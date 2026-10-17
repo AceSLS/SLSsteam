@@ -1727,11 +1727,12 @@ enum ECompromiseDetectionType : int {
   k_ECompromiseDetectionType_TicketAction = 4,
   k_ECompromiseDetectionType_MaliciousRefund = 5,
   k_ECompromiseDetectionType_Move2FA = 6,
-  k_ECompromiseDetectionType_DeviceType = 7
+  k_ECompromiseDetectionType_DeviceType = 7,
+  k_ECompromiseDetectionType_LeakedCredentialList = 8
 };
 bool ECompromiseDetectionType_IsValid(int value);
 constexpr ECompromiseDetectionType ECompromiseDetectionType_MIN = k_ECompromiseDetectionType_None;
-constexpr ECompromiseDetectionType ECompromiseDetectionType_MAX = k_ECompromiseDetectionType_DeviceType;
+constexpr ECompromiseDetectionType ECompromiseDetectionType_MAX = k_ECompromiseDetectionType_LeakedCredentialList;
 constexpr int ECompromiseDetectionType_ARRAYSIZE = ECompromiseDetectionType_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ECompromiseDetectionType_descriptor();
@@ -2230,7 +2231,8 @@ enum EContentModerationSanction : int {
   k_EContentModerationSanction_HarassmentBanned = 10,
   k_EContentModerationSanction_HarassmentStrike = 11,
   k_EContentModerationSanction_Escalate = 12,
-  k_EContentModerationSanction_MAX = 13
+  k_EContentModerationSanction_MarkedIncompatible = 13,
+  k_EContentModerationSanction_MAX = 14
 };
 bool EContentModerationSanction_IsValid(int value);
 constexpr EContentModerationSanction EContentModerationSanction_MIN = k_EContentModerationSanction_Invalid;
