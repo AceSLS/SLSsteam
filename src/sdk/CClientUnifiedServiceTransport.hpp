@@ -8,5 +8,5 @@
 SDK_Class CClientUnifiedServiceTransport
 {
 public:
-	uint32_t sendAndRecvMsg(const char* name, void* send, void* recv);
+	bool sendAndRecvMsg(const char* name, void* send, void* recv);
 };
