@@ -49,6 +49,11 @@ AppId_t FakeAppIds::getRealAppIdForCurrentPipe(const bool fallback)
 		return appId;
 	}
 
+	if (fakeAppIdMap.contains(utils->getCurrentSteamPipe()))
+	{
+		return fakeAppIdMap.at(utils->getCurrentSteamPipe());
+	}
+
 	if (fallback)
 	{
 		return utils->getAppId();
@@ -119,6 +124,8 @@ bool FakeAppIds::shouldUseRealAppIdForInterface(const EIPCInterface type)
 
 void FakeAppIds::setAppIdForCurrentPipe(AppId_t& appId)
 {
+	fakeAppIdMap[g_pSteamEngine->getUtils()->getCurrentSteamPipe()] = appId;
+
 	//Do not change Steam Client itself (AppId 0)
 	if (!appId)
 	{
@@ -129,7 +136,7 @@ void FakeAppIds::setAppIdForCurrentPipe(AppId_t& appId)
 	if (newAppId)
 	{
 		LOG_DEBUG("Changing AppId of %u\n", appId);
-		appId = newAppId;
+		//appId = newAppId;
 	}
 }
 
