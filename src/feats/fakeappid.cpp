@@ -6,7 +6,7 @@
 
 
 std::unordered_map<HSteamPipe, AppId_t> FakeAppIds::fakeAppIdMap = std::unordered_map<HSteamPipe, AppId_t>();
-std::unordered_map<uint32_t, AppId_t> FakeAppIds::fakeAppIdMapServer = std::unordered_map<uint32_t, AppId_t>();
+std::unordered_map<HServerRequest, AppId_t> FakeAppIds::fakeAppIdMapServer = std::unordered_map<HServerRequest, AppId_t>();
 std::unordered_map<uint64_t, AppId_t> FakeAppIds::fakeAppIdMapPings = std::unordered_map<uint64_t, AppId_t>();
 
 AppId_t FakeAppIds::getFakeAppId(const AppId_t appId)
@@ -122,6 +122,14 @@ bool FakeAppIds::shouldUseRealAppIdForInterface(const EIPCInterface type)
 	}
 }
 
+void FakeAppIds::closePipe(const HSteamPipe pipe)
+{
+	if (fakeAppIdMap.contains(pipe))
+	{
+		fakeAppIdMap.erase(pipe);
+	}
+}
+
 void FakeAppIds::setAppIdForCurrentPipe(AppId_t& appId)
 {
 	fakeAppIdMap[g_pSteamEngine->getUtils()->getCurrentSteamPipe()] = appId;
@@ -169,14 +177,14 @@ void FakeAppIds::runIPCFrame(const bool post, const EIPCInterface interface)
 	g_pSteamEngine->setAppIdForCurrentPipe(appId);
 }
 
-void FakeAppIds::getServerDetails(const uint32_t handle, gameserverdetails_t& details)
+void FakeAppIds::getServerDetails(const HServerRequest handle, gameserverdetails_t& details)
 {
 	if (!fakeAppIdMapServer.contains(handle))
 	{
 		return;
 	}
 
-	const AppId_t realAppId = fakeAppIdMapServer[handle];
+	const AppId_t realAppId = fakeAppIdMapServer.at(handle);
 	fakeAppIdMapPings[details.ip64] = realAppId;
 	details.appId = realAppId;
 
@@ -208,7 +216,7 @@ void FakeAppIds::pingResponse(gameserverdetails_t *details)
 		return;
 	}
 
-	details->appId = fakeAppIdMapPings[ip];
+	details->appId = fakeAppIdMapPings.at(ip);
 }
 
 void FakeAppIds::sendGamesPlayed(CNetPacket *pkt)

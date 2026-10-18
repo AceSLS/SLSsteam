@@ -15,6 +15,7 @@ typedef int32_t ENetPacket;
 
 typedef uint32_t HSteamPipe;
 typedef uint32_t HSteamUser;
+typedef void* HServerRequest;
 
 typedef uint32_t steamsize_t;
 
