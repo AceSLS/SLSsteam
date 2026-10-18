@@ -495,6 +495,8 @@ static uint32_t hkSteamEngine_ProcessIPCFrame(CSteamEngine* pSteamEngine, HSteam
 
 	if (cmd == EIPCCmd::ClosePipe)
 	{
+		FakeAppIds::closePipe(hPipe);
+
 		if (g_processMap.contains(hPipe))
 		{
 			LOG_DEBUG("Deleting g_processMap mapping %u for 0x%x\n", g_processMap.at(hPipe).appId, hPipe);
@@ -586,14 +588,14 @@ static bool hkWebSocketConnection_BBuildAndAsyncSendFrame(CWebSocketConnection* 
 	return Hooks::CWebSocketConnection_BBuildAndAsyncSendFrame->tramp.fn(pWebSocketConnection, type, pData, dataSize);
 }
 
-static gameserverdetails_t* hkSteamMatchmakingServers_GetServerDetails(void* pSteamMatchmakingServers, uint32_t handle, uint32_t serverIdx)
+static gameserverdetails_t* hkSteamMatchmakingServers_GetServerDetails(void* pSteamMatchmakingServers, HServerRequest handle, uint32_t serverIdx)
 {
 	LOG_TRACE("Calling tramp\n");
 	gameserverdetails_t* ret = Hooks::CSteamMatchmakingServers_GetServerDetails->tramp.fn(pSteamMatchmakingServers, handle, serverIdx);
 
 	LOG_DEBUG
 	(
-		"%s(%p, 0x%x, %u) -> %p\n",
+		"%s(%p, %p, %u) -> %p\n",
 
 		Hooks::CSteamMatchmakingServers_GetServerDetails->name.c_str(),
 		pSteamMatchmakingServers,
@@ -610,16 +612,16 @@ static gameserverdetails_t* hkSteamMatchmakingServers_GetServerDetails(void* pSt
 	return ret;
 }
 
-static uint32_t hkSteamMatchmakingServers_RequestInternetServerList(void* pSteamMatchmakingServers, AppId_t appId, uint32_t a2, uint32_t a3, uint32_t a4)
+static HServerRequest hkSteamMatchmakingServers_RequestInternetServerList(void* pSteamMatchmakingServers, AppId_t appId, void* a2, uint32_t a3, void* a4)
 {
 	const uint32_t fake = FakeAppIds::requestInternetServerList(appId);
 
 	LOG_TRACE("Calling tramp\n");
-	uint32_t handle = Hooks::CSteamMatchmakingServers_RequestInternetServerList->tramp.fn(pSteamMatchmakingServers, fake ? fake : appId, a2, a3, a4);
+	HServerRequest handle = Hooks::CSteamMatchmakingServers_RequestInternetServerList->tramp.fn(pSteamMatchmakingServers, fake ? fake : appId, a2, a3, a4);
 
 	LOG_DEBUG
 	(
-		"%s(%p, %u, 0x%x, 0x%x, 0x%x)->0x%x\n",
+		"%s(%p, %u, %p, 0x%x, %p)->%p\n",
 
 		Hooks::CSteamMatchmakingServers_RequestInternetServerList->name.c_str(),
 		pSteamMatchmakingServers,

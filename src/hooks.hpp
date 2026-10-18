@@ -171,8 +171,8 @@ namespace Hooks
 	typedef uint32_t(*CSteamEngine_ProcessIPCFrame_t)(CSteamEngine*, HSteamPipe, CUtlBuffer*, CUtlBuffer*);
 	typedef AppId_t(*CSteamEngine_SetAppIdForCurrentPipe_t)(CSteamEngine*, AppId_t, bool);
 
-	typedef gameserverdetails_t*(*CSteamMatchmakingServers_GetServerDetails_t)(void*, uint32_t, uint32_t);
-	typedef uint32_t(*CSteamMatchmakingServers_RequestInternetServerList_t)(void*, AppId_t, uint32_t, uint32_t, uint32_t);
+	typedef gameserverdetails_t*(*CSteamMatchmakingServers_GetServerDetails_t)(void*, HServerRequest, uint32_t);
+	typedef HServerRequest(*CSteamMatchmakingServers_RequestInternetServerList_t)(void*, AppId_t, void*, uint32_t, void*);
 
 	typedef bool(*CUser_CheckAppOwnership_t)(CUser*, AppId_t, AppOwnershipInfo_t*);
 	typedef uint32_t(*CUser_GetSubscribedApps_t)(CUser*, AppId_t*, uint32_t, uint8_t);
