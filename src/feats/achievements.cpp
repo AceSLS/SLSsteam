@@ -274,3 +274,151 @@ uint32_t Achievements::sendAndRecvGetUserStats(CAPIJob* job, CProtoBufMsgBase* s
 	LOG_DEBUG("No schemas for %u found! Falling back to offline cache\n", appId);
 	return 1;
 }
+
+std::unordered_map<long, AppId_t> Achievements::jobToAppIdMap = std::unordered_map<long, AppId_t>();
+std::unordered_map<AppId_t, CPlayer_GetGameAchievements_Response> Achievements::gameAchievements = std::unordered_map<AppId_t, CPlayer_GetGameAchievements_Response>();
+std::unordered_map<AppId_t, std::vector<uint8_t>> Achievements::userAchievements = std::unordered_map<AppId_t, std::vector<uint8_t>>();
+
+bool Achievements::recvMsg(CNetPacket* pkt)
+{
+	if (pkt->getProtoBufType() != k_EMsgServiceMethodResponse)
+	{
+		return false;
+	}
+
+	const auto hdr = pkt->deserializeHeader();
+	if (!hdr.has_target_job_name() || !hdr.has_jobid_target())
+	{
+		return false;
+	}
+
+	const long jobId = hdr.jobid_target();
+	LOG_DEBUG("Received %s %lu\n", hdr.target_job_name().c_str(), hdr.jobid_target());
+
+	if (!jobToAppIdMap.contains(jobId))
+	{
+		return false;
+	}
+
+	const AppId_t appId = jobToAppIdMap.at(jobId);
+
+	if (hdr.target_job_name() == GET_GAME_ACHIEVEMENTS_SERVICE_NAME)
+	{
+		gameAchievements[appId] = pkt->deserializeBody<CPlayer_GetGameAchievements_Response>();
+
+		//Queued user achievements, inject now
+		if (userAchievements.contains(appId))
+		{
+			const auto& bytes = userAchievements.at(appId);
+
+			CNetPacket statPkt { };
+			statPkt.refs = 2;
+			statPkt.body = reinterpret_cast<CNetPacketBody*>(Steam::Plat_Alloc(bytes.size()));
+			statPkt.originalBody = statPkt.body;
+			statPkt.size = bytes.size();
+
+			if (!statPkt.body)
+			{
+				LOG_ERROR("Failed to allocate fake packet for stat injection for %u!\n", appId);
+				return false;
+			}
+
+			memcpy(statPkt.body, bytes.data(), bytes.size());
+			g_pCMInterface->recvPktHk(&statPkt);
+
+			statPkt.free();
+			LOG_DEBUG("Injected fake %s for %u\n", GET_USER_ACHIEVEMENTS_SERVICE_NAME, appId);
+		}
+	}
+	else if (hdr.target_job_name() == GET_USER_ACHIEVEMENTS_SERVICE_NAME)
+	{
+		//We can't fill in data we don't have yet. Choke the packet & reinject later
+		if (!gameAchievements.contains(appId))
+		{
+			auto& bytes = userAchievements[appId];
+			bytes.resize(pkt->size);
+			memcpy(bytes.data(), pkt->body, pkt->size);
+
+			LOG_DEBUG("Failed to fill achievements for %u! Missing Game achievements. Queueing...\n", appId);
+
+			return true; //Choke packet
+		}
+
+		auto msg = pkt->deserializeBody<CPlayer_GetUserAchievements_Response>();
+
+		const auto& gameAch = gameAchievements.at(appId);
+
+		msg.clear_achievements();
+		msg.clear_groups();
+
+		const auto stats = g_pSteamEngine->getUser()->getClientUserStats();
+
+		for (const auto& ach : gameAch.achievements())
+		{
+			auto newAch = msg.add_achievements();
+			newAch->set_internal_key(ach.internal_key());
+
+			bool unlocked;
+			uint32_t time;
+
+			stats->getAchievement(appId, ach.internal_name().c_str(), &unlocked, &time);
+
+			LOG_DEBUG("Achievement %s %s\n", ach.internal_name().c_str(), unlocked ? "unlocked" : "locked");
+
+			if (unlocked)
+			{
+				newAch->set_unlocked(unlocked);
+				newAch->set_unlock_time(time);
+			}
+		}
+
+		for (const auto& grp : gameAch.groups())
+		{
+			auto newGrp = msg.add_groups();
+			newGrp->set_groupid(grp.groupid());
+			newGrp->set_is_achievable(true);
+		}
+
+		pkt->serialize(msg);
+		LOG_DEBUG("Injected achievements for %u\n", appId);
+	}
+
+	return false;
+}
+
+void Achievements::sendMsg(CNetPacket* pkt)
+{
+	if (pkt->getProtoBufType() != k_EMsgServiceMethodCallFromClient)
+	{
+		return;
+	}
+
+	const auto hdr = pkt->deserializeHeader();
+	if (!hdr.has_target_job_name() || !hdr.has_jobid_source())
+	{
+		return;
+	}
+
+	const long jobId = hdr.jobid_source();
+
+	LOG_DEBUG("Sending %s (%lu)\n", hdr.target_job_name().c_str(), hdr.jobid_source());
+
+	//Store appId for later use
+	if (hdr.target_job_name() == GET_GAME_ACHIEVEMENTS_SERVICE_NAME)
+	{
+		const auto msg = pkt->deserializeBody<CPlayer_GetGameAchievements_Request>();
+		jobToAppIdMap[jobId] = msg.appid();
+	}
+	else if (hdr.target_job_name() == GET_USER_ACHIEVEMENTS_SERVICE_NAME)
+	{
+		const auto msg = pkt->deserializeBody<CPlayer_GetUserAchievements_Request>();
+		const AppId_t appId = msg.appid();
+
+		//Only modify unowned games
+		if (!g_pSteamEngine->getUser()->isSubscribed(appId))
+		{
+			jobToAppIdMap[jobId] = msg.appid();
+			LOG_DEBUG("AppId %u is unowned! Injecting achievements\n", appId);
+		}
+	}
+}

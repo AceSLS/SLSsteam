@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IClientCompat.hpp"
+#include "IClientUserStats.hpp"
 #include "types.hpp"
 
 #include <cstdint>
@@ -76,6 +77,7 @@ public:
 	IClientApps* getClientApps();
 	IClientCompat* getClientCompat();
 	IClientUser* getClientUser();
+	IClientUserStats* getClientUserStats();
 
 	bool checkAppOwnership(const AppId_t appId, AppOwnershipInfo_t* pInfo);
 	bool isSubscribed(const AppId_t appId);

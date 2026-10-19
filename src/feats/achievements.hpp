@@ -7,10 +7,12 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 
 namespace Achievements
 {
+	//Legacy schemas, used by games/steam_api
 	constexpr const char* GET_PLAYER_STATS_SERVICE_NAME = "Player.GetUserStats#1";
 	constexpr unsigned int COOLDOWN_MINUTES = 10;
 
@@ -42,4 +44,15 @@ namespace Achievements
 	uint32_t tryGetUserStats(CAPIJob* job, CProtoBufMsgBase* send, const uint32_t timeOut, CProtoBufMsgBase* recv, const EMsg targetType, const uint64_t steamId);
 	//GetUserStats
 	uint32_t sendAndRecvGetUserStats(CAPIJob* job, CProtoBufMsgBase* send, const uint32_t timeOut, CProtoBufMsgBase* recv, const EMsg targetType);
+
+	//New schemas, used by the Steam UI
+	constexpr const char* GET_GAME_ACHIEVEMENTS_SERVICE_NAME = "Player.GetGameAchievements#1";
+	constexpr const char* GET_USER_ACHIEVEMENTS_SERVICE_NAME = "Player.GetUserAchievements#1";
+
+	extern std::unordered_map<long, AppId_t> jobToAppIdMap;
+	extern std::unordered_map<AppId_t, CPlayer_GetGameAchievements_Response> gameAchievements;
+	extern std::unordered_map<AppId_t, std::vector<uint8_t>> userAchievements;
+
+	bool recvMsg(CNetPacket* pkt);
+	void sendMsg(CNetPacket* pkt);
 }

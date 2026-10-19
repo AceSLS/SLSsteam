@@ -35,6 +35,12 @@ IClientUser* CUser::getClientUser()
 	return reinterpret_cast<IClientUser*>(this + offset);
 }
 
+IClientUserStats* CUser::getClientUserStats()
+{
+	const static lm_address_t offset = MemHlp::searchOffsetByTypeName(this, "10CUserStats");
+	return reinterpret_cast<IClientUserStats*>(this + offset);
+}
+
 bool CUser::checkAppOwnership(const AppId_t appId, AppOwnershipInfo_t* pInfo)
 {
 	return Hooks::CUser_CheckAppOwnership->tramp.fn(this, appId, pInfo);
