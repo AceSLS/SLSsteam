@@ -233,7 +233,6 @@ namespace Hooks
 	typedef bool(*IClientUser_BLoggedOn_t)(IClientUser*);
 	typedef uint32_t(*IClientUser_BUpdateAppOwnershipTicket_t)(IClientUser*, AppId_t, bool);
 	typedef uint32_t(*IClientUser_GetAppOwnershipTicketExtendedData_t)(IClientUser*, uint32_t, void*, uint32_t, uint32_t*, uint32_t*, uint32_t*, uint32_t*);
-	typedef bool(*IClientUser_GetEncryptedAppTicket_t)(IClientUser*, void*, steamsize_t, steamsize_t*);
 	typedef bool(*IClientUser_GetLegacyCDKey_t)(IClientUser*, AppId_t, char*, steamsize_t);
 	typedef CSteamId(*IClientUser_GetSteamId_t)(IClientUser*);
 	typedef uint8_t(*IClientUser_IsUserSubscribedAppInTicket_t)(IClientUser*, uint64_t, AppId_t);
@@ -254,7 +253,6 @@ namespace Hooks
 	extern VFTHook<IClientUser_BLoggedOn_t>* IClientUser_BLoggedOn;
 	extern VFTHook<IClientUser_BUpdateAppOwnershipTicket_t>* IClientUser_BUpdateAppOwnershipTicket;
 	extern VFTHook<IClientUser_GetAppOwnershipTicketExtendedData_t>* IClientUser_GetAppOwnershipTicketExtendedData;
-	extern VFTHook<IClientUser_GetEncryptedAppTicket_t>* IClientUser_GetEncryptedAppTicket;
 	extern VFTHook<IClientUser_GetLegacyCDKey_t>* IClientUser_GetLegacyCDKey;
 	extern VFTHook<IClientUser_GetSteamId_t>* IClientUser_GetSteamId;
 	extern VFTHook<IClientUser_IsUserSubscribedAppInTicket_t>* IClientUser_IsUserSubscribedAppInTicket;
