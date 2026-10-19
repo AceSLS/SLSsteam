@@ -63,16 +63,6 @@ bool Stealth::sendMsg(CNetPacket* pkt)
 				msg.mutable_games_played()->DeleteSubrange(i, 1);
 			}
 
-			const bool isPlaying = msg.games_played_size();
-			static bool wasPlaying = isPlaying;
-
-			if (!wasPlaying && !isPlaying)
-			{
-				choke = true;
-			}
-
-			wasPlaying = isPlaying;
-
 			break;
 		}
 
