@@ -110,7 +110,6 @@ void DetourHook<T>::place()
 	}
 
 	this->size = LM_HookCode(this->originalFn.address, this->hookFn.address, &this->tramp.address);
-	MemHlp::fixPICThunkCall(this->name.c_str(), this->originalFn.address, this->tramp.address);
 
 	LOG_DEBUG
 	(
@@ -217,7 +216,6 @@ Lua::Ptr_t LuaHook::place()
 		return nullptr;
 	}
 
-	MemHlp::fixPICThunkCall(name.c_str(), fn, tramp);
 	LOG_DEBUG("Placed LuaHook %s from 0x%lx to 0x%lx\n", name.c_str(), fn, hookFn);
 	return reinterpret_cast<void*>(tramp);
 }
