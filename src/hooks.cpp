@@ -389,11 +389,12 @@ static void hkCMInterface_RecvPkt(CCMInterface* pCMInterface, CNetPacket* pNetPa
 		Ticket::recvMsg(pNetPacket);
 
 		//const bool choke = Stealth::recvMsg(pNetPacket);
-		//if (choke)
-		//{
-		//	pNetPacket->free();
-		//	return;
-		//}
+		const bool choke = Achievements::recvMsg(pNetPacket);
+		if (choke)
+		{
+			pNetPacket->free();
+			return;
+		}
 	}
 
 	LOG_TRACE("Calling tramp\n");
@@ -547,6 +548,7 @@ static bool hkWebSocketConnection_BBuildAndAsyncSendFrame(CWebSocketConnection* 
 
 				Lua::fireCallback(Lua::Callbacks::Network_SendPkt, &packet);
 
+				Achievements::sendMsg(&packet);
 				Apps::sendMsg(&packet);
 				FakeAppIds::sendMsg(&packet);
 

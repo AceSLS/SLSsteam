@@ -127,6 +127,16 @@ namespace VFTIndexes
 		extern VFTableInfo_t SetLegacyCDKey;
 	}
 
+	namespace IClientUserStats
+	{
+		extern VFTableInfo_t GetAchievement;
+		extern VFTableInfo_t GetAchievementDisplayAttribute;
+		extern VFTableInfo_t GetNumAchievements;
+		extern VFTableInfo_t GetNumStats;
+		extern VFTableInfo_t GetAchievementName;
+		extern VFTableInfo_t GetStatName;
+	}
+
 	extern std::vector<VFTableInfo_t*> functions;
 	extern std::unordered_map<std::string, std::map<std::string, unsigned int>> tableMap;
 

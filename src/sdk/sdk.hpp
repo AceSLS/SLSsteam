@@ -13,6 +13,7 @@
 #include "IClientCompat.hpp"
 #include "IClientFriends.hpp"
 #include "IClientUser.hpp"
+#include "IClientUserStats.hpp"
 #include "IClientUtils.hpp"
 #include "steam.hpp"
 #include "types.hpp"

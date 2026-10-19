@@ -355,6 +355,40 @@ namespace VFTIndexes
 		};
 	}
 
+	namespace IClientUserStats
+	{
+		VFTableInfo_t GetAchievement
+		{
+			"19IClientUserStatsMap",
+			"GetAchievement"
+		};
+		VFTableInfo_t GetAchievementDisplayAttribute
+		{
+			"19IClientUserStatsMap",
+			"GetAchievementDisplayAttribute"
+		};
+		VFTableInfo_t GetNumAchievements
+		{
+			"19IClientUserStatsMap",
+			"GetNumAchievements"
+		};
+		VFTableInfo_t GetNumStats
+		{
+			"19IClientUserStatsMap",
+			"GetNumStats"
+		};
+		VFTableInfo_t GetAchievementName
+		{
+			"19IClientUserStatsMap",
+			"GetAchievementName"
+		};
+		VFTableInfo_t GetStatName
+		{
+			"19IClientUserStatsMap",
+			"GetStatName"
+		};
+	}
+
 	std::vector<VFTableInfo_t*> functions;
 	std::unordered_map<std::string, std::map<std::string, unsigned int>> tableMap;
 }
