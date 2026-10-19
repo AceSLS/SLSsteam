@@ -82,9 +82,6 @@ namespace MemHlp
 	lm_address_t getJmpTarget(const lm_address_t address);
 	lm_address_t findPrologue(const lm_address_t address, const std::vector<int16_t>& prologueBytes);
 
-	//TODO: Create hooking wrapper that calls this automatically
-	bool fixPICThunkCall(const char* name, const lm_address_t fn, const lm_address_t tramp);
-
 	std::string hexdump(const void* address, const size_t size);
 
 	const char* getTypeName(const void* pClass);
