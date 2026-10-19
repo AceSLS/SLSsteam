@@ -25,28 +25,12 @@ AppId_t FakeAppIds::getFakeAppId(const AppId_t appId)
 	return 0;
 }
 
-AppId_t FakeAppIds::getRealAppIdFromEnv(const HSteamPipe pipe)
-{
-	if (g_processMap.contains(pipe))
-	{
-		return g_processMap.at(pipe).appId;
-	}
-
-	return 0;
-}
-
 AppId_t FakeAppIds::getRealAppIdForCurrentPipe(const bool fallback)
 {
 	const auto utils = g_pSteamEngine->getUtils();
 	if (!utils)
 	{
 		return 0;
-	}
-
-	const AppId_t appId = getRealAppIdFromEnv(utils->getCurrentSteamPipe());
-	if (appId)
-	{
-		return appId;
 	}
 
 	if (fakeAppIdMap.contains(utils->getCurrentSteamPipe()))

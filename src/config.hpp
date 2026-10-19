@@ -28,14 +28,6 @@ public:
 	static std::filesystem::path getPath();
 	static void onFileChange(__attribute__((unused)) const std::filesystem::path& path, __attribute__((unused)) const int eventMask);
 
-	typedef unsigned int SmartTicketsFlags_t;
-
-	enum ESmartTickets : SmartTicketsFlags_t
-	{
-		k_ESmartTicketsSteamDRM = 1 << 0,
-		k_ESmartTicketsDenuvo = 1 << 1,
-	};
-
 	struct FakeGame_t
 	{
 		AppId_t appId = 0;
@@ -80,7 +72,6 @@ public:
 	MTVariable<bool> disableFamilyLock;
 	MTVariable<bool> useWhiteList;
 	MTVariable<uint32_t> maxSchemaTries;
-	MTVariable<SmartTicketsFlags_t> smartTickets;
 	MTVariable<bool> safeMode;
 	MTVariable<bool> warnHashMissmatch;
 	MTVariable<bool> notifyInit;

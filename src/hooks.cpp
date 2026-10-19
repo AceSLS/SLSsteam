@@ -480,26 +480,9 @@ static uint32_t hkSteamEngine_ProcessIPCFrame(CSteamEngine* pSteamEngine, HSteam
 		ret = Hooks::CSteamEngine_ProcessIPCFrame->tramp.fn(pSteamEngine, hPipe, pBufIn, pBufOut);
 	}
 
-	if (cmd == EIPCCmd::ConnectPipe)
-	{
-		const auto serverPipe = g_pSteamEngine->getServerPipe(hPipe);
-		auto& proc = g_processMap[serverPipe->pipeHandle];
-
-		if (proc.init(serverPipe->pid, serverPipe->pipeHandle))
-		{
-			Ticket::connectPipe(hPipe);
-		}
-	}
-
 	if (cmd == EIPCCmd::ClosePipe)
 	{
 		FakeAppIds::closePipe(hPipe);
-
-		if (g_processMap.contains(hPipe))
-		{
-			LOG_DEBUG("Deleting g_processMap mapping %u for 0x%x\n", g_processMap.at(hPipe).appId, hPipe);
-			g_processMap.erase(hPipe);
-		}
 	}
 
 	//LOG_DEBUG("In\n%s\n", MemHlp::hexdump(pBufIn->mem.base, pBufIn->offset).c_str());
@@ -1080,31 +1063,6 @@ static uint32_t hkClientUser_GetAppOwnershipTicketExtendedData
 	return size;
 }
 
-static bool hkClientUser_GetEncryptedAppTicket(IClientUser* pClientUser, void* pTicket, steamsize_t ticketSize, steamsize_t* pTicketSize)
-{
-	LOG_TRACE("Calling original\n");
-	const bool success = Hooks::IClientUser_GetEncryptedAppTicket->originalFn.fn(pClientUser, pTicket, ticketSize, pTicketSize);
-
-	LOG_DEBUG
-	(
-		"%s(%p, %p, %u, %p) -> %u\n",
-
-		Hooks::IClientUser_GetEncryptedAppTicket->name.c_str(),
-		reinterpret_cast<void*>(pClientUser),
-		pTicket,
-		ticketSize,
-		reinterpret_cast<void*>(pTicketSize),
-		success
-	);
-
-	if (success)
-	{
-		Ticket::getEncryptedAppTicket(FakeAppIds::getRealAppIdForCurrentPipe());
-	}
-
-	return success;
-}
-
 static bool hkClientUser_GetLegacyCDKey(IClientUser* pClientUser, AppId_t appId, char* pChKey, steamsize_t keySize)
 {
 	Apps::getLegacyCDKey(appId);
@@ -1164,22 +1122,12 @@ static CSteamId hkClientUser_GetSteamId(IClientUser* pClientUser)
 	}
 
 	const auto ticket = Ticket::getCachedTicket(realAppId, Ticket::ETicketType::EncryptedAppOwnershipTicket);
-	if (!ticket)
+	if (ticket)
 	{
-		return steamId;
+		return ticket->steamId;
 	}
 
-	if (g_config.smartTickets.copy() & CConfig::k_ESmartTicketsDenuvo)
-	{
-		const auto& proc = g_processMap.at(utils->getCurrentSteamPipe());
-
-		if (!proc.denuvo)
-		{
-			return steamId;
-		}
-	}
-
-	return ticket->steamId;
+	return steamId;
 }
 
 static uint8_t hkClientUser_IsUserSubscribedAppInTicket(IClientUser* pClientUser, uint64_t steamId, AppId_t appId)
@@ -1333,7 +1281,6 @@ namespace Hooks
 	VFTHook<IClientUser_BLoggedOn_t>* IClientUser_BLoggedOn = nullptr;
 	VFTHook<IClientUser_BUpdateAppOwnershipTicket_t>* IClientUser_BUpdateAppOwnershipTicket = nullptr;
 	VFTHook<IClientUser_GetAppOwnershipTicketExtendedData_t>* IClientUser_GetAppOwnershipTicketExtendedData = nullptr;
-	VFTHook<IClientUser_GetEncryptedAppTicket_t>* IClientUser_GetEncryptedAppTicket = nullptr;
 	VFTHook<IClientUser_GetLegacyCDKey_t>* IClientUser_GetLegacyCDKey = nullptr;
 	VFTHook<IClientUser_GetSteamId_t>* IClientUser_GetSteamId = nullptr;
 	VFTHook<IClientUser_IsUserSubscribedAppInTicket_t>* IClientUser_IsUserSubscribedAppInTicket = nullptr;
@@ -1524,9 +1471,6 @@ void Hooks::placeVFTHooks()
 		Hooks::IClientUser_BLoggedOn = new VFTHook(vft, VFTIndexes::IClientUser::BLoggedOn, &hkClientUser_BLoggedOn);
 		Hooks::IClientUser_BUpdateAppOwnershipTicket = new VFTHook(vft, VFTIndexes::IClientUser::BUpdateAppOwnershipTicket, hkClientUser_BUpdateAppOwnershipTicket);
 		Hooks::IClientUser_GetAppOwnershipTicketExtendedData = new VFTHook(vft, VFTIndexes::IClientUser::GetAppOwnershipTicketExtendedData, hkClientUser_GetAppOwnershipTicketExtendedData);
-		//GetEncryptedAppTicket is just a wrapper for CUser::GetEncryptedAppTicket. But there is no need to go deeper
-		//since we load the encrypted ticket in the Networking layer. We just need this function to spoof our steamId once
-		Hooks::IClientUser_GetEncryptedAppTicket = new VFTHook(vft, VFTIndexes::IClientUser::GetEncryptedAppTicket, hkClientUser_GetEncryptedAppTicket);
 		Hooks::IClientUser_GetLegacyCDKey = new VFTHook(vft, VFTIndexes::IClientUser::GetLegacyCDKey, hkClientUser_GetLegacyCDKey);
 		Hooks::IClientUser_GetSteamId = new VFTHook(vft, VFTIndexes::IClientUser::GetSteamID, hkClientUser_GetSteamId);
 		Hooks::IClientUser_IsUserSubscribedAppInTicket = new VFTHook(vft, VFTIndexes::IClientUser::IsUserSubscribedAppInTicket, hkClientUser_IsUserSubscribedAppInTicket);

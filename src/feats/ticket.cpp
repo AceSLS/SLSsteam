@@ -169,55 +169,8 @@ bool Ticket::saveTicketToCache(const AppId_t appId, const std::string& bytes, co
 	return true;
 }
 
-void Ticket::connectPipe(const HSteamPipe pipe)
-{
-	const auto& proc = g_processMap.at(pipe);
-
-	if (!proc.steamDRM)
-	{
-		return;
-	}
-
-	const auto ticket = getCachedTicket(proc.appId, ETicketType::AppOwnershipTicket);
-	if (!ticket)
-	{
-		return;
-	}
-
-	oneTimeSteamIdSpoof[proc.appId] = ticket->steamId;
-}
-
-void Ticket::getEncryptedAppTicket(const AppId_t appId)
-{
-	if (!(g_config.smartTickets.copy() & CConfig::k_ESmartTicketsDenuvo))
-	{
-		return;
-	}
-
-	const auto cached = Ticket::getCachedTicket(appId, ETicketType::EncryptedAppOwnershipTicket);
-	if (!cached)
-	{
-		return;
-	}
-
-	oneTimeSteamIdSpoof[appId] = cached->steamId;
-}
-
 void Ticket::getTicketOwnershipExtendedData(const AppId_t appId)
 {
-	const auto utils = g_pSteamEngine->getUtils();
-
-	if (g_config.smartTickets.copy() & CConfig::k_ESmartTicketsSteamDRM)
-	{
-		const auto& proc = g_processMap.at(utils->getCurrentSteamPipe());
-		if (proc.steamDRM)
-		{
-			//Handled in connectPipe
-			//For other ticket requests we fall through to spoofing the next GetSteamID call
-			return;
-		}
-	}
-
 	const auto cached = Ticket::getCachedTicket(appId, ETicketType::AppOwnershipTicket);
 	if (!cached)
 	{

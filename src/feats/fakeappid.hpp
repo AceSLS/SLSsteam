@@ -13,7 +13,6 @@ namespace FakeAppIds
 	extern std::unordered_map<uint64_t, AppId_t> fakeAppIdMapPings;
 
 	AppId_t getFakeAppId(const AppId_t appId);
-	AppId_t getRealAppIdFromEnv(const HSteamPipe pipe);
 	AppId_t getRealAppIdForCurrentPipe(const bool fallback = true);
 	bool shouldUseRealAppIdForInterface(const EIPCInterface type);
 

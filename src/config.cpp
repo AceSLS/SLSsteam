@@ -177,7 +177,6 @@ bool CConfig::loadSettings(const bool firstLoad, const bool silent)
 	disableFamilyLock = getSetting<bool>(rootNode, "DisableFamilyShareLock", true);
 	useWhiteList = getSetting<bool>(rootNode, "UseWhitelist", false);
 	maxSchemaTries = getSetting<uint32_t>(rootNode, "MaxSchemaTries", 10);
-	smartTickets = getSetting<SmartTicketsFlags_t>(rootNode, "SmartTickets", 1);
 	safeMode = getSetting<bool>(rootNode, "SafeMode", false);
 	warnHashMissmatch = getSetting<bool>(rootNode, "WarnHashMissmatch", false);
 	notifyInit = getSetting<bool>(rootNode, "NotifyInit", true);
