@@ -390,12 +390,12 @@ static void hkCMInterface_RecvPkt(CCMInterface* pCMInterface, CNetPacket* pNetPa
 		Misc::recvMsg(pNetPacket);
 		Ticket::recvMsg(pNetPacket);
 
-		const bool choke = Stealth::recvMsg(pNetPacket);
-		if (choke)
-		{
-			pNetPacket->free();
-			return;
-		}
+		//const bool choke = Stealth::recvMsg(pNetPacket);
+		//if (choke)
+		//{
+		//	pNetPacket->free();
+		//	return;
+		//}
 	}
 
 	LOG_TRACE("Calling tramp\n");
@@ -569,7 +569,7 @@ static bool hkWebSocketConnection_BBuildAndAsyncSendFrame(CWebSocketConnection* 
 				Apps::sendMsg(&packet);
 				FakeAppIds::sendMsg(&packet);
 
-				choke = Stealth::sendMsg(&packet);
+				//choke = Stealth::sendMsg(&packet);
 			}
 
 			bool success = true;
