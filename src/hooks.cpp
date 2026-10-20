@@ -294,9 +294,9 @@ static uint32_t hkAppDataCache_BParseResponseFromMessage(void* pAppDataCache, CP
 	return ret;
 }
 
-static bool hkClientUnifiedServiceTransport_SendAndRecvMsg(CClientUnifiedServiceTransport* pUnifiedServiceTransport, const char* name, void* send, void* recv, void* arg4)
+static uint32_t hkClientUnifiedServiceTransport_SendAndRecvMsg(CClientUnifiedServiceTransport* pUnifiedServiceTransport, const char* name, void* send, void* recv, void* arg4)
 {
-	bool ret = Achievements::sendAndRecvGetPlayerStats
+	uint32_t ret = Achievements::sendAndRecvGetPlayerStats
 	(
 		pUnifiedServiceTransport,
 		name,
@@ -304,7 +304,7 @@ static bool hkClientUnifiedServiceTransport_SendAndRecvMsg(CClientUnifiedService
 		reinterpret_cast<CPlayer_GetUserStats_Response*>(recv)
 	);
 
-	if (!ret)
+	if (ret == k_EResultNoResult)
 	{
 		LOG_TRACE("Calling tramp\n");
 		ret = Hooks::CClientUnifiedServiceMethod_SendAndRecvMsg->tramp.fn(pUnifiedServiceTransport, name, send, recv, arg4);
