@@ -131,6 +131,7 @@ namespace VFTIndexes
 	{
 		extern VFTableInfo_t GetAchievement;
 		extern VFTableInfo_t GetAchievementDisplayAttribute;
+		extern VFTableInfo_t GetAchievementProgress;
 		extern VFTableInfo_t GetNumAchievements;
 		extern VFTableInfo_t GetNumStats;
 		extern VFTableInfo_t GetAchievementName;

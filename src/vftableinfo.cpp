@@ -367,6 +367,11 @@ namespace VFTIndexes
 			"19IClientUserStatsMap",
 			"GetAchievementDisplayAttribute"
 		};
+		VFTableInfo_t GetAchievementProgress
+		{
+			"19IClientUserStatsMap",
+			"GetAchievementProgress"
+		};
 		VFTableInfo_t GetNumAchievements
 		{
 			"19IClientUserStatsMap",

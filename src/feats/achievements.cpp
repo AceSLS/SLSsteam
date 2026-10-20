@@ -360,16 +360,22 @@ bool Achievements::recvMsg(CNetPacket* pkt)
 
 			bool unlocked;
 			uint32_t time;
-
 			stats->getAchievement(appId, ach.internal_name().c_str(), &unlocked, &time);
 
-			LOG_DEBUG("Achievement %s %s\n", ach.internal_name().c_str(), unlocked ? "unlocked" : "locked");
+			float minProgress;
+			float curProgress;
+			float maxProgress;
+			stats->getAchievementProgress(appId, ach.internal_name().c_str(), &minProgress, &curProgress, &maxProgress);
+
+			LOG_DEBUG("Achievement %s %s, progress %f %f %f\n", ach.internal_name().c_str(), unlocked ? "unlocked" : "locked", minProgress, curProgress, maxProgress);
 
 			if (unlocked)
 			{
 				newAch->set_unlocked(unlocked);
 				newAch->set_unlock_time(time);
 			}
+
+			newAch->set_progress_float(curProgress);
 		}
 
 		for (const auto& grp : gameAch.groups())
