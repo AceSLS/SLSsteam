@@ -141,15 +141,16 @@ static void load()
 
 	CFileWatcher::installSigHandler();
 
+	//Clearing the environment is literally useless now
+	//steam starts srt-client-container -> srt-bwrap -> pv-adverb -> steam (we inject here)
+	//srt-client-container is also responsible for spawning games, so we can't unset it early enough anymore
 	//Any release
-	cleanEnvVar("LD_AUDIT", "SLSsteam.so");
-	cleanEnvVar("LD_AUDIT", "library-inject.so");
+	//cleanEnvVar("LD_AUDIT", "SLSsteam.so");
+	//cleanEnvVar("LD_AUDIT", "library-inject.so");
 
-	//Arch release
-	cleanEnvVar("LD_AUDIT", "libSLSsteam.so");
-	cleanEnvVar("LD_AUDIT", "libSLS-library-inject.so");
-	//TODO: Investigate weird logging. Not like it's necessary anymore
-	//cleanEnvVar("LD_PRELOAD");
+	////Arch release
+	//cleanEnvVar("LD_AUDIT", "libSLSsteam.so");
+	//cleanEnvVar("LD_AUDIT", "libSLS-library-inject.so");
 
 	if (!g_config.init())
 	{
