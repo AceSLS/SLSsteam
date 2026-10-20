@@ -11,7 +11,6 @@ CXXFLAGS := -O3 -flto=auto -fPIC -std=c++20 -Wall -Wextra -Wpedantic -Wno-error=
 CXXFLAGS += -floop-block -fgraphite-identity -floop-parallelize-all -pipe -fopenmp -fomit-frame-pointer
 
 LDFLAGS := -shared -Wl,--no-undefined
-LDFLAGS += $(shell pkg-config --libs "openssl")
 LDFLAGS += $(shell pkg-config --libs "libcurl")
 
 JOBS := $(shell nproc)

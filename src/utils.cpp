@@ -6,8 +6,6 @@
 #include <cmath>
 #include <cstring>
 #include <filesystem>
-#include <fstream>
-#include <iomanip>
 #include <regex>
 #include <string>
 #include <sys/wait.h>
@@ -162,29 +160,20 @@ bool Utils::isNumber(const char* str)
 	return true;
 }
 
-std::string Utils::getFileSHA256(const char *filePath)
+std::string Utils::getFileSHA256(const std::filesystem::path& path)
 {
-	//TODO: Fix
-	return "";
-	//std::ifstream fs(filePath, std::ios::binary);
-	//if (!fs.is_open())
-	//{
-	//	//TODO: Read more about error types in C++ :)
-	//	throw std::runtime_error("Unable to read file!");
-	//}
+	//steam's mount namespace includes sha256sum, so we can safely run it
+	std::string shaOutput;
+	const auto exitCode = exec("/usr/bin/sha256sum", { path }, &shaOutput);
 
-	//const auto bytes = std::vector<unsigned char>(std::istreambuf_iterator(fs), {});
-	//unsigned char sha256Bytes[SHA256_DIGEST_LENGTH];
-	//SHA256(bytes.data(), bytes.size(), sha256Bytes);
+	if (exitCode != 0)
+	{
+		LOG_ERROR("Failed calculating %s sha256sum!\n", path.filename().c_str());
+		return "";
+	}
 
-	//std::ostringstream sha256;
-	//for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
-	//{
-	//	sha256 << std::hex << std::setw(2) << std::setfill('0') << (int)sha256Bytes[i];
-	//}
-
-	//fs.close();
-	//return sha256.str();
+	const auto split = strsplit(shaOutput, " ");
+	return split[0];
 }
 
 std::vector<std::string> Utils::strsplit(const std::string& str, const std::string& delimeter)

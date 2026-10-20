@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -11,7 +12,7 @@ namespace Utils
 	int exec(const std::string& executable, const std::vector<std::string>& args, std::string* stdOut);
 	int exec(const std::vector<std::string>& executableList, const std::vector<std::string>& args, std::string* stdOut);
 	bool isNumber(const char* str);
-	std::string getFileSHA256(const char* filePath);
+	std::string getFileSHA256(const std::filesystem::path& path);
 	std::vector<std::string> strsplit(const std::string& str, const std::string& delimeter);
 
 	template<typename T>
