@@ -327,6 +327,8 @@ bool Achievements::recvMsg(CNetPacket* pkt)
 			g_pCMInterface->recvPktHk(&statPkt);
 
 			statPkt.free();
+			userAchievements.erase(appId);
+
 			LOG_DEBUG("Injected fake %s for %u\n", GET_USER_ACHIEVEMENTS_SERVICE_NAME, appId);
 		}
 	}
