@@ -7,7 +7,7 @@ CXX := g++
 libs := $(wildcard lib/*.a)
 srcs := $(shell find src/ -type f -iname "*.cpp")
 
-CXXFLAGS := -O3 -flto=auto -fPIC -std=c++20 -Wall -Wextra -Wpedantic -Wno-error=format-security
+CXXFLAGS := -O3 -flto=auto -fPIC -std=c++20 -Wall -Wextra -Wpedantic -Wno-error=format-security -D_GLIBCXX_USE_CXX11_ABI=0
 CXXFLAGS += -floop-block -fgraphite-identity -floop-parallelize-all -pipe -fopenmp -fomit-frame-pointer
 
 LDFLAGS := -shared -Wl,--no-undefined
