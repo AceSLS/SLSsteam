@@ -5,7 +5,6 @@
 #include "feats/dlc.hpp"
 #include "feats/misc.hpp"
 #include "feats/fakeappid.hpp"
-#include "feats/stealth.hpp"
 #include "feats/ticket.hpp"
 
 #include "api.hpp"
@@ -16,14 +15,11 @@
 #include "lua.hpp"
 #include "memhlp.hpp"
 #include "patterns.hpp"
-#include "process.hpp"
 #include "vftableinfo.hpp"
 
 #include "libmem/libmem.h"
 
-#include <cstddef>
 #include <cstdint>
-#include <cstdio>
 #include <cstring>
 #include <mutex>
 #include <pthread.h>
@@ -258,11 +254,6 @@ static uint32_t hkAPIJob_SendAndRecv(CAPIJob* pAPIJob, CProtoBufMsgBase* send, u
 
 	if (!ret)
 	{
-		ret = Stealth::sendAndRecvStoreUserStats2(send, recv, targetType);
-	}
-
-	if (!ret)
-	{
 		LOG_TRACE("Calling tramp\n");
 		ret = Hooks::CAPIJob_SendAndRecv->tramp.fn(pAPIJob, send, a2, timeOut, recv, targetType);
 	}
@@ -388,7 +379,6 @@ static void hkCMInterface_RecvPkt(CCMInterface* pCMInterface, CNetPacket* pNetPa
 		Misc::recvMsg(pNetPacket);
 		Ticket::recvMsg(pNetPacket);
 
-		//const bool choke = Stealth::recvMsg(pNetPacket);
 		const bool choke = Achievements::recvMsg(pNetPacket);
 		if (choke)
 		{
@@ -536,8 +526,6 @@ static bool hkWebSocketConnection_BBuildAndAsyncSendFrame(CWebSocketConnection* 
 				packet.getType()
 			);
 
-			bool choke = false;
-
 			if (packet.isValid() && packet.isProtoBuf())
 			{
 				//Multiple sockets in use, we grab the main one
@@ -551,16 +539,10 @@ static bool hkWebSocketConnection_BBuildAndAsyncSendFrame(CWebSocketConnection* 
 				Achievements::sendMsg(&packet);
 				Apps::sendMsg(&packet);
 				FakeAppIds::sendMsg(&packet);
-
-				//choke = Stealth::sendMsg(&packet);
 			}
 
-			bool success = true;
-			if (!choke)
-			{
-				LOG_TRACE("Calling tramp\n");
-				success = Hooks::CWebSocketConnection_BBuildAndAsyncSendFrame->tramp.fn(pWebSocketConnection, type, packet.body, packet.size);
-			}
+			LOG_TRACE("Calling tramp\n");
+			bool success = Hooks::CWebSocketConnection_BBuildAndAsyncSendFrame->tramp.fn(pWebSocketConnection, type, packet.body, packet.size);
 
 			packet.free();
 			return success;
