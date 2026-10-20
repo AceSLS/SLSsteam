@@ -30,6 +30,20 @@ const char* IClientUserStats::getAchievementDisplayAttribute(const GameId_t game
 	);
 }
 
+bool IClientUserStats::getAchievementProgress(const GameId_t gameId, const char* name, float* pMin, float* pCur, float* pMax)
+{
+	return MemHlp::callVFunc<bool(*)(void*, const GameId_t*, const char*, float*, float*, float*)>
+	(
+		VFTIndexes::IClientUserStats::GetAchievementProgress.index,
+		this,
+		&gameId,
+		name,
+		pMin,
+		pCur,
+		pMax
+	);
+}
+
 uint32_t IClientUserStats::getNumAchievements(const GameId_t gameId)
 {
 	return MemHlp::callVFunc<uint32_t(*)(void*, const GameId_t*)>(VFTIndexes::IClientUserStats::GetNumAchievements.index, this, &gameId);
