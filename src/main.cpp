@@ -141,6 +141,9 @@ static void load()
 
 	CFileWatcher::installSigHandler();
 
+	//Necessary for dbus notifications
+	setenv("DBUS_SESSION_BUS_ADDRESS", "unix:path=/run/user/1000/bus", 1);
+
 	//Clearing the environment is literally useless now
 	//steam starts srt-client-container -> srt-bwrap -> pv-adverb -> steam (we inject here)
 	//srt-client-container is also responsible for spawning games, so we can't unset it early enough anymore

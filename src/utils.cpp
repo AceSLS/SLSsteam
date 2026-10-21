@@ -13,7 +13,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include <openssl/sha.h>
+#include <dbus/dbus.h>
 
 
 double Utils::calculateEntropy(const std::vector<uint8_t>& bytes)
@@ -174,6 +174,82 @@ std::string Utils::getFileSHA256(const std::filesystem::path& path)
 
 	const auto split = strsplit(shaOutput, " ");
 	return split[0];
+}
+
+bool Utils::notify(const char* title, const char* text, const int timeOut)
+{
+	constexpr const char *app_name = "SLSsteam";
+	constexpr const char *app_icon = "";
+
+	DBusError error;
+	DBusMessage* msg = nullptr;
+	dbus_uint32_t replaces_id = 0;
+	DBusMessageIter args, array;
+	bool success = false;
+
+	dbus_error_init(&error);
+	DBusConnection* conn = dbus_bus_get(DBUS_BUS_SESSION, &error);
+
+	if (dbus_error_is_set(&error))
+	{
+		LOG_CUSTOM(k_ELogLevelError | k_ELogLevelOnce, "DBus connection error: %s\n", error.message);
+		goto failed;
+	}
+
+	msg = dbus_message_new_method_call
+	(
+		"org.freedesktop.Notifications",
+		"/org/freedesktop/Notifications",
+		"org.freedesktop.Notifications",
+		"Notify"
+	);
+
+	if (!msg)
+	{
+		LOG_ERROR("Failed to create new dbus method call!\n");
+		goto failed;
+	}
+
+	//TODO: Add support for urgency
+
+	dbus_message_iter_init_append(msg, &args);
+
+	dbus_message_iter_append_basic(&args, DBUS_TYPE_STRING, &app_name);
+	dbus_message_iter_append_basic(&args, DBUS_TYPE_UINT32, &replaces_id);
+	dbus_message_iter_append_basic(&args, DBUS_TYPE_STRING, &app_icon);
+	dbus_message_iter_append_basic(&args, DBUS_TYPE_STRING, &title);
+	dbus_message_iter_append_basic(&args, DBUS_TYPE_STRING, &text);
+
+	dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY, "as", &array);
+	dbus_message_iter_close_container(&args, &array);
+
+	dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY, "a{sv}", &array);
+	dbus_message_iter_close_container(&args, &array);
+
+	dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &timeOut);
+
+	if (!dbus_connection_send(conn, msg, nullptr))
+	{
+		LOG_CUSTOM(k_ELogLevelError | k_ELogLevelOnce, "Failed to send msg to dbus connection!\n");
+		goto failed;
+	}
+
+	dbus_connection_flush(conn);
+	success = true;
+
+failed:
+	if (conn)
+	{
+		dbus_connection_unref(conn);
+	}
+
+	if (msg)
+	{
+		dbus_message_unref(msg);
+	}
+
+	dbus_error_free(&error);
+	return success;
 }
 
 std::vector<std::string> Utils::strsplit(const std::string& str, const std::string& delimeter)

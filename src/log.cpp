@@ -1,6 +1,7 @@
 #include "log.hpp"
 
 #include "config.hpp"
+#include "utils.hpp"
 
 #include <cstdarg>
 #include <cstddef>
@@ -78,50 +79,47 @@ bool CLog::shouldNotify(const LogLevelFlags_t flags)
 	return false;
 }
 
-std::string CLog::buildNotification(const LogLevelFlags_t flags, const char* msg)
+CLog::Notification_t CLog::buildNotification(const LogLevelFlags_t flags, const char* msg)
 {
 	const bool notifyShort = flags & k_ELogLevelNotifyShort;
 	const bool notifyLong = flags & k_ELogLevelNotifyLong;
 
+	Notification_t notify { };
+
 	if (!notifyShort && !notifyLong)
 	{
-		return "";
+		return notify;
 	}
 
 	const bool warn = flags & k_ELogLevelWarn;
 	const bool error = flags & k_ELogLevelError;
-	std::ostringstream notifySS;
 
-	notifySS << "notify-send ";
+	std::ostringstream notifySS;
 
 	if (flags & k_ELogLevelNotifyLong)
 	{
-		notifySS << "-t 30000";
+		notify.timeOut = 30000;
 	}
 	else if (flags & k_ELogLevelNotifyShort)
 	{
-		notifySS << "-t 10000";
+		notify.timeOut = 10000;
 	}
-
-	notifySS << " -u ";
 
 	if (error)
 	{
-		notifySS << "\"critical\" \"SLSsteam\" \"Error:\n";
+		notifySS << "Error:\n";
 	}
 	else if (warn)
 	{
-		notifySS << "\"normal\" \"SLSsteam\" \"Warning:\n";
-	}
-	else
-	{
-		notifySS << "\"normal\" \"SLSsteam\" \"";
+		notifySS << "Warning:\n";
 	}
 
 	//Leading quote is added by error/warn/none if statement above
-	notifySS << msg << "\"";
+	notifySS << msg;
 
-	return notifySS.str();
+	notify.msg = notifySS.str();
+
+	return notify;
 }
 
 void CLog::__log(const LogLevelFlags_t flags, const char* file, const char* function, const int line, const char* msg, va_list& vArgs)
@@ -147,11 +145,10 @@ void CLog::__log(const LogLevelFlags_t flags, const char* file, const char* func
 	//Use built string to check further down
 	const auto notification = buildNotification(flags, formatted.c_str());
 
-	if (shouldNotify(flags) && notification.size() > 0)
+	if (shouldNotify(flags) && notification.msg.size())
 	{
-		//TODO: Fix
-		//system(notification.c_str());
-		debug(file, function, line, "system(\"%s\")\n", notification.c_str());
+		Utils::notify("SLSsteam", notification.msg.c_str(), notification.timeOut);
+		debug(file, function, line, "dbus-notification(\"%s\")\n", notification.msg.c_str());
 	}
 
 	std::ostringstream prefixSS;
@@ -192,7 +189,7 @@ void CLog::__log(const LogLevelFlags_t flags, const char* file, const char* func
 	//Padding makes things nicer, but basically unreadable
 	ofstream << prefix << " " << formatted.c_str();
 
-	if (notification.size() > 0)
+	if (notification.msg.size() > 0)
 	{
 		ofstream << "\n";
 	}
