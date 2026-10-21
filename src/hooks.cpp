@@ -304,7 +304,7 @@ static uint32_t hkClientUnifiedServiceTransport_SendAndRecvMsg(CClientUnifiedSer
 		reinterpret_cast<CPlayer_GetUserStats_Response*>(recv)
 	);
 
-	if (ret == k_EResultNoResult)
+	if (!ret)
 	{
 		LOG_TRACE("Calling tramp\n");
 		ret = Hooks::CClientUnifiedServiceMethod_SendAndRecvMsg->tramp.fn(pUnifiedServiceTransport, name, send, recv, arg4);
