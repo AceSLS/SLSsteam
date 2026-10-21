@@ -13,6 +13,7 @@ namespace Utils
 	int exec(const std::vector<std::string>& executableList, const std::vector<std::string>& args, std::string* stdOut);
 	bool isNumber(const char* str);
 	std::string getFileSHA256(const std::filesystem::path& path);
+	bool notify(const char* title, const char* text, const int timeOut = -1);
 	std::vector<std::string> strsplit(const std::string& str, const std::string& delimeter);
 
 	template<typename T>

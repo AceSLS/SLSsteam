@@ -50,12 +50,18 @@ std::string ELogLevel_ToString(LogLevelFlags_t lvlFlags);
 
 class CLog
 {
+	struct Notification_t
+	{
+		std::string msg;
+		int timeOut;
+	};
+
 	std::ofstream ofstream;
 	std::unordered_set<std::string> msgHist {};
 	std::shared_mutex mutex;
 
 	bool shouldNotify(const LogLevelFlags_t flags);
-	std::string buildNotification(const LogLevelFlags_t flags, const char* msg);
+	Notification_t buildNotification(const LogLevelFlags_t flags, const char* msg);
 	void __log(const LogLevelFlags_t flags, const char* file, const char* function, const int line, const char* msg, va_list& vArgs);
 
 	//Calls to these will fully disappear from the release build
