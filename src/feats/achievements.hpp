@@ -24,7 +24,7 @@ namespace Achievements
 	std::unordered_set<uint64_t> getReviewersForGame(const AppId_t appId);
 	void setCooldown(const AppId_t appId);
 
-	bool tryGetPlayerStats
+	uint32_t tryGetPlayerStats
 	(
 		CClientUnifiedServiceTransport* serviceTransport,
 		const char* serviceName,
@@ -33,7 +33,7 @@ namespace Achievements
 		const uint64_t steamId
 	);
 	//CPlayer_GetUserStats
-	bool sendAndRecvGetPlayerStats
+	uint32_t sendAndRecvGetPlayerStats
 	(
 		CClientUnifiedServiceTransport* serviceTransport,
 		const char* serviceName,

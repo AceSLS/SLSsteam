@@ -112,7 +112,7 @@ void Achievements::setCooldown(const AppId_t appId)
 	LOG_DEBUG("Set cooldown for %u for %u minutes\n", appId, COOLDOWN_MINUTES);
 }
 
-bool Achievements::tryGetPlayerStats
+uint32_t Achievements::tryGetPlayerStats
 (
 	CClientUnifiedServiceTransport* serviceTransport,
 	const char* serviceName,
@@ -123,11 +123,11 @@ bool Achievements::tryGetPlayerStats
 {
 	LOG_DEBUG("CPlayer_GetUserStats_Request->set_steamid(%lu)\n", steamId);
 	send->set_steamid(steamId);
-	const bool res = serviceTransport->sendAndRecvMsg(serviceName, send, recv);
+	const uint32_t res = serviceTransport->sendAndRecvMsg(serviceName, send, recv);
 
-	if (!res)
+	if (!CClientUnifiedServiceTransport::wasResultSuccess(res))
 	{
-		return false;
+		return k_EResultNoResult;
 	}
 
 	recv->clear_crc_stats();
@@ -137,10 +137,10 @@ bool Achievements::tryGetPlayerStats
 
 	preferredOwners[appId] = steamId;
 	LOG_DEBUG("Using steamId %lu for %u\n", steamId, appId);
-	return true;
+	return res;
 }
 
-bool Achievements::sendAndRecvGetPlayerStats
+uint32_t Achievements::sendAndRecvGetPlayerStats
 (
 	CClientUnifiedServiceTransport* serviceTransport,
 	const char* serviceName,
@@ -150,13 +150,13 @@ bool Achievements::sendAndRecvGetPlayerStats
 {
 	if (strcmp(serviceName, GET_PLAYER_STATS_SERVICE_NAME) != 0)
 	{
-		return false;
+		return k_EResultNoResult;
 	}
 
 	//Don't do anything for legit apps
 	if (g_pSteamEngine->getUser(0)->isSubscribed(send->appid()))
 	{
-		return false;
+		return k_EResultNoResult;
 	}
 
 	const AppId_t appId = send->appid();
@@ -166,10 +166,10 @@ bool Achievements::sendAndRecvGetPlayerStats
 	//by review fetching in games that spam stat requests
 	if (preferredOwners.contains(appId))
 	{
-		const bool res = tryGetPlayerStats(serviceTransport, serviceName, send, recv, preferredOwners.at(appId));
+		const uint32_t res = tryGetPlayerStats(serviceTransport, serviceName, send, recv, preferredOwners.at(appId));
 		if (res)
 		{
-			return true;
+			return res;
 		}
 
 		preferredOwners.erase(send->appid());
@@ -179,16 +179,16 @@ bool Achievements::sendAndRecvGetPlayerStats
 
 	for (const auto& id : reviewers)
 	{
-		const bool res = tryGetPlayerStats(serviceTransport, serviceName, send, recv, id);
+		const uint32_t res = tryGetPlayerStats(serviceTransport, serviceName, send, recv, id);
 		if (res)
 		{
-			return true;
+			return res;
 		}
 	}
 
 	setCooldown(appId);
 	LOG_DEBUG("No schemas for %u found! Falling back to offline cache\n", appId);
-	return true;
+	return k_EResultNoConnection;
 }
 
 uint32_t Achievements::tryGetUserStats(CAPIJob* job, CProtoBufMsgBase* send, const uint32_t timeOut, CProtoBufMsgBase* recv, const EMsg targetType, const uint64_t steamId)
