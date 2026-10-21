@@ -23,4 +23,5 @@ public:
 
 	CSteamId getSteamId();
 	bool setLegacyCDKey(const AppId_t appId, const char* key);
+	bool updateAppOwnershipTicket(const AppId_t appId, const bool staleOnly);
 };
