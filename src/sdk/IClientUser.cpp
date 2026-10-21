@@ -33,3 +33,9 @@ bool IClientUser::setLegacyCDKey(const AppId_t appId, const char* key)
 {
 	return MemHlp::callVFunc<bool(*)(void*, AppId_t, const char*)>(VFTIndexes::IClientUser::SetLegacyCDKey.index, this, appId, key);
 }
+
+
+bool IClientUser::updateAppOwnershipTicket(const AppId_t appId, const bool staleOnly)
+{
+	return Hooks::IClientUser_BUpdateAppOwnershipTicket->originalFn.fn(this, appId, staleOnly);
+}
