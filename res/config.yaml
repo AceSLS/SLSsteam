@@ -56,6 +56,7 @@ FakeOffline:
 #Use 0 as a key to set for all unowned Apps
 #Do not run multiple apps under the same AppId simultaneously! It's possible but
 #will most likely cause undefined behaviour
+#The last app you launched will be used as the real appId
 FakeAppIds:
 
 #Override Depot manifest IDs

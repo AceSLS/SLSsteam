@@ -772,9 +772,9 @@ static bool hkClientAppManager_BCanRemotePlayTogether(IClientAppManager* pAppMan
 	return true;
 }
 
-static void* hkClientAppManager_LaunchApp(IClientAppManager* pAppManager, GameId_t* pAppId, uint32_t a2, uint32_t a3, const char* a4)
+static void* hkClientAppManager_LaunchApp(IClientAppManager* pAppManager, GameId_t* pGameId, uint32_t a2, uint32_t a3, const char* a4)
 {
-	if (pAppId)
+	if (pGameId)
 	{
 		LOG_ONCE
 		(
@@ -782,18 +782,19 @@ static void* hkClientAppManager_LaunchApp(IClientAppManager* pAppManager, GameId
 
 			Hooks::IClientAppManager_LaunchApp->name.c_str(),
 			reinterpret_cast<void*>(pAppManager),
-			*pAppId,
+			*pGameId,
 			a2,
 			a3,
 			a4
 		);
 
-		Ticket::launchApp(*pAppId);
+		FakeAppIds::launchApp(*pGameId);
+		Ticket::launchApp(*pGameId);
 	}
 
 	LOG_TRACE("Calling original\n");
 	//Do not do anything in post! Otherwise App launching will break
-	return Hooks::IClientAppManager_LaunchApp->originalFn.fn(pAppManager, pAppId, a2, a3, a4);
+	return Hooks::IClientAppManager_LaunchApp->originalFn.fn(pAppManager, pGameId, a2, a3, a4);
 }
 
 static bool hkClientAppManager_IsAppDlcInstalled(IClientAppManager* pAppManager, AppId_t appId, AppId_t dlcId)
