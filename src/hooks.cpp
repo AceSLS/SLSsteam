@@ -697,6 +697,15 @@ static uint32_t hkUser_SpawnGameId
 
 	Apps::spawnGame(pGameId, newExe, newCmd);
 
+	//Clean env after we modified it, in case people are autoloading rtld-audit libraries
+	if (newCmd.find("LD_AUDIT=") == std::string::npos)
+	{
+		//We can't unset LD_AUDIT from main.cpp anymore
+		//So we unset it just before games get spawned
+		newExe = "env";
+		newCmd = "env -u LD_AUDIT " + newCmd;
+	}
+
 	LOG_DEBUG("Launching gameId %lu with cmd %s as %s\n", *pGameId, newExe.c_str(), newCmd.c_str());
 
 	const uint32_t ret = Hooks::CUser_SpawnGameId->tramp.fn
