@@ -8,6 +8,7 @@
 
 namespace FakeAppIds
 {
+	extern GameId_t lastLaunchedGame;
 	extern std::unordered_map<HSteamPipe, AppId_t> fakeAppIdMap;
 	extern std::unordered_map<HServerRequest, AppId_t> fakeAppIdMapServer;
 	extern std::unordered_map<uint64_t, AppId_t> fakeAppIdMapPings;
@@ -18,6 +19,7 @@ namespace FakeAppIds
 
 	//General functionality
 	void closePipe(const HSteamPipe pipe);
+	void launchApp(const GameId_t gameId);
 	void setAppIdForCurrentPipe(AppId_t& appId);
 	void runIPCFrame(const bool post, const EIPCInterface interface);
 

@@ -1,10 +1,9 @@
 #include "fakeappid.hpp"
 
 #include "../config.hpp"
-#include "../process.hpp"
 
 
-
+GameId_t FakeAppIds::lastLaunchedGame = 0;
 std::unordered_map<HSteamPipe, AppId_t> FakeAppIds::fakeAppIdMap = std::unordered_map<HSteamPipe, AppId_t>();
 std::unordered_map<HServerRequest, AppId_t> FakeAppIds::fakeAppIdMapServer = std::unordered_map<HServerRequest, AppId_t>();
 std::unordered_map<uint64_t, AppId_t> FakeAppIds::fakeAppIdMapPings = std::unordered_map<uint64_t, AppId_t>();
@@ -114,9 +113,21 @@ void FakeAppIds::closePipe(const HSteamPipe pipe)
 	}
 }
 
+void FakeAppIds::launchApp(const GameId_t gameId)
+{
+	lastLaunchedGame = gameId;
+}
+
 void FakeAppIds::setAppIdForCurrentPipe(AppId_t& appId)
 {
-	fakeAppIdMap[g_pSteamEngine->getUtils()->getCurrentSteamPipe()] = appId;
+	//Do not fill fakeAppIdMap with non-steam games
+	if (lastLaunchedGame & GAME_TYPE_SHORTCUT)
+	{
+		return;
+	}
+
+	fakeAppIdMap[g_pSteamEngine->getUtils()->getCurrentSteamPipe()] = lastLaunchedGame;
+	//fakeAppIdMap[g_pSteamEngine->getUtils()->getCurrentSteamPipe()] = appId;
 
 	//Do not change Steam Client itself (AppId 0)
 	if (!appId)
@@ -128,7 +139,7 @@ void FakeAppIds::setAppIdForCurrentPipe(AppId_t& appId)
 	if (newAppId)
 	{
 		LOG_DEBUG("Changing AppId of %u\n", appId);
-		//appId = newAppId;
+		appId = newAppId;
 	}
 }
 
