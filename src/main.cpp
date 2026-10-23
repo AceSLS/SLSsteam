@@ -99,6 +99,20 @@ static void setup()
 		return;
 	}
 
+	if (strcmp(proc.name, "steamwebhelper") == 0)
+	{
+		//Clearing the environment is literally useless now
+		//steam starts srt-client-container -> srt-bwrap -> pv-adverb -> steam (we inject here)
+		//srt-client-container is also responsible for spawning games, so we can't unset it early enough anymore
+		//Any release
+		cleanEnvVar("LD_AUDIT", "SLSsteam.so");
+		cleanEnvVar("LD_AUDIT", "library-inject.so");
+
+		//Arch release
+		cleanEnvVar("LD_AUDIT", "libSLSsteam.so");
+		cleanEnvVar("LD_AUDIT", "libSLS-library-inject.so");
+	}
+
 	//Do not do anything in other processes
 	if (strcmp(proc.name, "steam") != 0)
 	{
@@ -143,17 +157,6 @@ static void load()
 
 	//Necessary for dbus notifications
 	setenv("DBUS_SESSION_BUS_ADDRESS", "unix:path=/run/user/1000/bus", 1);
-
-	//Clearing the environment is literally useless now
-	//steam starts srt-client-container -> srt-bwrap -> pv-adverb -> steam (we inject here)
-	//srt-client-container is also responsible for spawning games, so we can't unset it early enough anymore
-	//Any release
-	//cleanEnvVar("LD_AUDIT", "SLSsteam.so");
-	//cleanEnvVar("LD_AUDIT", "library-inject.so");
-
-	////Arch release
-	//cleanEnvVar("LD_AUDIT", "libSLSsteam.so");
-	//cleanEnvVar("LD_AUDIT", "libSLS-library-inject.so");
 
 	if (!g_config.init())
 	{
