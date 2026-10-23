@@ -220,10 +220,10 @@ bool Utils::notify(const char* title, const char* text, const int timeOut)
 	dbus_message_iter_append_basic(&args, DBUS_TYPE_STRING, &title);
 	dbus_message_iter_append_basic(&args, DBUS_TYPE_STRING, &text);
 
-	dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY, "as", &array);
+	dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY, "s", &array);
 	dbus_message_iter_close_container(&args, &array);
 
-	dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY, "a{sv}", &array);
+	dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY, "{sv}", &array);
 	dbus_message_iter_close_container(&args, &array);
 
 	dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &timeOut);
