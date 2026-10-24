@@ -251,6 +251,11 @@ unsigned int la_version(unsigned int)
 
 char* la_objsearch(const char* name, __attribute__((unused)) uintptr_t* cookie, __attribute__((unused)) unsigned int flag)
 {
+	if (!setupSuccess)
+	{
+		return const_cast<char*>(name);
+	}
+
 	const auto nameStr = std::string(name);
 	if (nameStr.ends_with("/crashhandler.so"))
 	{
@@ -263,6 +268,11 @@ char* la_objsearch(const char* name, __attribute__((unused)) uintptr_t* cookie, 
 
 unsigned int la_objopen(struct link_map *map, __attribute__((unused)) Lmid_t lmid, __attribute__((unused)) uintptr_t *cookie)
 {
+	if (!setupSuccess)
+	{
+		return 0;
+	}
+
 	const std::string name = map->l_name;
 
 	if (name.ends_with("/steamclient.so"))
