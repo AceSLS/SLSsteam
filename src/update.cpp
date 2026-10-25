@@ -36,7 +36,7 @@ bool Updater::init()
 
 	for (const auto url : urls)
 	{
-		res = Curl::downloadString(url, data);
+		res = Curl::downloadString(url, data, Curl::DEFAULT_TIMEOUT, false);
 		LOG_INFO("Curl Res: %u for %s with len %lu\n", res, url, data.size());
 
 		if (res == 0 && data.starts_with("SafeModeHashes:\n")) //User reported empty responses
