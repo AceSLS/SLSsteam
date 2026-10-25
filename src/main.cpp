@@ -23,6 +23,7 @@
 #include <cstring>
 #include <dlfcn.h>
 #include <filesystem>
+#include <gnu/libc-version.h>
 #include <link.h>
 #include <memory>
 #include <string>
@@ -235,12 +236,18 @@ static void load()
 		//Funsy easter egg :)
 		if (static_cast<unsigned int>(ymd.month()) == 2 && static_cast<unsigned int>(ymd.day()) == 22)
 		{
-			LOG_NOTIFY("Happy birthday SLSsteam!");
+			LOG_NOTIFYLONG("Happy birthday SLSsteam!");
 		}
 		else
 		{
 			LOG_NOTIFY("Loaded successfully");
 		}
+	}
+
+	int major, minor;
+	if (Utils::isGLIBCBugged(&major, &minor))
+	{
+		LOG_NOTIFYERROR("Bugged glibc version detected (%i.%i)!\nIf possible update to glibc 2.43+, otherwise expect crashes in \"random\" places", major, minor);
 	}
 }
 
