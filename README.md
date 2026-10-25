@@ -55,6 +55,6 @@ Feel free to join our [Discord](https://discord.gg/j3ZzjeV4eQ) instead.
 
 [steamnetsock-patch](https://github.com/yesyes0649/steamnetsock-patch) & [eos-proxy](https://github.com/yesyes0649/eos-proxy): Makes FakeAppIds work in some games where it otherwise wouldn't
 
-[CloudRedirect](https://github.com/Selectively11/CloudRedirect): Enables Steam Cloud, playtime & achievement sync on unowned games
+[CloudRedirect](https://github.com/crghofficial/cloudredirect): Enables Steam Cloud, playtime & achievement sync on unowned games
 
 [SteamDB App Parser](https://greasyfork.org/en/scripts/543010-steamdb-app-parser): Vibecoded script that adds a button on SteamDB Game's pages to generate AdditionalApps & DlcData
