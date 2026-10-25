@@ -1,6 +1,7 @@
 #include "curl.hpp"
 
 #include "log.hpp"
+#include "utils.hpp"
 
 #include <dlfcn.h>
 #include <thread>
@@ -52,7 +53,7 @@ int Curl::downloadString(const char* url, const std::vector<std::string>& header
 	int result = 0;
 	Request_t req { url, headers, out, timeOut, result };
 
-	if (async)
+	if (async && Utils::isGLIBCBugged())
 	{
 		//This might be considered a warcrime. But it's necessary on glibc < 2.43
 		//because of a bug with TLS that causes a null pointer dereference

@@ -6,6 +6,7 @@
 #include <cmath>
 #include <cstring>
 #include <filesystem>
+#include <gnu/libc-version.h>
 #include <regex>
 #include <string>
 #include <sys/wait.h>
@@ -158,6 +159,34 @@ bool Utils::isNumber(const char* str)
 	}
 
 	return true;
+}
+
+bool Utils::isGLIBCBugged(int* pMajorVer, int* pMinorVer)
+{
+	static int major = 0;
+	static int minor = 0;
+
+	if (!major)
+	{
+		const char* ver = gnu_get_libc_version();
+		const auto split = strsplit(ver, "\\.");
+
+		major = std::stoi(split[0]);
+		minor = std::stoi(split[1]);
+
+		LOG_DEBUG("Using glibc %i.%i\n", major, minor);
+	}
+
+	if (pMajorVer)
+	{
+		*pMajorVer = major;
+	}
+	if (pMinorVer)
+	{
+		*pMinorVer = minor;
+	}
+
+	return major <= 2 && minor <= 42;
 }
 
 std::string Utils::getFileSHA256(const std::filesystem::path& path)
