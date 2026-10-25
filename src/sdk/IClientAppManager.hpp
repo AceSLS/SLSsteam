@@ -35,7 +35,10 @@ SDK_Struct DepotInfo_t
 	AppId_t depotId;			//0x0
 	AppId_t appId;				//0x4
 	uint64_t manifestId;		//0x8
-	uint8_t __pad0x10[0x10];	//0x10
+	uint64_t size;				//0x10
+	uint8_t __pad0x18[0x4];		//0x18
+	bool lcsRequired;			//0x1C
+	uint8_t __pad0x1D[0x3];		//0x1D
 }; //0x20
 
 SDK_Class IClientAppManager
