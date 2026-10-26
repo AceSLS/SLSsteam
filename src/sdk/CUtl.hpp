@@ -75,77 +75,77 @@ public:
 }; //0x40
 
 
-//TODO: Update to 64 bits
-//template<typename T, typename T2>
-//SDK_Class CUtlRBTree
-//{
-//public:
-//	struct Element_t
-//	{
-//		int32_t leftIndex;			//0x0
-//		int32_t rightIndex;			//0x4
-//		uint8_t __pad0x0[0x8];		//0x8
-//		T key;						//0x10
-//		T2* value;					//0x14
-//	}; //0x18
-//
-//	uint8_t __pad0x0[0x14];		//0x0
-//	int32_t rootNodeIndex;		//0x14
-//	uint32_t allocated;			//0x18
-//	uint8_t __pad0x1C[0x4];		//0x1C
-//	uint32_t size;				//0x20
-//	uint8_t __pad0x24[0x4];		//0x24
-//	Element_t* elements;		//0x28
-//
-//	Element_t* find(const T key)
-//	{
-//		int32_t index = rootNodeIndex;
-//
-//		for (;;)
-//		{
-//			const auto node = &elements[index];
-//
-//			if (node->key == key)
-//			{
-//				return node;
-//			}
-//
-//			if (key > node->key)
-//			{
-//				index = node->rightIndex;
-//			}
-//			else
-//			{
-//				index = node->leftIndex;
-//			}
-//
-//			if (index == -1)
-//			{
-//				break;
-//			}
-//		}
-//
-//		return nullptr;
-//	}
-//};
-//
-//template<typename T, typename T2>
-//SDK_Class CUtlMap
-//{
-//public:
-//	CUtlRBTree<T, T2> tree;		//0x0
-//
-//	T2* at(size_t key)
-//	{
-//		const auto node = tree.find(key);
-//		if (node)
-//		{
-//			return node->value;
-//		}
-//
-//		return nullptr;
-//	}
-//};
+template<typename T, typename T2>
+SDK_Class CUtlRBTree
+{
+public:
+	struct Element_t
+	{
+		int32_t leftIndex;			//0x0
+		int32_t rightIndex;			//0x4
+		uint8_t __pad0x0[0x8];		//0x8
+		T key;						//0x10
+		uint8_t __pad0x14[0x4];		//0x14
+		T2* value;					//0x18
+	}; //0x20
+
+	uint8_t __pad0x0[0x18];		//0x0
+	int32_t rootNodeIndex;		//0x18
+	uint32_t allocated;			//0x1C
+	uint8_t __pad0x1C[0x4];		//0x20
+	uint32_t size;				//0x24
+	uint8_t __pad0x24[0x8];		//0x28
+	Element_t* elements;		//0x30
+
+	Element_t* find(const T key)
+	{
+		int32_t index = rootNodeIndex;
+
+		for (;;)
+		{
+			const auto node = &elements[index];
+
+			if (node->key == key)
+			{
+				return node;
+			}
+
+			if (key > node->key)
+			{
+				index = node->rightIndex;
+			}
+			else
+			{
+				index = node->leftIndex;
+			}
+
+			if (index == -1)
+			{
+				break;
+			}
+		}
+
+		return nullptr;
+	}
+};
+
+template<typename T, typename T2>
+SDK_Class CUtlMap
+{
+public:
+	CUtlRBTree<T, T2> tree;		//0x0
+
+	T2* at(size_t key)
+	{
+		const auto node = tree.find(key);
+		if (node)
+		{
+			return node->value;
+		}
+
+		return nullptr;
+	}
+}; //0x8?
 
 //Null terminated wrapper
 SDK_Class CUtlString
