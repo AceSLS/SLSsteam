@@ -46,6 +46,11 @@ bool CUser::checkAppOwnership(const AppId_t appId, AppOwnershipInfo_t* pInfo)
 	return Hooks::CUser_CheckAppOwnership->tramp.fn(this, appId, pInfo);
 }
 
+steamsize_t CUser::getSubscribedApps(AppId_t* pAppIds, steamsize_t numAppIds)
+{
+	return Hooks::CUser_GetSubscribedApps->tramp.fn(this, pAppIds, numAppIds, 1);
+}
+
 bool CUser::isSubscribed(const AppId_t appId)
 {
 	AppOwnershipInfo_t info {};

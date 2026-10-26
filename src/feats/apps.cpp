@@ -233,19 +233,36 @@ void Apps::getLegacyCDKey(const AppId_t appId)
 
 void Apps::getSubscribedApps(AppId_t* appList, const uint32_t size, uint32_t& count)
 {
+	const auto user = g_pSteamEngine->getUser();
 	const auto addedApps = g_config.addedAppIds.get();
+
+	auto apps = std::vector<AppId_t>();
+	apps.resize(count);
+	user->getSubscribedApps(apps.data(), apps.size());
+
+	//Collect subscribed + AdditionalApps in a set to deduplicate them
+	//Proly entirely unnecessary, but whatever
+	auto merged = std::unordered_set<AppId_t>();
+	for (const auto& app : apps)
+	{
+		merged.emplace(app);
+	}
+	for (const auto& app : *addedApps)
+	{
+		merged.emplace(app);
+	}
+
+	count = merged.size();
 
 	//Valve calls this function twice, once with size of 0 then again
 	if (!size || !appList)
 	{
-		count = count + addedApps->size();
 		return;
 	}
 
-	//TODO: Maybe Add check if AppId already in list before blindly appending
-	for (auto& appId : *addedApps)
+	for (unsigned int i = 0; i < merged.size(); i++)
 	{
-		appList[count++] = appId;
+		appList[i] = *std::next(merged.begin(), i);
 	}
 }
 
