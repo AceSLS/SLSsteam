@@ -59,7 +59,8 @@ bool CUser::isSubscribed(const AppId_t appId)
 		return false;
 	}
 
-	return info.ownsLicense && !info.licenseExpired;
+	LOG_ONCE("AppOwnership for %u, owns %u, expired %u, num %u\n", appId, info.ownsLicense, info.licenseExpired, info.numLicenses);
+	return info.ownsLicense && !info.licenseExpired && info.numLicenses;
 }
 
 void CUser::postCallback(const ECallbackType type, void* pCallback, const steamsize_t callbackSize)
