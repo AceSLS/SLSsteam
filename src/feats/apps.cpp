@@ -15,7 +15,6 @@
 #include <string>
 
 
-bool Apps::applistRequested;
 std::unordered_set<AppId_t> Apps::privateApps = std::unordered_set<AppId_t>();
 
 std::mutex Apps::pendingLicenseChangesMutex;
@@ -90,11 +89,11 @@ void Apps::buildDepotDependency(CUtlVector<DepotInfo_t>* depots, CUtlVector<Depo
 	}
 }
 
-bool Apps::checkAppOwnership(AppId_t appId, AppOwnershipInfo_t* pInfo)
+bool Apps::checkAppOwnership(const AppId_t appId, AppOwnershipInfo_t* pInfo)
 {
 	//Wait Until GetSubscribedApps gets called once to let Steam request and populate legit data first.
 	//Afterwards modifying should hopefully not affect false positives anymore
-	if (!applistRequested || !pInfo || !g_currentSteamId.isSet())
+	if (!g_currentSteamId.isSet())
 	{
 		return false;
 	}
@@ -248,8 +247,6 @@ void Apps::getSubscribedApps(AppId_t* appList, const uint32_t size, uint32_t& co
 	{
 		appList[count++] = appId;
 	}
-
-	applistRequested = true;
 }
 
 void Apps::parseProductInfoFromResponse(CMsgClientPICSProductInfoResponse* msg)
