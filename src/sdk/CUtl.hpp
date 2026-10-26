@@ -103,6 +103,11 @@ public:
 
 		for (;;)
 		{
+			if (index == -1)
+			{
+				break;
+			}
+
 			const auto node = &elements[index];
 
 			if (node->key == key)
@@ -117,11 +122,6 @@ public:
 			else
 			{
 				index = node->leftIndex;
-			}
-
-			if (index == -1)
-			{
-				break;
 			}
 		}
 
