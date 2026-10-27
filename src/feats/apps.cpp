@@ -284,6 +284,16 @@ void Apps::parseProductInfoFromResponse(CMsgClientPICSProductInfoResponse* msg)
 		pendingLicenseChanges.erase(app.appid());
 	}
 
+	for (const auto& app : msg->unknown_appids())
+	{
+		if (!pendingLicenseChanges.contains(app))
+		{
+			continue;
+		}
+
+		pendingLicenseChanges.erase(app);
+	}
+
 	postAppLicensesChanged(set);
 }
 
