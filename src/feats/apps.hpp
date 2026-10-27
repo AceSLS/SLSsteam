@@ -9,6 +9,7 @@
 
 namespace Apps
 {
+	extern bool applistRequested;
 	extern std::unordered_set<AppId_t> privateApps;
 
 	extern std::mutex pendingLicenseChangesMutex;
