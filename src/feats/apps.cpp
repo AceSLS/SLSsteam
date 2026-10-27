@@ -92,8 +92,6 @@ void Apps::buildDepotDependency(CUtlVector<DepotInfo_t>* depots, CUtlVector<Depo
 
 bool Apps::checkAppOwnership(const AppId_t appId, AppOwnershipInfo_t* pInfo)
 {
-	//Wait Until GetSubscribedApps gets called once to let Steam request and populate legit data first.
-	//Afterwards modifying should hopefully not affect false positives anymore
 	if (!g_currentSteamId.isSet())
 	{
 		return false;
