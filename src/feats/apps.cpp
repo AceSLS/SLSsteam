@@ -15,6 +15,7 @@
 #include <string>
 
 
+bool Apps::applistRequested;
 std::unordered_set<AppId_t> Apps::privateApps = std::unordered_set<AppId_t>();
 
 std::mutex Apps::pendingLicenseChangesMutex;
@@ -264,6 +265,8 @@ void Apps::getSubscribedApps(AppId_t* appList, const uint32_t size, uint32_t& co
 	{
 		appList[i] = *std::next(merged.begin(), i);
 	}
+
+	applistRequested = true;
 }
 
 void Apps::parseProductInfoFromResponse(CMsgClientPICSProductInfoResponse* msg)

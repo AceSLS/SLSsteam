@@ -331,7 +331,9 @@ void CConfig::setAdditionalApps(const std::unordered_set<AppId_t>& appIds, const
 	auto _removedApps = removedApps.copy();
 	const auto prevAppIds = addedAppIds.copy();
 
-	if (!firstLoad)
+	//No need to post a AppLicenseChanged_t callback
+	//when GetSubscribedApps hasn't been called yet
+	if (!firstLoad && Apps::applistRequested)
 	{
 		for (const auto& appId : prevAppIds)
 		{
