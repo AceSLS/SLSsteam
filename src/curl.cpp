@@ -22,8 +22,9 @@ static void actualDownloadString(Curl::Request_t* req)
 	CURL* curl = curl_easy_init();
 	if (!curl)
 	{
-		LOG_ERROR("Failed to initialize curl!");
+		LOG_CUSTOM(k_ELogLevelError | k_ELogLevelOnce, "Failed to initialize curl!\n");
 		req->result = CURLE_FAILED_INIT;
+		return;
 	}
 
 	curl_easy_setopt(curl, CURLOPT_URL, req->url);
