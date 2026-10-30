@@ -174,6 +174,8 @@ namespace Hooks
 	typedef gameserverdetails_t*(*CSteamMatchmakingServers_GetServerDetails_t)(void*, HServerRequest, uint32_t);
 	typedef HServerRequest(*CSteamMatchmakingServers_RequestInternetServerList_t)(void*, AppId_t, void*, uint32_t, void*);
 
+	typedef void(*CUDPConnection_BAsyncSend_t)(CUDPConnection*, EUDPConnectionSendType, void*, steamsize_t);
+
 	typedef bool(*CUser_CheckAppOwnership_t)(CUser*, AppId_t, AppOwnershipInfo_t*);
 	typedef uint32_t(*CUser_GetSubscribedApps_t)(CUser*, AppId_t*, uint32_t, uint8_t);
 	typedef uint32_t(*CUser_PostCallbackToAppId_t)(CUser*, AppId_t, ECallbackType, void*, steamsize_t);
@@ -204,6 +206,8 @@ namespace Hooks
 
 	extern DetourHook<CSteamEngine_ProcessIPCFrame_t>* CSteamEngine_ProcessIPCFrame;
 	extern DetourHook<CSteamEngine_SetAppIdForCurrentPipe_t>* CSteamEngine_SetAppIdForCurrentPipe;
+
+	extern DetourHook<CUDPConnection_BAsyncSend_t>* CUDPConnection_BAsyncSend;
 
 	extern DetourHook<CUser_CheckAppOwnership_t>* CUser_CheckAppOwnership;
 	extern DetourHook<CUser_GetSubscribedApps_t>* CUser_GetSubscribedApps;

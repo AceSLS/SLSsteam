@@ -156,6 +156,17 @@ namespace Patterns
 		};
 	}
 
+	namespace CUDPConnection
+	{
+		Pattern_t BAsyncSend
+		{
+			"CUDPConnection::BAsyncSend",
+			"03 43 ? 8D 50",
+			SigFollowMode::PrologueUpwards,
+			std::vector<int16_t> { 0x55, 0x41, 0xD6, 0x89, 0x49, 0x56, 0x41 }
+		};
+	};
+
 	namespace CUserAppManager
 	{
 		Pattern_t BuildDepotDependency
