@@ -405,7 +405,6 @@ void Apps::runIPCFrame()
 	g_config.newApps = g_config.newApps.defaultInst();
 }
 
-
 void Apps::spawnGame(const GameId_t* gameId, std::string& cmd, std::string& cmdline)
 {
 	if (!gameId)
