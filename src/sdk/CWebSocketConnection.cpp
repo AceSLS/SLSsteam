@@ -12,5 +12,3 @@ bool CWebSocketConnection::buildAndAsyncSendFrameHk(const EWebSocketConnectionSe
 {
 	return Hooks::CWebSocketConnection_BBuildAndAsyncSendFrame->hookFn.fn(this, type, data, dataSize);
 }
-
-CWebSocketConnection* g_pWebSocketConnection = nullptr;

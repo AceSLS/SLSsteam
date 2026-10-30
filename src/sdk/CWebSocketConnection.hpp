@@ -17,5 +17,3 @@ public:
 	bool buildAndAsyncSendFrame(const EWebSocketConnectionSendType type, void* data, const steamsize_t dataSize);
 	bool buildAndAsyncSendFrameHk(const EWebSocketConnectionSendType type, void* data, const steamsize_t dataSize);
 };
-
-extern CWebSocketConnection* g_pWebSocketConnection;
