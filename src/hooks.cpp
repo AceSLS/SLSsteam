@@ -503,50 +503,94 @@ static AppId_t hkSteamEngine_SetAppIdForCurrentPipe(CSteamEngine* pSteamEngine, 
 	return ret;
 }
 
+enum class ESendType
+{
+	WebSocket = 0,
+	UDPConnection = 1
+};
+
+static bool hkSendPacket(void* pThis, ESendType type, void* pData, steamsize_t size)
+{
+	CNetPacket packet {};
+	packet.body = reinterpret_cast<CNetPacketBody*>(Steam::Plat_Alloc(size));
+
+	if (!packet.body)
+	{
+		LOG_ERROR("Failed to allocate body for modifying outgoing CNetPacket!\n");
+		return false;
+	}
+
+	memcpy(packet.body, pData, size);
+	packet.size = size;
+
+	LOG_DEBUG
+	(
+		"%s::SendPkt(%p) %s -> 0x%x\n",
+
+		MemHlp::getTypeName(pThis),
+		reinterpret_cast<void*>(pThis),
+		packet.getProtoBufTypeName().c_str(),
+		packet.getType()
+	);
+
+	if (!packet.isValid() || !packet.isProtoBuf())
+	{
+		return false;
+	}
+
+	Lua::fireCallback(Lua::Callbacks::Network_SendPkt, &packet);
+
+	Achievements::sendMsg(&packet);
+	Apps::sendMsg(&packet);
+	FakeAppIds::sendMsg(&packet);
+
+	bool success = true;
+
+	LOG_TRACE("Calling tramp\n");
+	switch (type)
+	{
+		case ESendType::UDPConnection:
+			Hooks::CUDPConnection_BAsyncSend->tramp.fn
+			(
+				reinterpret_cast<CUDPConnection*>(pThis),
+				k_EUDPConnectionSendRaw,
+				packet.body,
+				packet.size
+			);
+			break;
+
+		case ESendType::WebSocket:
+			success = Hooks::CWebSocketConnection_BBuildAndAsyncSendFrame->tramp.fn
+			(
+				reinterpret_cast<CWebSocketConnection*>(pThis),
+				k_EWebSocketConnectionSendRaw,
+				packet.body,
+				packet.size
+			);
+			break;
+	}
+
+	packet.free();
+	return success;
+}
+
+static void hkUDPConnection_BAsyncSend(CUDPConnection* pNetConnection, EUDPConnectionSendType type, void* pData, steamsize_t dataSize)
+{
+	if (type == k_EUDPConnectionSendRaw)
+	{
+		hkSendPacket(pNetConnection, ESendType::UDPConnection, pData, dataSize);
+		return;
+	}
+
+	LOG_TRACE("Calling tramp\n");
+	Hooks::CUDPConnection_BAsyncSend->tramp.fn(pNetConnection, type, pData, dataSize);
+}
+
 static bool hkWebSocketConnection_BBuildAndAsyncSendFrame(CWebSocketConnection* pWebSocketConnection, EWebSocketConnectionSendType type, void* pData, steamsize_t dataSize)
 {
 	if (type == k_EWebSocketConnectionSendRaw)
 	{
-		//Freeing pData royally fucks up memory since
-		//it gets freed sometime after the function returns
-		//(going up the callstack around 5 times)
-		CNetPacket packet {};
-		packet.body = reinterpret_cast<CNetPacketBody*>(Steam::Plat_Alloc(dataSize));
-
-		if (packet.body)
-		{
-			memcpy(packet.body, pData, dataSize);
-			packet.size = dataSize;
-
-			LOG_DEBUG
-			(
-				"SendPkt with CWebSocketConnection at %p %s -> 0x%x\n",
-				reinterpret_cast<void*>(pWebSocketConnection),
-				packet.getProtoBufTypeName().c_str(),
-				packet.getType()
-			);
-
-			if (packet.isValid() && packet.isProtoBuf())
-			{
-				//Multiple sockets in use, we grab the main one
-				if (!g_pWebSocketConnection && packet.getProtoBufType() == k_EMsgClientLogon)
-				{
-					g_pWebSocketConnection = reinterpret_cast<CWebSocketConnection*>(pWebSocketConnection);
-				}
-
-				Lua::fireCallback(Lua::Callbacks::Network_SendPkt, &packet);
-
-				Achievements::sendMsg(&packet);
-				Apps::sendMsg(&packet);
-				FakeAppIds::sendMsg(&packet);
-			}
-
-			LOG_TRACE("Calling tramp\n");
-			bool success = Hooks::CWebSocketConnection_BBuildAndAsyncSendFrame->tramp.fn(pWebSocketConnection, type, packet.body, packet.size);
-
-			packet.free();
-			return success;
-		}
+		return hkSendPacket(pWebSocketConnection, ESendType::WebSocket, pData, dataSize);
 	}
 
 	LOG_TRACE("Calling tramp\n");
@@ -1246,6 +1290,8 @@ namespace Hooks
 	DetourHook<CSteamEngine_ProcessIPCFrame_t>* CSteamEngine_ProcessIPCFrame = nullptr;
 	DetourHook<CSteamEngine_SetAppIdForCurrentPipe_t>* CSteamEngine_SetAppIdForCurrentPipe = nullptr;
 
+	DetourHook<CUDPConnection_BAsyncSend_t>* CUDPConnection_BAsyncSend = nullptr;
+
 	DetourHook<CUser_CheckAppOwnership_t>* CUser_CheckAppOwnership = nullptr;
 	DetourHook<CUser_GetSubscribedApps_t>* CUser_GetSubscribedApps = nullptr;
 	DetourHook<CUser_PostCallbackToAppId_t>* CUser_PostCallbackToAppId = nullptr;
@@ -1363,6 +1409,8 @@ bool Hooks::init()
 
 	CSteamEngine_ProcessIPCFrame = new DetourHook(Patterns::CSteamEngine::ProcessIPCFrame, hkSteamEngine_ProcessIPCFrame);
 	CSteamEngine_SetAppIdForCurrentPipe = new DetourHook(Patterns::CSteamEngine::SetAppIdForCurrentPipe, hkSteamEngine_SetAppIdForCurrentPipe);
+
+	CUDPConnection_BAsyncSend = new DetourHook(Patterns::CUDPConnection::BAsyncSend, hkUDPConnection_BAsyncSend);
 
 	CUser_CheckAppOwnership = new DetourHook(Patterns::CUser::CheckAppOwnership, hkUser_CheckAppOwnership);
 	CUser_GetSubscribedApps = new DetourHook(Patterns::CUser::GetSubscribedApps, hkUser_GetSubscribedApps);

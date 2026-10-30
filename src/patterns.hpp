@@ -48,6 +48,11 @@ namespace Patterns
 		extern Pattern_t Offset_User;
 	}
 
+	namespace CUDPConnection
+	{
+		extern Pattern_t BAsyncSend;
+	};
+
 	namespace CUser
 	{
 		//TODO: Order & Convert old patterns
