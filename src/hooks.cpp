@@ -503,13 +503,24 @@ static AppId_t hkSteamEngine_SetAppIdForCurrentPipe(CSteamEngine* pSteamEngine, 
 	return ret;
 }
 
-enum class ESendType
+struct RouteInfo_t
 {
-	WebSocket = 0,
-	UDPConnection = 1
+	enum class EConnection
+	{
+		UDPConnection = 0,
+		WebSocket = 1
+	};
+
+	EConnection connectionType;
+
+	//CWebSocket args
+	EWebSocketConnectionSendType websocketSendType;
+
+	//CUDPConnection args
+	bool useDataGram;
 };
 
-static bool hkSendPacket(void* pThis, ESendType type, void* pData, steamsize_t size)
+static bool hkSendPacket(void* pThis, const RouteInfo_t& route, void* pData, steamsize_t size)
 {
 	CNetPacket packet {};
 	packet.body = reinterpret_cast<CNetPacketBody*>(Steam::Plat_Alloc(size));
@@ -547,23 +558,23 @@ static bool hkSendPacket(void* pThis, ESendType type, void* pData, steamsize_t s
 	bool success = true;
 
 	LOG_TRACE("Calling tramp\n");
-	switch (type)
+	switch (route.connectionType)
 	{
-		case ESendType::UDPConnection:
-			Hooks::CUDPConnection_BAsyncSend->tramp.fn
+		case RouteInfo_t::EConnection::UDPConnection:
+			success = Hooks::CUDPConnection_BAsyncSend->tramp.fn
 			(
 				reinterpret_cast<CUDPConnection*>(pThis),
-				k_EUDPConnectionSendRaw,
 				packet.body,
-				packet.size
+				packet.size,
+				route.useDataGram
 			);
 			break;
 
-		case ESendType::WebSocket:
+		case RouteInfo_t::EConnection::WebSocket:
 			success = Hooks::CWebSocketConnection_BBuildAndAsyncSendFrame->tramp.fn
 			(
 				reinterpret_cast<CWebSocketConnection*>(pThis),
-				k_EWebSocketConnectionSendRaw,
+				route.websocketSendType,
 				packet.body,
 				packet.size
 			);
@@ -574,27 +585,22 @@ static bool hkSendPacket(void* pThis, ESendType type, void* pData, steamsize_t s
 	return success;
 }
 
-static void hkUDPConnection_BAsyncSend(CUDPConnection* pNetConnection, EUDPConnectionSendType type, void* pData, steamsize_t dataSize)
+static bool hkUDPConnection_BAsyncSend(CUDPConnection* pNetConnection, void* pData, steamsize_t dataSize, bool useDataGram)
 {
-	if (type == k_EUDPConnectionSendRaw)
-	{
-		hkSendPacket(pNetConnection, ESendType::UDPConnection, pData, dataSize);
-		return;
-	}
+	RouteInfo_t routeInfo { };
+	routeInfo.connectionType = RouteInfo_t::EConnection::UDPConnection;
+	routeInfo.useDataGram = useDataGram;
 
-	LOG_TRACE("Calling tramp\n");
-	Hooks::CUDPConnection_BAsyncSend->tramp.fn(pNetConnection, type, pData, dataSize);
+	return hkSendPacket(pNetConnection, routeInfo, pData, dataSize);
 }
 
 static bool hkWebSocketConnection_BBuildAndAsyncSendFrame(CWebSocketConnection* pWebSocketConnection, EWebSocketConnectionSendType type, void* pData, steamsize_t dataSize)
 {
-	if (type == k_EWebSocketConnectionSendRaw)
-	{
-		return hkSendPacket(pWebSocketConnection, ESendType::WebSocket, pData, dataSize);
-	}
+	RouteInfo_t routeInfo { };
+	routeInfo.connectionType = RouteInfo_t::EConnection::WebSocket;
+	routeInfo.websocketSendType = type;
 
-	LOG_TRACE("Calling tramp\n");
-	return Hooks::CWebSocketConnection_BBuildAndAsyncSendFrame->tramp.fn(pWebSocketConnection, type, pData, dataSize);
+	return hkSendPacket(pWebSocketConnection, routeInfo, pData, dataSize);
 }
 
 static gameserverdetails_t* hkSteamMatchmakingServers_GetServerDetails(void* pSteamMatchmakingServers, HServerRequest handle, uint32_t serverIdx)
