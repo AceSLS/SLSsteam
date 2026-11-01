@@ -96,10 +96,17 @@ unsigned int Decompiler::getString(const lm_address_t addr, std::string* outStr)
 		}
 	}
 
-	if (i && outStr && nullTerminated)
+	if (outStr)
 	{
-		*outStr = std::string(pChAddr, i);
-}
+		if (i && nullTerminated)
+		{
+			*outStr = std::string(pChAddr, i);
+		}
+		else
+		{
+			outStr->clear();
+		}
+	}
 
 	//i = offset
 	//i + 1 = size/num read
