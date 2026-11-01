@@ -4,8 +4,10 @@
 #include "IClientUtils.hpp"
 #include "types.hpp"
 
+#include "../decompiler.hpp"
 #include "../hooks.hpp"
 #include "../patterns.hpp"
+#include "../utils.hpp"
 
 #include "libmem/libmem.h"
 
@@ -156,7 +158,16 @@ CServerPipe* CSteamEngine::getServerPipe(const HSteamPipe pipe)
 
 CUser* CSteamEngine::getUser(const uint32_t index)
 {
+#ifdef ARM64
+	lm_inst_t inst { };
+	LM_Disassemble(Patterns::CSteamEngine::Offset_User.address, &inst);
+	LOG_DEBUG("Disassembled %s %s", inst.mnemonic, inst.op_str);
+	const static auto offset = Decompiler::extractHexNum(inst.op_str);
+	LOG_DEBUG("Offset %lu\n", offset);
+#else
 	const static auto offset = *reinterpret_cast<int32_t*>(Patterns::CSteamEngine::Offset_User.address + 3); //Offset is only 4 bytes
+#endif
+
 	const auto vec = reinterpret_cast<const CUtlVector<CUser*>*>(this + offset);
 	if (index >= vec->size)
 	{
