@@ -1,20 +1,14 @@
 #include "process.hpp"
 
-#include "sdk/CSteamEngine.hpp"
-
 #include "config.hpp"
 #include "log.hpp"
-#include "utils.hpp"
 
-#include <chrono>
 #include <cstdio>
 #include <cstring>
+#include <elf.h>
 #include <fcntl.h>
 #include <filesystem>
-#include <iterator>
 #include <memory>
-#include <regex>
-#include <unordered_set>
 
 
 IExecutableFile::~IExecutableFile()
