@@ -56,10 +56,6 @@ public:
 class CELFExecutableFile : public IExecutableFile
 {
 public:
-
-	constexpr static uint32_t ISA_X86 = 0x3;
-	constexpr static uint32_t ISA_AMD64 = 0x3e;
-
 	constexpr static size_t ELF_HEADER32_SIZE = sizeof(Elf32_Ehdr);
 	constexpr static size_t ELF_HEADER64_SIZE = sizeof(Elf64_Ehdr);
 

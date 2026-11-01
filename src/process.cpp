@@ -374,7 +374,7 @@ bool CELFExecutableFile::parseSections()
 		return false;
 	}
 
-	if (hdr64.e_ident[EI_CLASS] == ELFCLASS32 && hdr64.e_machine == ISA_X86)
+	if (hdr64.e_ident[EI_CLASS] == ELFCLASS32 && (hdr64.e_machine == EM_386 || hdr64.e_machine == EM_ARM))
 	{
 		LOG_DEBUG("Parsing as 32 bit file\n");
 
@@ -383,7 +383,7 @@ bool CELFExecutableFile::parseSections()
 		Elf32_Ehdr hdr32 = *reinterpret_cast<Elf32_Ehdr*>(&hdr64);
 		return parseElf32Headers(hdr32);
 	}
-	else if (hdr64.e_ident[EI_CLASS] == ELFCLASS64 && hdr64.e_machine == ISA_AMD64)
+	else if (hdr64.e_ident[EI_CLASS] == ELFCLASS64 && (hdr64.e_machine == EM_X86_64 || hdr64.e_machine == EM_AARCH64))
 	{
 		LOG_DEBUG("Parsing as 64 bit file\n");
 		return parseElf64Headers(hdr64);
