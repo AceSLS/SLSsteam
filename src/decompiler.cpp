@@ -72,6 +72,7 @@ unsigned int VFTable::analyze()
 std::unordered_map<std::string, Elf_Shdr> Decompiler::sections = std::unordered_map<std::string, Elf_Shdr>();
 std::unordered_map<lm_address_t, std::string> Decompiler::picThunks = std::unordered_map<lm_address_t, std::string>();
 std::unordered_map<lm_address_t, std::string> Decompiler::strings = std::unordered_map<lm_address_t, std::string>();
+std::unordered_map<lm_address_t, std::string> Decompiler::typeInfos = std::unordered_map<lm_address_t, std::string>();
 std::unordered_map<std::string, VFTable> Decompiler::vftables = std::unordered_map<std::string, VFTable>();
 
 unsigned int Decompiler::getString(const lm_address_t addr, std::string* outStr)
@@ -332,20 +333,14 @@ void Decompiler::collectStrings(const lm_module_t& mod, const Elf_Shdr& section)
 		}
 
 		strings[begin] = strBuf;
-		//LOG_DEBUG("Found string %s at 0x%x with size %u\n", strBuf.c_str(), begin, strBuf.size());
+		//LOG_DEBUG("Found string %s at 0x%lx with size %lu\n", strBuf.c_str(), begin, strBuf.size());
 	}
 }
 
-bool Decompiler::collectVFTables(const lm_module_t& mod, const Elf_Shdr& section)
+void Decompiler::collectTypeInfos(const lm_module_t& mod, const Elf_Shdr& section)
 {
 	const lm_address_t start = mod.base + section.rva;
 	const lm_address_t end = start + section.size;
-
-	auto typeInfos = std::unordered_map<lm_address_t, std::string>();
-
-	//TODO: Iterate the section backwards to do it all in one pass
-	//TODO: Improve typeInfo detection, since it also detects arbitrary strings at TypeInfos
-	//Potential solutions: Matching the name via regex
 
 	//First pass to collect all typeInfos. Luckily .data.rel.ro seems to be sizeof(lm_address_t) byte aligned
 	for (lm_address_t addr = start; addr < end; addr += sizeof(addr))
@@ -374,10 +369,16 @@ bool Decompiler::collectVFTables(const lm_module_t& mod, const Elf_Shdr& section
 			const lm_address_t typeInfo = addr - sizeof(addr);
 			const auto& name = strings.at(ptr);
 
-			//LOG_DEBUG("TypeInfo for %s at 0x%x\n", name.c_str(), typeInfo);
+			//LOG_DEBUG("TypeInfo for %s at 0x%lx\n", name.c_str(), typeInfo);
 			typeInfos[typeInfo] = name;
 		}
 	}
+}
+
+bool Decompiler::collectVFTables(const lm_module_t& mod, const Elf_Shdr& section)
+{
+	const lm_address_t start = mod.base + section.rva;
+	const lm_address_t end = start + section.size;
 
 	//Second pass to find actual VFTables by looking up the TypeInfos
 	for (lm_address_t addr = start; addr < end; addr += sizeof(addr))
@@ -416,7 +417,7 @@ bool Decompiler::collectVFTables(const lm_module_t& mod, const Elf_Shdr& section
 			}
 
 			vftables[name] = vft;
-			//LOG_DEBUG("VFTable %s at 0x%x\n", name.c_str(), vft.address);
+			//LOG_DEBUG("VFTable %s at 0x%lx\n", name.c_str(), vft.address);
 		}
 	}
 
@@ -464,12 +465,23 @@ void Decompiler::parseModule(const lm_module_t &mod)
 		collectStrings(mod, *shRODataStr);
 	}
 
+	//AMD64 & partially ARM64
 	const Elf_Shdr* shDataRelRO = getSection(mod, ".data.rel.ro");
 	if (shDataRelRO)
 	{
 		LOG_DEBUG("Scanning .data.rel.ro for VFTables in %s\n", mod.name);
 		//Use collected strings to identify typeInfos, then cross reference those to find VFTables
+		collectTypeInfos(mod, *shDataRelRO);
 		collectVFTables(mod, *shDataRelRO);
+	}
+
+	//ARM64 exclusive
+	const Elf_Shdr* shDataRelROLocal = getSection(mod, ".data.rel.ro.local");
+	if (shDataRelROLocal)
+	{
+		LOG_DEBUG("Scanning .data.rel.ro.local for VFTables in %s\n", mod.name);
+		//Use collected strings to identify typeInfos, then cross reference those to find VFTables
+		collectVFTables(mod, *shDataRelROLocal);
 	}
 }
 
@@ -677,5 +689,6 @@ void Decompiler::cleanUp()
 	sections.clear();
 	picThunks.clear();
 	strings.clear();
+	typeInfos.clear();
 	vftables.clear();
 }

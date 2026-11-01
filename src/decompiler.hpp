@@ -43,6 +43,7 @@ namespace Decompiler
 	extern std::unordered_map<std::string, Elf_Shdr> sections;
 	extern std::unordered_map<lm_address_t, std::string> picThunks;
 	extern std::unordered_map<lm_address_t, std::string> strings;
+	extern std::unordered_map<lm_address_t, std::string> typeInfos;
 	extern std::unordered_map<std::string, VFTable> vftables;
 
 	unsigned int getString(const lm_address_t addr, std::string* outStr);
@@ -54,6 +55,7 @@ namespace Decompiler
 	Elf_Shdr* getSection(const lm_module_t& mod, const char* name);
 
 	void collectStrings(const lm_module_t& mod, const Elf_Shdr& section);
+	void collectTypeInfos(const lm_module_t& mod, const Elf_Shdr& section);
 	bool collectVFTables(const lm_module_t& mod, const Elf_Shdr& section);
 
 	bool parseHeader(const lm_module_t& mod);
