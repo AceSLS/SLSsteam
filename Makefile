@@ -4,7 +4,9 @@
 #Force g++ cause clang crashes on some hooks
 CXX := g++
 
-libs := $(wildcard lib/*.a)
+ARCH := $(shell uname -m)
+
+libs := $(wildcard lib/$(ARCH)/*.a)
 srcs := $(shell find src/ -type f -iname "*.cpp")
 
 CXXFLAGS := -O3 -flto=auto -fPIC -std=c++20 -Wall -Wextra -Wpedantic -Wno-error=format-security -D_GLIBCXX_USE_CXX11_ABI=0
@@ -32,6 +34,10 @@ endif
 
 ifeq ($(shell echo $$NATIVE),1)
 	CXXFLAGS += -march=native
+endif
+
+ifeq ($(ARCH),aarch64)
+	CXXFLAGS += -D "ARM64"
 endif
 
 #Speed up compilation if additional dependencies are found
