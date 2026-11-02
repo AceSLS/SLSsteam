@@ -658,7 +658,15 @@ void Decompiler::__parseFunction
 			{
 				if (!taken)
 				{
-					__parseFunction(branch, references, branchesTaken, armCPU);
+					if (armCPU)
+					{
+						CARMEmu cpuCpy(*armCPU);
+						__parseFunction(branch, references, branchesTaken, &cpuCpy);
+					}
+					else
+					{
+						__parseFunction(branch, references, branchesTaken, nullptr);
+					}
 				}
 			}
 
