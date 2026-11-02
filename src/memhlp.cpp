@@ -221,21 +221,15 @@ lm_address_t MemHlp::searchSignature(const char* name, const char* signature, co
 
 lm_address_t MemHlp::getJmpTarget(const lm_address_t address)
 {
-	lm_inst_t inst;
-	if (!LM_Disassemble(address, &inst)) //Should not happen if we land in a code section
+	lm_address_t target;
+	lm_inst_t inst { };
+	if (!LM_Disassemble(address, &inst))
 	{
-		LOG_ERROR("Failed to disassemble code at 0x%lx!", address);
+		LOG_ERROR("Failed to follow %s %s!\n", inst.mnemonic, inst.op_str)
 		return LM_ADDRESS_BAD;
 	}
 
-	LOG_DEBUG("Resolved to %s %s\n", inst.mnemonic, inst.op_str);
-
-	if (strcmp(inst.mnemonic, "jmp") != 0 && strcmp(inst.mnemonic, "call") != 0)
-	{
-		return LM_ADDRESS_BAD;
-	}
-
-	return std::stoul(inst.op_str, nullptr, 16);
+	return Decompiler::getRelativeTarget(inst, target);
 }
 
 lm_address_t MemHlp::findPrologue(const lm_address_t address, const std::vector<int16_t>& prologueBytes)
