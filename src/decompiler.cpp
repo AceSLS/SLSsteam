@@ -89,7 +89,45 @@ std::unordered_set<ARMCPUContext_t::Reg_t*> CARMEmu::run(const lm_inst_t& inst)
 
 		changedRegs.emplace(&reg);
 	}
-	else if (strcmp(inst.mnemonic, "mov") == 0)
+	else if (strcmp(inst.mnemonic, "ldr") == 0)
+	{
+		//ldr w4, [x2, #0x100]
+		//ldr w4, [x2]
+		//etc
+		const auto split = Utils::strsplit(inst.op_str, ", ");
+
+		lm_address_t ldrAddr = 0;
+
+		for (unsigned int i = 1; i < split.size(); i++)
+		{
+			auto addr = *std::next(split.begin(), i);
+
+			if (addr.starts_with("["))
+			{
+				addr = addr.substr(1, addr.size() - 1);
+			}
+			if (addr.ends_with("]"))
+			{
+				addr = addr.substr(0, addr.size() - 1);
+			}
+
+			if (addr[0] == '#')
+			{
+				ldrAddr += Decompiler::extractHexNum(addr);
+			}
+			else
+			{
+				const auto& sourceReg = cpu.regFromString(addr);
+				ldrAddr += sourceReg.xu;
+			}
+		}
+
+		auto& targetReg = cpu.regFromString(split[0]);
+		targetReg.xu = ldrAddr;
+
+		changedRegs.emplace(&targetReg);
+	}
+	else if (strcmp(inst.mnemonic, "mov") == 0 || strcmp(inst.mnemonic, "movz") == 0)
 	{
 		const auto split = Utils::strsplit(inst.op_str, ", ");
 		auto& targetReg = cpu.regFromString(split[0]);
@@ -102,6 +140,24 @@ std::unordered_set<ARMCPUContext_t::Reg_t*> CARMEmu::run(const lm_inst_t& inst)
 		{
 			const auto& sourceReg = cpu.regFromString(split[1]);
 			targetReg.xu = sourceReg.xu;
+		}
+
+		changedRegs.emplace(&targetReg);
+	}
+	else if (strcmp(inst.mnemonic, "movn") == 0)
+	{
+		//TODO: Merge into mov family
+		const auto split = Utils::strsplit(inst.op_str, ", ");
+		auto& targetReg = cpu.regFromString(split[0]);
+
+		if (split[1][0] == '#')
+		{
+			targetReg.xu = ~Decompiler::extractHexNum(split[1]);
+		}
+		else
+		{
+			const auto& sourceReg = cpu.regFromString(split[1]);
+			targetReg.xu = ~sourceReg.xu;
 		}
 
 		changedRegs.emplace(&targetReg);
