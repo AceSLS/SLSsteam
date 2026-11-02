@@ -15,6 +15,67 @@
 #include <vector>
 
 
+ARMCPUContext_t::Reg_t& ARMCPUContext_t::regFromString(const std::string& name)
+{
+	if (name == "sp")
+	{
+		return sp;
+	}
+	else if (name == "pc")
+	{
+		return pc;
+	}
+	else if (name == "br")
+	{
+		return br;
+	}
+
+	const auto numStr = name.substr(1, name.size() - 1);
+	const auto idx = std::stoul(numStr);
+
+	return registers[idx];
+}
+
+CARMEmu::CARMEmu(const lm_address_t pc)
+{
+	cpu.pc.xu = pc;
+}
+
+std::unordered_set<ARMCPUContext_t::Reg_t*> CARMEmu::run(const lm_inst_t& inst)
+{
+	if (strcmp(inst.mnemonic, "adrp") == 0)
+	{
+		//libmem already handles the relative addressing
+		//adrp x21, #0xffff323d6000
+		const auto split = Utils::strsplit(inst.op_str, ", ");
+
+		const lm_address_t val = Decompiler::extractHexNum(split[1]);
+		auto& reg = cpu.regFromString(split[0]);
+		reg.xu = val;
+
+		return { &reg };
+	}
+	else if (strcmp(inst.mnemonic, "add") == 0)
+	{
+		const auto split = Utils::strsplit(inst.op_str, ", ");
+		const auto offset = Decompiler::extractHexNum(split[2]);
+		if (offset == LM_ADDRESS_BAD)
+		{
+			return { };
+		}
+
+		//This just assumes every register is 64 bits
+		//But for our intends and purposes this should be enough
+		auto& targetReg = cpu.regFromString(split[0])	;
+		auto& reg1 = cpu.regFromString(split[1]);
+
+		targetReg.xu = reg1.xu + offset;
+		return { &targetReg };
+	}
+
+	return { };
+}
+
 void VFTable::init(const lm_address_t addr, const lm_module_t& mod)
 {
 	this->moduleBase = mod.base;
@@ -466,14 +527,20 @@ void Decompiler::parseModule(const lm_module_t &mod)
 void Decompiler::parseFunction(const lm_address_t begin, std::unordered_map<lm_address_t, unsigned int>& references)
 {
 	auto branchesTaken = std::unordered_set<lm_address_t>();
-	__parseFunction(begin, references, branchesTaken);
+	CARMEmu cpu = CARMEmu(begin);
+	__parseFunction(begin, references, branchesTaken, &cpu);
+#ifdef ARM64
+#else
+	__parseFunction(begin, references, branchesTaken, nullptr);
+#endif
 }
 
 void Decompiler::__parseFunction
 (
 	const lm_address_t begin,
 	std::unordered_map<lm_address_t, unsigned int>& references,
-	std::unordered_set<lm_address_t>& branchesTaken
+	std::unordered_set<lm_address_t>& branchesTaken,
+	CARMEmu* armCPU
 )
 {
 
@@ -559,7 +626,7 @@ void Decompiler::__parseFunction
 			{
 				if (!taken)
 				{
-					__parseFunction(branch, references, branchesTaken);
+					__parseFunction(branch, references, branchesTaken, armCPU);
 				}
 			}
 
@@ -573,6 +640,17 @@ void Decompiler::__parseFunction
 			return;
 		}
 
+	#ifdef ARM64
+		const auto regs = armCPU->run(instr);
+		for (const auto reg : regs)
+		{
+			if (strings.contains(reg->xu))
+			{
+				//LOG_DEBUG("Found reference to %s!\n", strings.at(reg->xu).c_str());
+				references[reg->xu]++;
+			}
+		}
+	#else
 		if (strcmp(instr.mnemonic, "lea") != 0)
 		{
 			continue;
@@ -592,27 +670,6 @@ void Decompiler::__parseFunction
 
 		lm_address_t targetAddr = (instr.address + instr.size) - extractHexNum(instr.op_str);
 
-		//if (!strstr(instr.op_str, thunkReg.c_str()))
-		//{
-		//	continue;
-		//}
-
-		//lm_address_t targetAddr;
-		//if (strstr(instr.op_str, "-"))
-		//{
-		//	const lm_address_t offset = extractHexNum(instr.op_str);
-		//	targetAddr = leaOffset - offset;
-		//}
-		//else if (strstr(instr.op_str, "+"))
-		//{
-		//	const lm_address_t offset = extractHexNum(instr.op_str);
-		//	targetAddr = leaOffset + offset;
-		//}
-		//else
-		//{
-		//	continue;
-		//}
-
 		//LOG_DEBUG("Target addr for op 0x%lx\n", targetAddr);
 
 		if (!strings.contains(targetAddr))
@@ -623,6 +680,7 @@ void Decompiler::__parseFunction
 		//const auto& str = strings.at(targetAddr);
 		//LOG_DEBUG("String reference to %s at 0x%x\n", str.c_str(), instr.address);
 		references[targetAddr]++;
+	#endif
 	}
 }
 

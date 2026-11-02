@@ -2,6 +2,7 @@
 
 #include "process.hpp"
 
+#include <cstdint>
 #include <elf.h>
 #include <libmem/libmem.h>
 #include <map>
@@ -14,6 +15,73 @@
 typedef Elf64_Ehdr Elf_Ehdr;
 //typedef Elf32_Shdr Elf_Shdr;
 typedef SectionHdr_t Elf_Shdr;
+
+struct ARMCPUContext_t
+{
+public:
+
+	union Reg_t
+	{
+		uint64_t xu;
+		int64_t xi;
+
+		uint32_t wu;
+		int32_t wi;
+	};
+
+	constexpr static unsigned int NUM_REGS = 31;
+	Reg_t registers[NUM_REGS] { };
+
+	Reg_t& reg0 = registers[0];
+	Reg_t& reg1 = registers[1];
+	Reg_t& reg2 = registers[2];
+	Reg_t& reg3 = registers[3];
+	Reg_t& reg4 = registers[4];
+	Reg_t& reg5 = registers[5];
+	Reg_t& reg6 = registers[6];
+	Reg_t& reg7 = registers[7];
+	Reg_t& reg8 = registers[8];
+	Reg_t& reg9 = registers[9];
+	Reg_t& reg10 = registers[10];
+	Reg_t& reg11 = registers[11];
+	Reg_t& reg12 = registers[12];
+	Reg_t& reg13 = registers[13];
+	Reg_t& reg14 = registers[14];
+	Reg_t& reg15 = registers[15];
+	Reg_t& reg16 = registers[16];
+	Reg_t& reg17 = registers[17];
+	Reg_t& reg18 = registers[18];
+	Reg_t& reg19 = registers[19];
+	Reg_t& reg20 = registers[20];
+	Reg_t& reg21 = registers[21];
+	Reg_t& reg22 = registers[22];
+	Reg_t& reg23 = registers[23];
+	Reg_t& reg24 = registers[24];
+	Reg_t& reg25 = registers[25];
+	Reg_t& reg26 = registers[26];
+	Reg_t& reg27 = registers[27];
+	Reg_t& reg28 = registers[28];
+	Reg_t& reg29 = registers[29];
+	Reg_t& reg30 = registers[30];
+
+	Reg_t sp { };
+	Reg_t pc { };
+	Reg_t br { };
+
+	Reg_t& regFromString(const std::string& name);
+};
+
+class CARMEmu
+{
+public:
+
+	ARMCPUContext_t cpu;
+
+	CARMEmu(const lm_address_t pc);
+
+	//Parse instruction and return changed registers
+	std::unordered_set<ARMCPUContext_t::Reg_t*> run(const lm_inst_t& inst);
+};
 
 struct VFTable
 {
@@ -66,7 +134,8 @@ namespace Decompiler
 	(
 		const lm_address_t begin,
 		std::unordered_map<lm_address_t, unsigned int>& references,
-		std::unordered_set<lm_address_t>& branchesTaken
+		std::unordered_set<lm_address_t>& branchesTaken,
+		CARMEmu* armCPU
 	);
 	
 	std::map<std::string, unsigned int> parseInterfaceMapBase(const char* interface);
