@@ -59,18 +59,22 @@ std::unordered_set<ARMCPUContext_t::Reg_t*> CARMEmu::run(const lm_inst_t& inst)
 	if (strcmp(inst.mnemonic, "add") == 0)
 	{
 		const auto split = Utils::strsplit(inst.op_str, ", ");
-		const auto offset = Decompiler::extractHexNum(split[2]);
-		if (offset == LM_ADDRESS_BAD)
-		{
-			goto done;
-		}
 
 		//This just assumes every register is 64 bits
 		//But for our intends and purposes this should be enough
-		auto& targetReg = cpu.regFromString(split[0])	;
-		auto& reg1 = cpu.regFromString(split[1]);
+		auto& targetReg = cpu.regFromString(split[0]);
+		const auto& reg1 = cpu.regFromString(split[1]);
 
-		targetReg.xu = reg1.xu + offset;
+		if (split[2][0] == '#')
+		{
+			targetReg.xu = reg1.xu + Decompiler::extractHexNum(split[2]);
+		}
+		else
+		{
+			const auto& reg2 = cpu.regFromString(split[2]);
+			targetReg.xu = reg1.xu + reg2.xu;
+		}
+
 		changedRegs.emplace(&targetReg);
 	}
 	else if (strcmp(inst.mnemonic, "adrp") == 0)
