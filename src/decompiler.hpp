@@ -80,6 +80,7 @@ public:
 	CARMEmu(const lm_address_t pc);
 
 	//Parse instruction and return changed registers
+	std::unordered_set<ARMCPUContext_t::Reg_t*> run();
 	std::unordered_set<ARMCPUContext_t::Reg_t*> run(const lm_inst_t& inst);
 };
 
