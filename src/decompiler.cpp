@@ -159,21 +159,9 @@ lm_address_t Decompiler::extractHexNum(const std::string& str)
 
 bool Decompiler::getRelativeTarget(const lm_inst_t& instr, lm_address_t& target)
 {
-	auto str = std::string(instr.op_str);
-	//Numbers start with 0x
-	if (str.size() < 3)
-	{
-		return false;
-	}
-	str = str.substr(2, str.size() - 2);
+	target = extractHexNum(instr.op_str);
 
-	if (std::find_if (str.begin(), str.end(), [](const unsigned char c) { return !std::isxdigit(c); }) != str.end())
-	{
-		return false;
-	}
-
-	target = std::stoul(str, nullptr, 16);
-	return true;
+	return target != LM_ADDRESS_BAD;
 }
 
 lm_address_t Decompiler::getLeaOffset(lm_inst_t& callInstr)
@@ -497,10 +485,21 @@ void Decompiler::__parseFunction
 	std::unordered_set<lm_address_t>& branchesTaken
 )
 {
+
+#ifdef ARM64
+	//TODO: Add handling of TB* (TBNZ for example)
+	constexpr const char* JMP_MNEMONIC = "b";
+	constexpr const char* CALL_MNEMONIC = "bl";
+#else
+	constexpr const char* JMP_MNEMONIC = "jmp";
+#endif
+
 	lm_address_t addr = begin;
 	lm_inst_t instr;
 
+#ifdef X86_64
 	unsigned int numCC = 0;
+#endif
 
 	for (;;)
 	{
@@ -514,7 +513,9 @@ void Decompiler::__parseFunction
 
 		addr += instr.size;
 
+	  #ifdef X86_64
 		//Shitty way to detect function boundaries
+		//Arm functions have proper flow, so we don't have to hack around it
 		//TODO: Investigate wheter there is a better way
 		if (strcmp(instr.mnemonic, "int3") == 0)
 		{
@@ -529,8 +530,14 @@ void Decompiler::__parseFunction
 		{
 			numCC = 0;
 		}
+	  #endif
 
-		if (instr.mnemonic[0] == 'j')
+	#ifdef ARM64
+		//Follow branches, not calls
+		if (instr.mnemonic[0] == JMP_MNEMONIC[0] && !std::string(instr.mnemonic).starts_with(CALL_MNEMONIC))
+	#else
+		if (instr.mnemonic[0] == JMP_MNEMONIC[0])
+	#endif
 		{
 			lm_address_t branch;
 
@@ -545,7 +552,8 @@ void Decompiler::__parseFunction
 			//LOG_DEBUG("%s branch %s %s at 0x%lx to 0x%lx\n", (taken ? "Taking" : "Skipping"), instr.mnemonic, instr.op_str, instr.address, branch);
 			branchesTaken.emplace(branch);
 
-			if (strcmp(instr.mnemonic, "jmp") == 0)
+			//Unconditional branch, take
+			if (strcmp(instr.mnemonic, JMP_MNEMONIC) == 0)
 			{
 				//Explored already, so we abort
 				if (taken)
@@ -555,6 +563,7 @@ void Decompiler::__parseFunction
 
 				addr = branch;
 			}
+			//Conditional branch, recurse
 			else
 			{
 				if (!taken)
