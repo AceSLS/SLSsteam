@@ -41,9 +41,39 @@ CARMEmu::CARMEmu(const lm_address_t pc)
 	cpu.pc.xu = pc;
 }
 
+std::unordered_set<ARMCPUContext_t::Reg_t*> CARMEmu::run()
+{
+	lm_inst_t inst { };
+	if (!LM_Disassemble(cpu.pc.xu, &inst))
+	{
+		LOG_ERROR("Failed to disassemble code at %lx!", cpu.pc.xu);
+	}
+
+	return run(inst);
+}
+
 std::unordered_set<ARMCPUContext_t::Reg_t*> CARMEmu::run(const lm_inst_t& inst)
 {
-	if (strcmp(inst.mnemonic, "adrp") == 0)
+	auto changedRegs = std::unordered_set<ARMCPUContext_t::Reg_t*>();
+	
+	if (strcmp(inst.mnemonic, "add") == 0)
+	{
+		const auto split = Utils::strsplit(inst.op_str, ", ");
+		const auto offset = Decompiler::extractHexNum(split[2]);
+		if (offset == LM_ADDRESS_BAD)
+		{
+			goto done;
+		}
+
+		//This just assumes every register is 64 bits
+		//But for our intends and purposes this should be enough
+		auto& targetReg = cpu.regFromString(split[0])	;
+		auto& reg1 = cpu.regFromString(split[1]);
+
+		targetReg.xu = reg1.xu + offset;
+		changedRegs.emplace(&targetReg);
+	}
+	else if (strcmp(inst.mnemonic, "adrp") == 0)
 	{
 		//libmem already handles the relative addressing
 		//adrp x21, #0xffff323d6000
@@ -53,27 +83,29 @@ std::unordered_set<ARMCPUContext_t::Reg_t*> CARMEmu::run(const lm_inst_t& inst)
 		auto& reg = cpu.regFromString(split[0]);
 		reg.xu = val;
 
-		return { &reg };
+		changedRegs.emplace(&reg);
 	}
-	else if (strcmp(inst.mnemonic, "add") == 0)
+	else if (strcmp(inst.mnemonic, "mov") == 0)
 	{
 		const auto split = Utils::strsplit(inst.op_str, ", ");
-		const auto offset = Decompiler::extractHexNum(split[2]);
-		if (offset == LM_ADDRESS_BAD)
+		auto& targetReg = cpu.regFromString(split[0]);
+
+		if (split[1][0] == '#')
 		{
-			return { };
+			targetReg.xu = Decompiler::extractHexNum(split[1]);
+		}
+		else
+		{
+			const auto& sourceReg = cpu.regFromString(split[1]);
+			targetReg.xu = sourceReg.xu;
 		}
 
-		//This just assumes every register is 64 bits
-		//But for our intends and purposes this should be enough
-		auto& targetReg = cpu.regFromString(split[0])	;
-		auto& reg1 = cpu.regFromString(split[1]);
-
-		targetReg.xu = reg1.xu + offset;
-		return { &targetReg };
+		changedRegs.emplace(&targetReg);
 	}
 
-	return { };
+done:
+	cpu.pc.xu += inst.size;
+	return changedRegs;
 }
 
 void VFTable::init(const lm_address_t addr, const lm_module_t& mod)
