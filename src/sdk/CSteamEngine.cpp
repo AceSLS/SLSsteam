@@ -159,11 +159,14 @@ CServerPipe* CSteamEngine::getServerPipe(const HSteamPipe pipe)
 CUser* CSteamEngine::getUser(const uint32_t index)
 {
 #ifdef ARM64
-	lm_inst_t inst { };
-	LM_Disassemble(Patterns::CSteamEngine::Offset_User.address, &inst);
-	LOG_DEBUG("Disassembled %s %s", inst.mnemonic, inst.op_str);
-	const static auto offset = Decompiler::extractHexNum(inst.op_str);
-	LOG_DEBUG("Offset %lu\n", offset);
+	static int32_t offset = 0;
+	if (!offset)
+	{
+		auto emu = CARMEmu(Patterns::CSteamEngine::Offset_User.address);
+		auto regs = emu.run();
+		offset = (*regs.begin())->wi;
+		LOG_DEBUG("CSteamEngine::getUser Offset %i\n", offset);
+	}
 #else
 	const static auto offset = *reinterpret_cast<int32_t*>(Patterns::CSteamEngine::Offset_User.address + 3); //Offset is only 4 bytes
 #endif
