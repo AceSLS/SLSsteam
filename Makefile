@@ -36,6 +36,9 @@ ifeq ($(shell echo $$NATIVE),1)
 	CXXFLAGS += -march=native
 endif
 
+ifeq ($(ARCH),x86_64)
+	CXXFLAGS += -D "X86_64"
+endif
 ifeq ($(ARCH),aarch64)
 	CXXFLAGS += -D "ARM64"
 endif
