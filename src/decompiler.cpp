@@ -5,7 +5,6 @@
 
 #include "libmem/libmem.h"
 
-#include <algorithm>
 #include <cctype>
 #include <cstring>
 #include <dlfcn.h>
@@ -116,36 +115,28 @@ unsigned int Decompiler::getString(const lm_address_t addr, std::string* outStr)
 lm_address_t Decompiler::extractHexNum(const std::string& str)
 {
 	unsigned int start = 0;
-	unsigned int end = 0;
+	unsigned int end = start;
+
+	bool found0x = false;
 
 	for (unsigned int i = 0; i < str.size(); i++)
 	{
-		const char c = str.at(i);
-
-		if (c == '0' && i + 2 < str.size())
+		if (!found0x)
 		{
-			const char n = str.at(i + 1);
-			if (n != 'x')
+			if (i && str.at(i) == 'x' && str.at(i - 1) == '0')
 			{
-				continue;
-			}
-
-			start = i + 2;
-			i++;
-			continue;
-		}
-
-		if (!std::isxdigit(c))
-		{
-			if (start)
-			{
-				break;
+				found0x = true;
+				start = i + 1;
 			}
 
 			continue;
 		}
 
-		end = i;
+		if (!std::isxdigit(str.at(i)) || i == str.size() - 1)
+		{
+			end = i + 1;
+			break;
+		}
 	}
 
 	if (start >= end)
@@ -153,7 +144,7 @@ lm_address_t Decompiler::extractHexNum(const std::string& str)
 		return LM_ADDRESS_BAD;
 	}
 
-	const std::string numStr = str.substr(start, end - start + 1);
+	const auto numStr = str.substr(start, end - start);
 	return std::stoull(numStr, nullptr, 16);
 }
 
