@@ -84,7 +84,7 @@ public:
 	std::unordered_set<ARMCPUContext_t::Reg_t*> run(const lm_inst_t& inst);
 };
 
-struct VFTable
+struct VFTable_t
 {
 	struct TypeInfo
 	{
@@ -98,7 +98,7 @@ struct VFTable
 	lm_address_t address;
 	TypeInfo* typeInfo;
 	std::vector<lm_address_t> functions;
-	std::map<unsigned int, VFTable> subclasses;
+	std::map<unsigned int, VFTable_t> subclasses;
 
 	void init(const lm_address_t addr, const lm_module_t& mod);
 	unsigned int analyze();
@@ -113,7 +113,7 @@ namespace Decompiler
 	extern std::unordered_map<lm_address_t, std::string> picThunks;
 	extern std::unordered_map<lm_address_t, std::string> strings;
 	extern std::unordered_map<lm_address_t, std::string> typeInfos;
-	extern std::unordered_map<std::string, VFTable> vftables;
+	extern std::unordered_map<std::string, VFTable_t> vftables;
 
 	unsigned int getString(const lm_address_t addr, std::string* outStr);
 	lm_address_t extractHexNum(const std::string& str);
