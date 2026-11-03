@@ -55,6 +55,8 @@ std::unordered_set<ARMCPUContext_t::Reg_t*> CARMEmu::run()
 std::unordered_set<ARMCPUContext_t::Reg_t*> CARMEmu::run(const lm_inst_t& inst)
 {
 	auto changedRegs = std::unordered_set<ARMCPUContext_t::Reg_t*>();
+
+	//LOG_DEBUG("Emulating %s %s\n", inst.mnemonic, inst.op_str);
 	
 	if (strcmp(inst.mnemonic, "add") == 0)
 	{
@@ -163,7 +165,6 @@ std::unordered_set<ARMCPUContext_t::Reg_t*> CARMEmu::run(const lm_inst_t& inst)
 		changedRegs.emplace(&targetReg);
 	}
 
-done:
 	cpu.pc.xu += inst.size;
 	return changedRegs;
 }
