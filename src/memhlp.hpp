@@ -86,6 +86,8 @@ namespace MemHlp
 
 	const char* getTypeName(const void* pClass);
 	lm_address_t searchOffsetByTypeName(const void* pClass, const std::string& name);
+
+	bool fixRelativeInstructions(const lm_address_t oldLocation, const lm_address_t newLocation, const size_t size);
 	
 	template<typename tFN, typename ...Args>
 	constexpr auto callVFunc(const unsigned int index, void* thisPtr, Args... args)
