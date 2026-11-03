@@ -115,6 +115,8 @@ void DetourHook<T>::place()
 		this->hookFn.address,
 		this->tramp.address
 	);
+
+	MemHlp::fixRelativeInstructions(this->originalFn.address, this->tramp.address, this->size);
 }
 
 template<typename T>

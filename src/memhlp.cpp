@@ -7,6 +7,7 @@
 #include "libmem/libmem.h"
 
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <iomanip>
 #include <sstream>
@@ -389,4 +390,54 @@ lm_address_t MemHlp::searchOffsetByTypeName(const void* pClass, const std::strin
 	}
 
 	return offset;
+}
+
+bool MemHlp::fixRelativeInstructions(const lm_address_t oldLocation, const lm_address_t newLocation, const size_t size)
+{
+	const lm_arch_t arch = LM_GetArchitecture();
+	lm_inst_t* instsBuf = nullptr;
+	lm_byte_t* newBytes = nullptr;
+
+	const size_t instsDissassembled = LM_DisassembleEx(newLocation, arch, size, 0, oldLocation, &instsBuf);
+
+	std::ostringstream instsSS;
+
+	for (size_t i = 0; i < instsDissassembled; i++)
+	{
+		const lm_inst_t& inst = instsBuf[i];
+		LOG_DEBUG("Disassembled %s %s\n", inst.mnemonic, inst.op_str);
+
+		if (instsSS.str().size() > 0)
+		{
+			instsSS << " ; ";
+		}
+
+		instsSS << inst.mnemonic << " " << inst.op_str;
+	}
+
+	const auto instsStr = instsSS.str();
+	const size_t newSize = LM_AssembleEx(instsStr.c_str(), arch, newLocation, &newBytes);
+
+	bool success = false;
+
+	if (newSize > size)
+	{
+		LOG_ERROR("Fixed instructions do not fit in the old trampoline!\n");
+		goto done;
+	}
+
+	lm_prot_t oldProt;
+	LM_ProtMemory(newLocation, size, LM_PROT_XRW, &oldProt);
+	memcpy(reinterpret_cast<void*>(newLocation), newBytes, newSize);
+	LM_ProtMemory(newLocation, size, oldProt, nullptr);
+
+	LOG_DEBUG("Rewrote trampoline instructions at 0x%lx with %s\n", newLocation, instsStr.c_str());
+
+	success = true;
+
+done:
+	LM_FreeInstructions(instsBuf);
+	LM_FreePayload(newBytes);
+
+	return success;
 }
