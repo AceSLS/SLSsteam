@@ -62,13 +62,21 @@ namespace MemHlp
 		return success;
 	}
 
+	bool fixRelativeInstructions(const lm_address_t oldLocation, const lm_address_t newLocation, const size_t size);
+
 	lm_module_t* getModule(const std::string& name);
 	lm_module_t* getModuleByAddress(const lm_address_t address, const bool useCached = true);
 	lm_segment_t getSegmentByAddress(const lm_address_t address, const bool useCached = true);
 
+	const char* getTypeName(const void* pClass);
+
+	std::string hexdump(const void* address, const size_t size);
+
 	std::vector<int16_t> patternToBytes(const char* pattern);
 	lm_address_t patternScan(const char* pattern, const lm_module_t& module);
 
+	lm_address_t findPrologue(const lm_address_t address, const std::vector<int16_t>& prologueBytes);
+	lm_address_t getJmpTarget(const lm_address_t address);
 	lm_address_t searchSignature
 	(
 		const char* name,
@@ -79,15 +87,7 @@ namespace MemHlp
 		const size_t extraDataSize = 0
 	);
 
-	lm_address_t getJmpTarget(const lm_address_t address);
-	lm_address_t findPrologue(const lm_address_t address, const std::vector<int16_t>& prologueBytes);
-
-	std::string hexdump(const void* address, const size_t size);
-
-	const char* getTypeName(const void* pClass);
 	lm_address_t searchOffsetByTypeName(const void* pClass, const std::string& name);
-
-	bool fixRelativeInstructions(const lm_address_t oldLocation, const lm_address_t newLocation, const size_t size);
 	
 	template<typename tFN, typename ...Args>
 	constexpr auto callVFunc(const unsigned int index, void* thisPtr, Args... args)
