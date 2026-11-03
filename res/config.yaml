@@ -150,7 +150,7 @@ FakeWalletBalance: 0
 #Default enables everything
 LogLevels: 0xff
 
-#Dump all used IClientInterfaceMaps
+#Decompile & dump all IClient*Map classes
 DumpClientInterfaces: no
 
 #Logs all calls to Steamworks (this makes the logfile huge! Only useful for debugging/analyzing
