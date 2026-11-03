@@ -16,6 +16,56 @@
 
 std::unordered_map<std::string, std::unique_ptr<lm_module_t>> MemHlp::moduleMap = std::unordered_map<std::string, std::unique_ptr<lm_module_t>>();
 
+bool MemHlp::fixRelativeInstructions(const lm_address_t oldLocation, const lm_address_t newLocation, const size_t size)
+{
+	const lm_arch_t arch = LM_GetArchitecture();
+	lm_inst_t* instsBuf = nullptr;
+	lm_byte_t* newBytes = nullptr;
+
+	const size_t instsDissassembled = LM_DisassembleEx(newLocation, arch, size, 0, oldLocation, &instsBuf);
+
+	std::ostringstream instsSS;
+
+	for (size_t i = 0; i < instsDissassembled; i++)
+	{
+		const lm_inst_t& inst = instsBuf[i];
+		LOG_DEBUG("Disassembled %s %s\n", inst.mnemonic, inst.op_str);
+
+		if (instsSS.str().size() > 0)
+		{
+			instsSS << " ; ";
+		}
+
+		instsSS << inst.mnemonic << " " << inst.op_str;
+	}
+
+	const auto instsStr = instsSS.str();
+	const size_t newSize = LM_AssembleEx(instsStr.c_str(), arch, newLocation, &newBytes);
+
+	bool success = false;
+
+	if (newSize > size)
+	{
+		LOG_ERROR("Fixed instructions do not fit in the old trampoline!\n");
+		goto done;
+	}
+
+	lm_prot_t oldProt;
+	LM_ProtMemory(newLocation, size, LM_PROT_XRW, &oldProt);
+	memcpy(reinterpret_cast<void*>(newLocation), newBytes, newSize);
+	LM_ProtMemory(newLocation, size, oldProt, nullptr);
+
+	LOG_DEBUG("Rewrote trampoline instructions at 0x%lx with %s\n", newLocation, instsStr.c_str());
+
+	success = true;
+
+done:
+	LM_FreeInstructions(instsBuf);
+	LM_FreePayload(newBytes);
+
+	return success;
+}
+
 lm_module_t* MemHlp::getModule(const std::string& name)
 {
 	if (!moduleMap.contains(name.c_str()))
@@ -96,6 +146,94 @@ lm_segment_t MemHlp::getSegmentByAddress(const lm_address_t address, const bool 
 	}
 
 	return lm_segment_t { };
+}
+
+const char* MemHlp::getTypeName(const void* pClass)
+{
+	constexpr static auto isValid = [](const lm_address_t addr) -> bool
+	{
+		const auto mod = getModuleByAddress(addr);
+		if (!mod)
+		{
+			return false;
+		}
+
+		const auto seg = getSegmentByAddress(addr);
+		return seg.prot & LM_PROT_R;
+	};
+
+	const lm_address_t vft = *reinterpret_cast<const lm_address_t*>(pClass);
+	if (!isValid(vft))
+	{
+		return nullptr;
+	}
+
+	const lm_address_t typeInfo = *reinterpret_cast<const lm_address_t*>(vft - sizeof(lm_address_t));
+	if (!isValid(typeInfo))
+	{
+		return nullptr;
+	}
+
+	const char* name = *reinterpret_cast<const char**>(typeInfo + sizeof(lm_address_t));
+	const lm_segment_t seg = getSegmentByAddress(reinterpret_cast<lm_address_t>(name));
+
+	if (!(seg.prot & LM_PROT_R))
+	{
+		return nullptr;
+	}
+
+	return name;
+}
+
+std::string MemHlp::hexdump(const void* address, const size_t size)
+{
+	constexpr unsigned int ROWS = 0x10;
+	std::ostringstream ss;
+
+	ss << std::setfill(' ') << std::hex;
+
+	for (unsigned int i = 0; i < ROWS; i++)
+	{
+		if (i == 0)
+		{
+			ss << std::setw(13) << i;
+		}
+		else
+		{
+			ss << std::setw(3) << i;
+		}
+	}
+
+	for (uintptr_t i = 0; i < size; i += ROWS)
+	{
+		const unsigned int byteStart = reinterpret_cast<uintptr_t>(address) + i;
+		const unsigned int num = ROWS > size - i ? size - i : ROWS;
+
+		ss << "\n0x" << byteStart;
+
+		for (uintptr_t j = 0; j < num; j++)
+		{
+			const unsigned int byte = *reinterpret_cast<uint8_t*>(byteStart + j);
+			ss << " " << std::setfill('0') << std::setw(2) << byte;
+		}
+
+		ss << std::setfill(' ') << std::setw((ROWS - num) * 3 + 1) << " ";
+
+		for (uintptr_t j = 0; j < num; j++)
+		{
+			const unsigned char byte = *reinterpret_cast<unsigned char*>(byteStart + j);
+			if (std::isprint(byte))
+			{
+				ss << byte;
+			}
+			else
+			{
+				ss << ".";
+			}
+		}
+	}
+
+	return ss.str();
 }
 
 std::vector<int16_t> MemHlp::patternToBytes(const char* pattern)
@@ -180,6 +318,52 @@ lm_address_t MemHlp::patternScan(const char* pattern, const lm_module_t& targetM
 	return address;
 }
 
+lm_address_t MemHlp::findPrologue(const lm_address_t address, const std::vector<int16_t>& prologueBytes)
+{
+	constexpr unsigned int scanSize = 0x10000;
+
+	for (unsigned int i = 0u; i < scanSize; i++)
+	{
+		bool found = true;
+		for (unsigned int j = 0u; j < prologueBytes.size(); j++)
+		{
+			if (prologueBytes[j] == -1)
+			{
+				continue;
+			}
+
+			if (*reinterpret_cast<lm_byte_t*>(address - i - j) != prologueBytes[j])
+			{
+				found = false;
+				break;
+			}
+		}
+
+		if (found)
+		{
+			lm_address_t prol = address - i - prologueBytes.size() + 1; //Add 1 byte back since bytesSize would be to big otherwise
+			LOG_DEBUG("Prologue found at 0x%lx\n", prol);
+			return prol;
+		}
+	}
+
+	LOG_ERROR("Unable to find prologue after going up 0x%x bytes!\n", scanSize);
+	return LM_ADDRESS_BAD;
+}
+
+lm_address_t MemHlp::getJmpTarget(const lm_address_t address)
+{
+	lm_address_t target;
+	lm_inst_t inst { };
+	if (!LM_Disassemble(address, &inst))
+	{
+		LOG_ERROR("Failed to follow %s %s!\n", inst.mnemonic, inst.op_str)
+		return LM_ADDRESS_BAD;
+	}
+
+	return Decompiler::getRelativeTarget(inst, target);
+}
+
 lm_address_t MemHlp::searchSignature(const char* name, const char* signature, const lm_module_t& module, const SigFollowMode mode, const void* extraData, const size_t extraDataSize)
 {
 	//lm_address_t address = LM_SigScan(signature, module.base, module.size);
@@ -220,140 +404,6 @@ lm_address_t MemHlp::searchSignature(const char* name, const char* signature, co
 	return address;
 }
 
-lm_address_t MemHlp::getJmpTarget(const lm_address_t address)
-{
-	lm_address_t target;
-	lm_inst_t inst { };
-	if (!LM_Disassemble(address, &inst))
-	{
-		LOG_ERROR("Failed to follow %s %s!\n", inst.mnemonic, inst.op_str)
-		return LM_ADDRESS_BAD;
-	}
-
-	return Decompiler::getRelativeTarget(inst, target);
-}
-
-lm_address_t MemHlp::findPrologue(const lm_address_t address, const std::vector<int16_t>& prologueBytes)
-{
-	constexpr unsigned int scanSize = 0x10000;
-
-	for (unsigned int i = 0u; i < scanSize; i++)
-	{
-		bool found = true;
-		for (unsigned int j = 0u; j < prologueBytes.size(); j++)
-		{
-			if (prologueBytes[j] == -1)
-			{
-				continue;
-			}
-
-			if (*reinterpret_cast<lm_byte_t*>(address - i - j) != prologueBytes[j])
-			{
-				found = false;
-				break;
-			}
-		}
-
-		if (found)
-		{
-			lm_address_t prol = address - i - prologueBytes.size() + 1; //Add 1 byte back since bytesSize would be to big otherwise
-			LOG_DEBUG("Prologue found at 0x%lx\n", prol);
-			return prol;
-		}
-	}
-
-	LOG_ERROR("Unable to find prologue after going up 0x%x bytes!\n", scanSize);
-	return LM_ADDRESS_BAD;
-}
-
-std::string MemHlp::hexdump(const void* address, const size_t size)
-{
-	constexpr unsigned int ROWS = 0x10;
-	std::ostringstream ss;
-
-	ss << std::setfill(' ') << std::hex;
-
-	for (unsigned int i = 0; i < ROWS; i++)
-	{
-		if (i == 0)
-		{
-			ss << std::setw(13) << i;
-		}
-		else
-		{
-			ss << std::setw(3) << i;
-		}
-	}
-
-	for (uintptr_t i = 0; i < size; i += ROWS)
-	{
-		const unsigned int byteStart = reinterpret_cast<uintptr_t>(address) + i;
-		const unsigned int num = ROWS > size - i ? size - i : ROWS;
-
-		ss << "\n0x" << byteStart;
-
-		for (uintptr_t j = 0; j < num; j++)
-		{
-			const unsigned int byte = *reinterpret_cast<uint8_t*>(byteStart + j);
-			ss << " " << std::setfill('0') << std::setw(2) << byte;
-		}
-
-		ss << std::setfill(' ') << std::setw((ROWS - num) * 3 + 1) << " ";
-
-		for (uintptr_t j = 0; j < num; j++)
-		{
-			const unsigned char byte = *reinterpret_cast<unsigned char*>(byteStart + j);
-			if (std::isprint(byte))
-			{
-				ss << byte;
-			}
-			else
-			{
-				ss << ".";
-			}
-		}
-	}
-
-	return ss.str();
-}
-
-const char* MemHlp::getTypeName(const void* pClass)
-{
-	constexpr static auto isValid = [](const lm_address_t addr) -> bool
-	{
-		const auto mod = getModuleByAddress(addr);
-		if (!mod)
-		{
-			return false;
-		}
-
-		const auto seg = getSegmentByAddress(addr);
-		return seg.prot & LM_PROT_R;
-	};
-
-	const lm_address_t vft = *reinterpret_cast<const lm_address_t*>(pClass);
-	if (!isValid(vft))
-	{
-		return nullptr;
-	}
-
-	const lm_address_t typeInfo = *reinterpret_cast<const lm_address_t*>(vft - sizeof(lm_address_t));
-	if (!isValid(typeInfo))
-	{
-		return nullptr;
-	}
-
-	const char* name = *reinterpret_cast<const char**>(typeInfo + sizeof(lm_address_t));
-	const lm_segment_t seg = getSegmentByAddress(reinterpret_cast<lm_address_t>(name));
-
-	if (!(seg.prot & LM_PROT_R))
-	{
-		return nullptr;
-	}
-
-	return name;
-}
-
 lm_address_t MemHlp::searchOffsetByTypeName(const void* pClass, const std::string& name)
 {
 	constexpr lm_address_t MAX_OFFSET = 0x10000;
@@ -390,54 +440,4 @@ lm_address_t MemHlp::searchOffsetByTypeName(const void* pClass, const std::strin
 	}
 
 	return offset;
-}
-
-bool MemHlp::fixRelativeInstructions(const lm_address_t oldLocation, const lm_address_t newLocation, const size_t size)
-{
-	const lm_arch_t arch = LM_GetArchitecture();
-	lm_inst_t* instsBuf = nullptr;
-	lm_byte_t* newBytes = nullptr;
-
-	const size_t instsDissassembled = LM_DisassembleEx(newLocation, arch, size, 0, oldLocation, &instsBuf);
-
-	std::ostringstream instsSS;
-
-	for (size_t i = 0; i < instsDissassembled; i++)
-	{
-		const lm_inst_t& inst = instsBuf[i];
-		LOG_DEBUG("Disassembled %s %s\n", inst.mnemonic, inst.op_str);
-
-		if (instsSS.str().size() > 0)
-		{
-			instsSS << " ; ";
-		}
-
-		instsSS << inst.mnemonic << " " << inst.op_str;
-	}
-
-	const auto instsStr = instsSS.str();
-	const size_t newSize = LM_AssembleEx(instsStr.c_str(), arch, newLocation, &newBytes);
-
-	bool success = false;
-
-	if (newSize > size)
-	{
-		LOG_ERROR("Fixed instructions do not fit in the old trampoline!\n");
-		goto done;
-	}
-
-	lm_prot_t oldProt;
-	LM_ProtMemory(newLocation, size, LM_PROT_XRW, &oldProt);
-	memcpy(reinterpret_cast<void*>(newLocation), newBytes, newSize);
-	LM_ProtMemory(newLocation, size, oldProt, nullptr);
-
-	LOG_DEBUG("Rewrote trampoline instructions at 0x%lx with %s\n", newLocation, instsStr.c_str());
-
-	success = true;
-
-done:
-	LM_FreeInstructions(instsBuf);
-	LM_FreePayload(newBytes);
-
-	return success;
 }
