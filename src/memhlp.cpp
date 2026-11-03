@@ -357,11 +357,18 @@ lm_address_t MemHlp::getJmpTarget(const lm_address_t address)
 	lm_inst_t inst { };
 	if (!LM_Disassemble(address, &inst))
 	{
-		LOG_ERROR("Failed to follow %s %s!\n", inst.mnemonic, inst.op_str)
+		LOG_ERROR("Failed to disassemble code at 0x%lx!\n", address);
 		return LM_ADDRESS_BAD;
 	}
 
-	return Decompiler::getRelativeTarget(inst, target);
+	if (!Decompiler::getRelativeTarget(inst, target))
+	{
+		LOG_ERROR("Failed to follow %s %s at 0x%lx!\n", inst.mnemonic, inst.op_str, address);
+		return LM_ADDRESS_BAD;
+	}
+
+	LOG_DEBUG("Relative target of %s %s -> 0x%lx\n", inst.mnemonic, inst.op_str, target);
+	return target;
 }
 
 lm_address_t MemHlp::searchSignature(const char* name, const char* signature, const lm_module_t& module, const SigFollowMode mode, const void* extraData, const size_t extraDataSize)

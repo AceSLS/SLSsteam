@@ -305,7 +305,6 @@ lm_address_t Decompiler::extractHexNum(const std::string& str)
 bool Decompiler::getRelativeTarget(const lm_inst_t& instr, lm_address_t& target)
 {
 	target = extractHexNum(instr.op_str);
-
 	return target != LM_ADDRESS_BAD;
 }
 
