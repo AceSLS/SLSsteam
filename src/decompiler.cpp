@@ -169,16 +169,16 @@ std::unordered_set<ARMCPUContext_t::Reg_t*> CARMEmu::run(const lm_inst_t& inst)
 	return changedRegs;
 }
 
-void VFTable::init(const lm_address_t addr, const lm_module_t& mod)
+void VFTable_t::init(const lm_address_t addr, const lm_module_t& mod)
 {
 	this->moduleBase = mod.base;
 	this->address = addr;
 	this->typeInfo = reinterpret_cast<TypeInfo*>(addr + sizeof(this->address));
 	this->functions = std::vector<lm_address_t>();
-	this->subclasses = std::map<unsigned int, VFTable>();
+	this->subclasses = std::map<unsigned int, VFTable_t>();
 }
 
-unsigned int VFTable::analyze()
+unsigned int VFTable_t::analyze()
 {
 	//*(address + 0) = 0
 	//*(address + sizeof(lm_address_t)) = TypeInfo*
@@ -225,7 +225,7 @@ std::unordered_map<std::string, Elf_Shdr> Decompiler::sections = std::unordered_
 std::unordered_map<lm_address_t, std::string> Decompiler::picThunks = std::unordered_map<lm_address_t, std::string>();
 std::unordered_map<lm_address_t, std::string> Decompiler::strings = std::unordered_map<lm_address_t, std::string>();
 std::unordered_map<lm_address_t, std::string> Decompiler::typeInfos = std::unordered_map<lm_address_t, std::string>();
-std::unordered_map<std::string, VFTable> Decompiler::vftables = std::unordered_map<std::string, VFTable>();
+std::unordered_map<std::string, VFTable_t> Decompiler::vftables = std::unordered_map<std::string, VFTable_t>();
 
 unsigned int Decompiler::getString(const lm_address_t addr, std::string* outStr)
 {
@@ -538,7 +538,7 @@ bool Decompiler::collectVFTables(const lm_module_t& mod, const Elf_Shdr& section
 			const lm_address_t vftAddr = addr - sizeof(addr);
 			const auto& name = typeInfos.at(ptr);
 
-			auto vft = VFTable();
+			auto vft = VFTable_t();
 			vft.init(vftAddr, mod);
 
 			if (vftables.contains(name))
