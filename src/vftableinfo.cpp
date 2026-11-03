@@ -4,6 +4,7 @@
 #include "decompiler.hpp"
 #include "log.hpp"
 
+#include <regex>
 #include <sstream>
 
 
@@ -430,9 +431,19 @@ bool VFTIndexes::init()
 
 	if (g_config.dumpInterfaceMaps.copy())
 	{
-		for (const auto& tbl : tableMap)
+		const auto re = std::regex("^[0-9]+IClient.*Map$");
+
+		for (const auto& vft : Decompiler::vftables)
 		{
-			dump(tbl.first, tbl.second);
+			const auto& name = vft.first;
+
+			if (!std::regex_match(name, re))
+			{
+				continue;
+			}
+
+			const auto tbl = Decompiler::parseInterfaceMapBase(name.c_str());
+			dump(name.c_str(), tbl);
 		}
 	}
 
