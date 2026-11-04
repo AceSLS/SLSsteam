@@ -142,7 +142,7 @@ namespace Patterns
 		{
 			"CSteamEngine::m_pUser",
 		#ifdef ARM64
-			"11 47 82 D2", //TODO: Wildcard, somehow (MOV X17, #0x1238)
+			"? ? ? F9 ? ? ? AA ? ? ? 2A ? ? ? 52 ? ? ? 8B ? ? ? F9 ? ? ? ? ? ? ? B9 ? ? ? 91 ? ? ? 6B ? ? ? ? ? ? ? B9 ? ? ? B9",
 		#else
 			"4C 03 A5 ? ? ? ? 48 89 DF 4C 89 E2 E8 ? ? ? ? 49 8B 74 24",
 		#endif
@@ -222,9 +222,8 @@ namespace Patterns
 		{
 			"CUser::UpdateAppOwnershipTicket",
 		#ifdef ARM64
-			"F7 03 03 2A 03 66 8A D2",
-			SigFollowMode::PrologueUpwards,
-			std::vector<int16_t> { 0x34, 0x00, 0x14, 0x03 } //TODO: Improve
+			"? ? ? 34 ? ? ? A9 ? ? ? 91 ? ? ? A9 ? ? ? 2A ? ? ? D2",
+			SigFollowMode::None,
 		#else
 			"41 89 CD 83 FD",
 			SigFollowMode::PrologueUpwards,
@@ -290,7 +289,7 @@ namespace Patterns
 		{
 			"IClientUtils::m_PipeIndex",
 		#ifdef ARM64
-			"E1 30 82 92 02 00 01 8B", //TODO: Add complex parsing of multiple instructions to calculate offset (3 instructions)
+			"E1 30 82 92 02 00 01 8B",
 		#else
 			"8B B7 ? ? ? ? 64 48 8B 1C 25 ? ? ? ? 48 89 5C 24 ? 48 89 FB 48 81 EF",
 		#endif
