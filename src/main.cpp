@@ -70,6 +70,35 @@ static bool cleanEnvVar(const char* varName, const char* endsWith)
 	return true;
 }
 
+static std::string getReleaseType()
+{
+	std::ostringstream type;
+
+#ifdef ARM64
+	type << "AArch64";
+#else
+	type << "X86_64";
+#endif
+
+	type << " ";
+
+#ifdef TRACE
+#ifdef DEBUG
+	type << "trace & DEBUG";
+#else
+	type << "trace";
+#endif
+#elif DEBUG
+	type << "debug";
+#else
+	type << "release";
+#endif
+
+	type << " built from " << BUILD_BRANCH << " with last commit " << LAST_COMMIT_HASH;
+
+	return type.str();
+}
+
 //Looking at /proc/self/maps it seems like this isn't needed for processes that aren't steam
 //__attribute__((noreturn))
 static void unload()
@@ -152,7 +181,7 @@ static void load()
 		return;
 	}
 
-	LOG_INFO("SLSsteam (%s -> %s) loading in %s (%u)\n", BUILD_BRANCH, LAST_COMMIT_HASH, proc.name, proc.pid);
+	LOG_INFO("SLSsteam %s loading in %s (%u)\n", getReleaseType().c_str(), proc.name, proc.pid);
 
 	CFileWatcher::installSigHandler();
 
