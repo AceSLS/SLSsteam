@@ -41,6 +41,11 @@ std::unordered_set<uint64_t> Achievements::getReviewersForGame(const AppId_t app
 		return list;
 	}
 
+	if (!g_pSteamEngine->getUser()->getClientUser()->loggedOn())
+	{
+		return list;
+	}
+
 	if (fetchCooldowns.contains(appId))
 	{
 		const auto now = std::chrono::system_clock::now();
