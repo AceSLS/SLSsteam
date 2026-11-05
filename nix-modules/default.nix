@@ -3,21 +3,20 @@
   lib,
   pkgs,
 }:
-pkgs.pkgsi686Linux.stdenv.mkDerivation {
+pkgs.stdenv.mkDerivation {
   pname = "SLSsteam";
   version = "${rev}";
   src = ../.;
 
   nativeBuildInputs = with pkgs; [
     pkg-config
-    makeWrapper
   ];
 
   env.GIT_COMMIT_HASH = rev;
 
-  buildInputs = with pkgs.pkgsi686Linux; [
-    openssl
+  buildInputs = with pkgs; [
     curl
+    dbus
     luajit
   ];
 
@@ -26,6 +25,7 @@ pkgs.pkgsi686Linux.stdenv.mkDerivation {
   '';
 
   buildPhase = ''
+    make clean
     make audit-libs
   '';
 
@@ -33,6 +33,10 @@ pkgs.pkgsi686Linux.stdenv.mkDerivation {
     mkdir -p $out/
     cp bin/SLSsteam.so $out/
     cp bin/library-inject.so $out/
+  '';
+
+  postFixup = ''
+    patchelf --remove-rpath $out/SLSsteam.so
   '';
 
   meta = {
