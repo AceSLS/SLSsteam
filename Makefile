@@ -40,7 +40,7 @@ ifeq ($(ARCH),x86_64)
 	CXXFLAGS += -D "X86_64"
 endif
 ifeq ($(ARCH),aarch64)
-	CXXFLAGS += -D "ARM64"
+	CXXFLAGS += -D "AARCH64"
 endif
 
 #Speed up compilation if additional dependencies are found

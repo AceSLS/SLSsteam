@@ -74,7 +74,7 @@ static std::string getReleaseType()
 {
 	std::ostringstream type;
 
-#ifdef ARM64
+#ifdef AARCH64
 	type << "AArch64";
 #else
 	type << "X86_64";

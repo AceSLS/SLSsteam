@@ -53,7 +53,7 @@ namespace Patterns
 	Pattern_t TraceIPC
 	{
 		"TraceIPC",
-	#ifdef ARM64
+	#ifdef AARCH64
 		"01 10 80 D2 63 00 00 4B",
 		SigFollowMode::PrologueUpwards,
 		std::vector<int16_t> { 0xA9, 0xAA, 0x7B, 0xFD }
@@ -69,7 +69,7 @@ namespace Patterns
 		Pattern_t SendAndRecv
 		{
 			"CAPIJob::SendAndRecv",
-		#ifdef ARM64
+		#ifdef AARCH64
 			"F7 03 05 2A 01 10 40 F9",
 			SigFollowMode::PrologueUpwards,
 			std::vector<int16_t> { 0xA9, 0xBB, 0x7B, 0xFD }
@@ -86,7 +86,7 @@ namespace Patterns
 		Pattern_t BParseResponseMessage
 		{
 			"CAppDataCache::BParseResponseMessage",
-		#ifdef ARM64
+		#ifdef AARCH64
 			"FB 03 01 AA 00 00 40 B9",
 			SigFollowMode::PrologueUpwards,
 			std::vector<int16_t> { 0xA9, 0xAC, 0x7B, 0xFD }
@@ -103,7 +103,7 @@ namespace Patterns
 		Pattern_t GetServerPipe
 		{
 			"CSteamEngine::GetServerPipe",
-		#ifdef ARM64
+		#ifdef AARCH64
 			"44 68 40 B9 23 3C 00 12",
 			SigFollowMode::PrologueUpwards,
 			std::vector<int16_t> { 0xAA, 0x00, 0x03, 0xE2 }
@@ -116,7 +116,7 @@ namespace Patterns
 		Pattern_t SetAppIdForCurrentPipe
 		{
 			"CSteamEngine::SetAppIdForCurrentPipe",
-		#ifdef ARM64
+		#ifdef AARCH64
 			"FF 03 02 D1 3F 24 00 71",
 			SigFollowMode::None,
 		#else
@@ -128,7 +128,7 @@ namespace Patterns
 		Pattern_t ProcessIPCFrame
 		{
 			"CSteamEngine::ProcessIPCFrame",
-		#ifdef ARM64
+		#ifdef AARCH64
 			"E0 03 02 AA E1 3F 00 B9",
 			SigFollowMode::PrologueUpwards,
 			std::vector<int16_t> { 0xA9, 0xBC, 0x7B, 0xFD }
@@ -141,7 +141,7 @@ namespace Patterns
 		Pattern_t Offset_User
 		{
 			"CSteamEngine::m_pUser",
-		#ifdef ARM64
+		#ifdef AARCH64
 			"? ? ? F9 ? ? ? AA ? ? ? 2A ? ? ? 52 ? ? ? 8B ? ? ? F9 ? ? ? ? ? ? ? B9 ? ? ? 91 ? ? ? 6B ? ? ? ? ? ? ? B9 ? ? ? B9",
 		#else
 			"4C 03 A5 ? ? ? ? 48 89 DF 4C 89 E2 E8 ? ? ? ? 49 8B 74 24",
@@ -155,7 +155,7 @@ namespace Patterns
 		Pattern_t CheckAppOwnership
 		{
 			"CUser::CheckAppOwnership",
-		#ifdef ARM64
+		#ifdef AARCH64
 			"FF 5B 00 F9 E1 D3 03 91",
 			SigFollowMode::PrologueUpwards,
 			std::vector<int16_t> { 0xA9, 0xAF, 0x7B, 0xFD }
@@ -168,7 +168,7 @@ namespace Patterns
 		Pattern_t GetSubscribedApps
 		{
 			"CUser::GetSubscribedApps",
-		#ifdef ARM64
+		#ifdef AARCH64
 			"FB 03 00 AA FC 03 02 91",
 			SigFollowMode::PrologueUpwards,
 			std::vector<int16_t> { 0xA9, 0xB4, 0x7B, 0xFD }
@@ -181,7 +181,7 @@ namespace Patterns
 		Pattern_t PostCallback
 		{
 			"CUser::PostCallback",
-		#ifdef ARM64
+		#ifdef AARCH64
 			//2026-10-13 14:05:20.391 XREF Signature #1 @ 0x62d48c (sub_62D398): ? ? ? ? 74 6E 41 B9 60 82 41 B9
 			//2026-10-13 14:05:20.406 XREF Signature #2 @ 0x68590c (sub_685790): ? ? ? ? 21 0F 40 F9 94 06 00 11
 			//2026-10-13 14:05:20.406 XREF Signature #3 @ 0x604288 (sub_6040B8): ? ? ? ? ? ? ? ? C0 DE 70 D3 00 6C 1C 12
@@ -196,7 +196,7 @@ namespace Patterns
 		Pattern_t PostCallbackToAppId
 		{
 			"CUser::PostCallbackToAppId",
-		#ifdef ARM64
+		#ifdef AARCH64
 			"FD 7B B9 A9 3F 1C 00 71",
 			SigFollowMode::None,
 		#else
@@ -208,7 +208,7 @@ namespace Patterns
 		Pattern_t SpawnGameId
 		{
 			"CUser::SpawnGameId",
-		#ifdef ARM64
+		#ifdef AARCH64
 			"F6 03 00 AA F5 03 06 2A",
 			SigFollowMode::PrologueUpwards,
 			std::vector<int16_t> { 0xD2, 0x82, 0x20, 0x0C }
@@ -221,7 +221,7 @@ namespace Patterns
 		Pattern_t UpdateAppOwnershipTicket
 		{
 			"CUser::UpdateAppOwnershipTicket",
-		#ifdef ARM64
+		#ifdef AARCH64
 			"? ? ? F9 ? ? ? ? ? ? ? B8 ? ? ? 31 ? ? ? ? ? ? ? 93 ? ? ? 8B ? ? ? B9 ? ? ? 6B ? ? ? ? ? ? ? ? ? ? ? B9 ? ? ? 31 ? ? ? ? ? ? ? D2 ? ? ? ? ? ? ? AA ? ? ? ? ? ? ? 2A",
 			SigFollowMode::PrologueUpwards,
 			std::vector<int16_t> { 0xA9, 0xB6, 0x7B, 0xFD, 0x34, -1, -1, -1 }
@@ -238,7 +238,7 @@ namespace Patterns
 		Pattern_t BAsyncSend
 		{
 			"CUDPConnection::BAsyncSend",
-		#ifdef ARM64
+		#ifdef AARCH64
 			"15 00 80 52 00 10 40 B9",
 			SigFollowMode::PrologueUpwards,
 			std::vector<int16_t> { 0xA9, 0xBC, 0x7B, 0xFD }
@@ -255,7 +255,7 @@ namespace Patterns
 		Pattern_t BuildDepotDependency
 		{
 			"CUserAppManager::BuildDepotDependency",
-		#ifdef ARM64
+		#ifdef AARCH64
 			"FB 73 05 A9 08 01 40 B9",
 			SigFollowMode::PrologueUpwards,
 			std::vector<int16_t> { 0xD1, 0x0A, 0xC3, 0xFF }
@@ -272,7 +272,7 @@ namespace Patterns
 		Pattern_t BBuildAndAsyncSendFrame
 		{
 			"CWebSocketConnection::BBuildAndAsyncSendFrame",
-		#ifdef ARM64
+		#ifdef AARCH64
 			"F3 03 03 2A 80 00 40 B9",
 			SigFollowMode::PrologueUpwards,
 			std::vector<int16_t> { 0xA9, 0xB0, 0x7B, 0xFD }
@@ -289,7 +289,7 @@ namespace Patterns
 		Pattern_t Offset_GetPipeIndex
 		{
 			"IClientUtils::m_PipeIndex",
-		#ifdef ARM64
+		#ifdef AARCH64
 			"E1 30 82 92 02 00 01 8B",
 		#else
 			"8B B7 ? ? ? ? 64 48 8B 1C 25 ? ? ? ? 48 89 5C 24 ? 48 89 FB 48 81 EF",

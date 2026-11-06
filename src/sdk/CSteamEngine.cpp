@@ -158,7 +158,7 @@ CServerPipe* CSteamEngine::getServerPipe(const HSteamPipe pipe)
 
 CUser* CSteamEngine::getUser(const uint32_t index)
 {
-#ifdef ARM64
+#ifdef AARCH64
 	static int32_t offset = 0;
 	if (!offset)
 	{
