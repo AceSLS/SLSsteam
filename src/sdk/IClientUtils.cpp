@@ -13,7 +13,7 @@ HSteamPipe IClientUtils::getCurrentSteamPipe()
 {
 	//Offset found in IClientUtils::GetAppId
 
-#ifdef ARM64
+#ifdef AARCH64
 	static int32_t offset = 0;
 	if (!offset)
 	{

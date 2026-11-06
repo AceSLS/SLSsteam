@@ -596,7 +596,7 @@ void Decompiler::parseModule(const lm_module_t &mod)
 		collectStrings(mod, *shRODataStr);
 	}
 
-	//AMD64 & partially ARM64
+	//X86_64 & partially AARCH64
 	const Elf_Shdr* shDataRelRO = getSection(mod, ".data.rel.ro");
 	if (shDataRelRO)
 	{
@@ -606,7 +606,7 @@ void Decompiler::parseModule(const lm_module_t &mod)
 		collectVFTables(mod, *shDataRelRO);
 	}
 
-	//ARM64 exclusive
+	//AARCH64 exclusive
 	const Elf_Shdr* shDataRelROLocal = getSection(mod, ".data.rel.ro.local");
 	if (shDataRelROLocal)
 	{
@@ -621,7 +621,7 @@ void Decompiler::parseFunction(const lm_address_t begin, std::unordered_map<lm_a
 	auto branchesTaken = std::unordered_set<lm_address_t>();
 	CARMEmu cpu = CARMEmu(begin);
 	__parseFunction(begin, references, branchesTaken, &cpu);
-#ifdef ARM64
+#ifdef AARCH64
 #else
 	__parseFunction(begin, references, branchesTaken, nullptr);
 #endif
@@ -636,7 +636,7 @@ void Decompiler::__parseFunction
 )
 {
 
-#ifdef ARM64
+#ifdef AARCH64
 	//TODO: Add handling of TB* (TBNZ for example)
 	constexpr const char* JMP_MNEMONIC = "b";
 	constexpr const char* CALL_MNEMONIC = "bl";
@@ -682,7 +682,7 @@ void Decompiler::__parseFunction
 		}
 	  #endif
 
-	#ifdef ARM64
+	#ifdef AARCH64
 		//Follow branches, not calls
 		if (instr.mnemonic[0] == JMP_MNEMONIC[0] && !std::string(instr.mnemonic).starts_with(CALL_MNEMONIC))
 	#else
@@ -740,7 +740,7 @@ void Decompiler::__parseFunction
 			return;
 		}
 
-	#ifdef ARM64
+	#ifdef AARCH64
 		const auto regs = armCPU->run(instr);
 		for (const auto reg : regs)
 		{
