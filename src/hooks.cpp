@@ -356,13 +356,6 @@ static void hkCMInterface_RecvPkt(CCMInterface* pCMInterface, CNetPacket* pNetPa
 		const auto header = pNetPacket->deserializeHeader();
 		const bool disableFamilyShareLock = g_config.disableFamilyLock.copy();
 
-		if (disableFamilyShareLock && type == k_EMsgClientSharedLibraryStopPlaying)
-		{
-			LOG_DEBUG("Choking %s\n", pNetPacket->getProtoBufTypeName().c_str());
-			pNetPacket->free();
-			return;
-		}
-
 		if
 		(
 			disableFamilyShareLock

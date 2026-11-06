@@ -21,8 +21,10 @@
 #  AppId1: FakeAppId1
 #  AppId2: FakeAppId2
 
-#Disables Family Share license locking for self and others
-DisableFamilyShareLock: yes
+#Disables Family Share license locking for self. This only disables the client side lock
+#You will still get kicked if you do not use something like FakeAppIds when a license is in use
+#by someone else
+DisableFamilyShareLock: no
 
 #Switches to whitelist instead of the default blacklist
 UseWhitelist: no
