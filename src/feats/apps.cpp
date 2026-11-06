@@ -568,10 +568,22 @@ void Apps::sendGamesPlayed(CNetPacket* pkt)
 		if (statusApp->appId)
 		{
 			auto game = msg.add_games_played();
+
 			game->set_game_id(statusApp->appId);
 			game->set_game_extra_info(statusApp->title);
 			game->set_game_flags(0);
 			//game->set_game_flags(EGAMEFLAG_MULTIPLAYER);
+
+			AppOwnershipInfo_t info { };
+			if (usr->checkAppOwnership(statusApp->appId, &info))
+			{
+				//Lock the selected license
+				game->set_owner_id(info.owner);
+			}
+			else
+			{
+				game->set_owner_id(g_currentSteamId.accountId());
+			}
 		}
 	}
 
