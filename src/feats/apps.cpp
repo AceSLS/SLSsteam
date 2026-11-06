@@ -23,10 +23,17 @@ std::unordered_set<AppId_t> Apps::pendingLicenseChanges = std::unordered_set<App
 
 bool Apps::unlockApp(const AppId_t appId, AppOwnershipInfo_t* info, const CSteamId& ownerId)
 {
-	//Changing the purchased field is enough, but just for nicety in the Steamclient UI we change the owner too
-	info->owner = ownerId.accountId();
-	info->realOwner = 0;
-	info->familyShared = info->owner != g_currentSteamId.accountId();
+	if (!info->familyShared)
+	{
+		//Changing the purchased field is enough, but just for nicety in the Steamclient UI we change the owner too
+		info->owner = ownerId.accountId();
+		info->realOwner = 0;
+		info->familyShared = false;
+	}
+	else
+	{
+		LOG_ONCE("Not taking ownership of %u since it's a family shared title\n", appId);
+	}
 
 	info->licensePermanent = !info->familyShared;
 	info->retailLicense = false;
