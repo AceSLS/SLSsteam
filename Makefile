@@ -54,10 +54,10 @@ ifeq ($(ARCH),aarch64)
 endif
 
 #Speed up compilation if additional dependencies are found
-ifeq ($(shell type ccache &> /dev/null && echo "found"),found)
-	export PATH := /usr/lib/ccache/bin:$(PATH)
+ifneq (,$(shell command -v ccache))
+	CXX := ccache $(CXX)
 endif
-#ifeq ($(shell type mold &> /dev/null && echo "found"),found)
+#ifneq (,$(shell command -v mold))
 #	LDFLAGS += -fuse-ld=mold
 #endif
 
