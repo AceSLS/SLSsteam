@@ -42,8 +42,8 @@ namespace SchemaGrabber
 
 	class SchemaGrabber
 	{
-		//Thanks Parasitic-Hollow for discovering this endpoint
-		public const string ReviewUrl = "https://store.steampowered.com/appreviews/{appId}?json=1&filter=recent&language=all&purchase_type=all&num_per_page=10";
+		//Thanks Parasitic-Hollow for the idea
+		public const string ReviewUrl = "https://api.steampowered.com/IUserReviewsService/GetAppReviews/v1/?appid={appId}&num_per_page=10&filter=1&languages[0]=all&day_range=0&review_type=0&purchase_type=1&filter_offtopic_activity=false&use_review_quality=false";
 
 		public readonly string GuardDataDir = Path.Combine(Environment.CurrentDirectory, "Sentries");
 
