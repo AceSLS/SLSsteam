@@ -4,7 +4,17 @@
 #Force g++ cause clang crashes on some hooks
 CXX := g++
 
+#Default architecture to build for
 ARCH := $(shell uname -m)
+
+ifeq ($(shell echo $$CROSS_HOST),X86_64)
+	CXX := x86_64-linux-gnu-g++
+	ARCH := x86_64
+endif
+ifeq ($(shell echo $$CROSS_HOST),AArch64)
+	CXX := aarch64-linux-gnu-g++
+	ARCH := aarch64
+endif
 
 libs := $(wildcard lib/$(ARCH)/*.a)
 srcs := $(shell find src/ -type f -iname "*.cpp")
