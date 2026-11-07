@@ -2,6 +2,35 @@
 
 set -e
 
+BUILD_PKG="1"
+BUILD_DEBUG="1"
+BUILD_TRACE="0"
+
+for arg in "$@"
+do
+	if [ "$arg" == "-h" ] || [ "$arg" == "--help" ]; then
+		echo "./$0 [OPTION...]"
+		echo ""
+		echo "  --no-pkg:		Don't build the Arch package"
+		echo "  --no-debug:		Don't build a debug zip"
+		echo "  --trace:		Build a trace zip"
+		exit 0
+	
+	elif [ "$arg" == "--no-pkg" ]; then
+		BUILD_PKG="0"
+
+	elif [ "$arg" == "--no-debug" ]; then
+		BUILD_DEBUG="0"
+
+	elif [ "$arg" == "--trace" ]; then
+		BUILD_TRACE="1"
+
+	else
+		echo "Unknown argument $arg!"
+		exit 1
+	fi
+done
+
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 cd "$SCRIPT_DIR"
 
@@ -16,15 +45,6 @@ PKG_REL="$(grep "pkgrel=.*" "$ARCH_PKG_DIR/PKGBUILD" | cut -d "=" -f 2)"
 
 BRANCH="$(git branch | grep "\*" | cut -d " " -f 2)"
 RELEASE_DIR="releases/$BRANCH/$TIMESTAMP"
-
-BUILD_PKG="1"
-
-for arg in "$@"
-do
-	if [ "$arg" == "--skip-pkg" ]; then
-		BUILD_PKG="0"
-	fi
-done
 
 make_release()
 {
@@ -55,5 +75,11 @@ make_release()
 	rm -r "$DIR"
 }
 
-#DEBUG=1 make_release "debug"
+if [ "$BUILD_TRACE" = "1" ]; then
+	TRACE=1 DEBUG=1 make_release "trace"
+fi
+if [ "$BUILD_DEBUG" = "1" ]; then
+	DEBUG=1 make_release "debug"
+fi
+
 make_release "release"
