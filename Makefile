@@ -84,7 +84,7 @@ link-bins:
 
 $(SLSSTEAMSO): $(objs) $(libs)
 	@mkdir -p bin
-	$(CXX) $(CXXFLAGS) $^ -o $(SLSSTEAMSO) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $^ -o $@ $(LDFLAGS)
 	$(MAKE) link-bins
 
 schema-grabber:
