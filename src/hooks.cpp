@@ -215,6 +215,9 @@ Lua::Ptr_t LuaHook::place()
 	}
 
 	LOG_DEBUG("Placed LuaHook %s from 0x%lx to 0x%lx\n", name.c_str(), fn, hookFn);
+
+	MemHlp::fixRelativeInstructions(fn, tramp, size);
+
 	return reinterpret_cast<void*>(tramp);
 }
 
