@@ -47,6 +47,7 @@ std::unordered_set<ARMCPUContext_t::Reg_t*> CARMEmu::run()
 	if (!LM_Disassemble(cpu.pc.xu, &inst))
 	{
 		LOG_ERROR("Failed to disassemble code at %lx!", cpu.pc.xu);
+		return { };
 	}
 
 	return run(inst);
