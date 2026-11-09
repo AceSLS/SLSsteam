@@ -68,18 +68,14 @@ deps := $(objs:%.o=%.d)
 
 audit-libs: embed-version #embed-version belongs to the SLSsteam.so target, yet we can't elegantly add it there. So it stays here for now
 	$(MAKE) -j $(JOBS) $(SLSSTEAMSO)
-	$(MAKE) link-bins
 
 tools:
 	$(MAKE) -j 2 schema-grabber ticket-grabber
 
-link-bins:
-	-test -f "$(SLSSTEAMSO)" && ln -f "$(SLSSTEAMSO)" "bin/SLSsteam.so"
-
 $(SLSSTEAMSO): $(objs) $(libs)
 	@mkdir -p bin
 	$(CXX) $(CXXFLAGS) $^ -o $@ $(LDFLAGS)
-	$(MAKE) link-bins
+	ln -f "$@" "bin/SLSsteam.so"
 
 schema-grabber:
 	$(MAKE) -C tools/schema-grabber
@@ -168,7 +164,6 @@ release: rebuild zips
 .PHONY: \
 	audit-libs \
 	tools \
-	link-bins \
 	schema-grabber \
 	ticket-grabber \
 	embed-version \
