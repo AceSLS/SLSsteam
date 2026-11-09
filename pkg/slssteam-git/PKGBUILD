@@ -45,17 +45,6 @@ build() {
 }
 
 package() {
-	cd "$pkgdir"
-
-	mkdir -p "$pkgdir/usr/share/doc/"
-	cp -rvL "$srcdir/SLSsteam/docs" "$pkgdir/usr/share/doc/SLSsteam"
-
-	#TODO: Create make install target
-	install -D "$srcdir/SLSsteam/bin/SLSsteam.so" "$pkgdir/usr/lib/libSLSsteam.so"
-	install -D "$srcdir/SLSsteam/res/SLSsteam.desktop" "$pkgdir/usr/share/applications/SLSsteam.desktop"
-	install -D "$srcdir/SLSsteam/res/SLSsteam-native.desktop" "$pkgdir/usr/share/applications/SLSsteam-native.desktop"
-	install -D "$srcdir/SLSsteam/res/logo.png" "$pkgdir/usr/share/pixmaps/SLSsteam.png"
-
-	install -D "$srcdir/SLSsteam/tools/ticket-grabber/bin/Release/net9.0/linux-x64/publish/ticket-grabber" "$pkgdir/usr/bin/sls-ticket-grabber"
-	install -D "$srcdir/SLSsteam/tools/schema-grabber/bin/Release/net9.0/linux-x64/publish/schema-grabber" "$pkgdir/usr/bin/sls-schema-grabber"
+	cd "$srcdir/SLSsteam"
+	PKGDIR="$pkgdir" make makepkg-install
 }

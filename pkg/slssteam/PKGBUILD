@@ -40,14 +40,6 @@ build() {
 }
 
 package() {
-	cd "$pkgdir"
-
-	install -D "$srcdir/SLSsteam-$pkgver/bin/SLSsteam.so" "$pkgdir/usr/lib/libSLSsteam.so"
-	install -D "$srcdir/SLSsteam-$pkgver/res/SLSsteam.desktop" "$pkgdir/usr/share/applications/SLSsteam.desktop"
-	install -D "$srcdir/SLSsteam-$pkgver/res/SLSsteam-native.desktop" "$pkgdir/usr/share/applications/SLSsteam-native.desktop"
-	install -D "$srcdir/SLSsteam-$pkgver/res/logo.png" "$pkgdir/usr/share/pixmaps/SLSsteam.png"
-
-	#Disabled until dev reaches main
-	install -D "$srcdir/SLSsteam-$pkgver/tools/ticket-grabber/bin/Release/net9.0/linux-x64/publish/ticket-grabber" "$pkgdir/usr/bin/sls-ticket-grabber"
-	install -D "$srcdir/SLSsteam-$pkgver/tools/schema-grabber/bin/Release/net9.0/linux-x64/publish/schema-grabber" "$pkgdir/usr/bin/sls-schema-grabber"
+	cd "$srcdir/SLSsteam-$pkgver"
+	PKGDIR="$pkgdir" make makepkg-install
 }

@@ -115,11 +115,23 @@ clean-tools:
 	-$(MAKE) -C tools/schema-grabber clean
 	-$(MAKE) -C tools/ticket-grabber clean
 
-install:
+install: build
 	sh setup.sh install
 
 uninstall:
 	sh setup.sh uninstall
+
+makepkg-install: build
+	-mkdir -p "$$PKGDIR/usr/share/doc/"
+	cp -rvL "docs" "$$PKGDIR/usr/share/doc/SLSsteam"
+
+	install -D "bin/SLSsteam.so" "$$PKGDIR/usr/lib/libSLSsteam.so"
+	install -D "res/SLSsteam.desktop" "$$PKGDIR/usr/share/applications/SLSsteam.desktop"
+	install -D "res/SLSsteam-native.desktop" "$$PKGDIR/usr/share/applications/SLSsteam-native.desktop"
+	install -D "res/logo.png" "$$PKGDIR/usr/share/pixmaps/SLSsteam.png"
+
+	install -D "tools/ticket-grabber/bin/Release/net9.0/linux-x64/publish/ticket-grabber" "$$PKGDIR/usr/bin/sls-ticket-grabber"
+	install -D "tools/schema-grabber/bin/Release/net9.0/linux-x64/publish/schema-grabber" "$$PKGDIR/usr/bin/sls-schema-grabber"
 
 zips: build
 	@mkdir -p zips
