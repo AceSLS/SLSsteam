@@ -27,7 +27,7 @@ Comment[th]=โปรแกรมสำหรับจัดการและ�
 Comment[tr]=Steam üzerinden oyun oynama ve düzenleme uygulaması
 Comment[uk]=Програма для керування іграми та запуску ігор у Steam
 Comment[vi]=Ứng dụng để quản lý và chơi trò chơi trên Steam
-Exec=/usr/bin/env LD_AUDIT="/usr/lib32/libSLS-library-inject.so:/usr/lib32/libSLSsteam.so" /usr/bin/steam %U
+Exec=/usr/bin/env LD_AUDIT="/usr/lib32/libSLSsteam.so" /usr/bin/steam %U
 Icon=SLSsteam
 Terminal=false
 Type=Application

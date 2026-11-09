@@ -3,11 +3,11 @@
 SLSDIR="$HOME/.local/share/SLSsteam"
 SLSPATH="$SLSDIR/path"
 SLSLIB="$SLSDIR/SLSsteam.so"
-SLSAUDIT="LD_AUDIT=\"$SLSDIR/library-inject.so:$SLSDIR/SLSsteam.so\""
+SLSAUDIT="LD_AUDIT=\"$SLSDIR/SLSsteam.so\""
 
 FLATPAK_APP_ID="com.valvesoftware.Steam"
 FLATPAK_SLSDIR="$HOME/.var/app/$FLATPAK_APP_ID/.local/share/SLSsteam"
-FLATPAK_LD_AUDIT="/app/links/\$LIB/libshared-library-guard.so:$FLATPAK_SLSDIR/library-inject.so:$FLATPAK_SLSDIR/SLSsteam.so"
+FLATPAK_LD_AUDIT="/app/links/\$LIB/libshared-library-guard.so:$FLATPAK_SLSDIR/SLSsteam.so"
 
 uninstall()
 {

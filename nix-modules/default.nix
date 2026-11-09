@@ -32,7 +32,6 @@ pkgs.stdenv.mkDerivation {
   installPhase = ''
     mkdir -p $out/
     cp bin/SLSsteam.so $out/
-    cp bin/library-inject.so $out/
   '';
 
   postFixup = ''

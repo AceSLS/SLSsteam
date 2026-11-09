@@ -67,12 +67,7 @@ objs := $(srcs:src/%.cpp=obj/$(FLAGSSHA)/%.o)
 deps := $(objs:%.o=%.d)
 
 audit-libs: embed-version #embed-version belongs to the SLSsteam.so target, yet we can't elegantly add it there. So it stays here for now
-	$(MAKE) -j $(JOBS) $(SLSSTEAMSO) library-inject
-	$(MAKE) link-bins
-
-library-inject:
-	@mkdir -p bin
-	$(MAKE) -C tools/library-inject
+	$(MAKE) -j $(JOBS) $(SLSSTEAMSO)
 	$(MAKE) link-bins
 
 tools:
@@ -80,7 +75,6 @@ tools:
 
 link-bins:
 	-test -f "$(SLSSTEAMSO)" && ln -f "$(SLSSTEAMSO)" "bin/SLSsteam.so"
-	-test -f "tools/library-inject/library-inject.so" && ln -f "tools/library-inject/library-inject.so" "bin/library-inject.so"
 
 $(SLSSTEAMSO): $(objs) $(libs)
 	@mkdir -p bin
@@ -132,7 +126,6 @@ zips: build
 	7z a -mx9 -m9=lzma2 \
 		"zips/SLSsteam $(DATE).7z" \
 		"bin/SLSsteam.so" \
-		"bin/library-inject.so" \
 		"setup.sh" \
 		"docs/LICENSE" \
 		"res/config.yaml" \
@@ -143,7 +136,6 @@ zips: build
 	7z a -mx9 -m9=lzma \
 		"zips/SLSsteam $(DATE).zip" \
 		"bin/SLSsteam.so" \
-		"bin/library-inject.so" \
 		"setup.sh" \
 		"docs/LICENSE" \
 		"res/config.yaml" \
@@ -163,7 +155,6 @@ release: rebuild zips
 
 .PHONY: \
 	audit-libs \
-	library-inject \
 	tools \
 	link-bins \
 	schema-grabber \

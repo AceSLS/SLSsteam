@@ -136,11 +136,9 @@ static void setup()
 		//srt-client-container is also responsible for spawning games, so we can't unset it early enough anymore
 		//Any release
 		cleanEnvVar("LD_AUDIT", "SLSsteam.so");
-		cleanEnvVar("LD_AUDIT", "library-inject.so");
 
 		//Arch release
 		cleanEnvVar("LD_AUDIT", "libSLSsteam.so");
-		cleanEnvVar("LD_AUDIT", "libSLS-library-inject.so");
 	}
 
 	//Do not do anything in other processes
