@@ -6,5 +6,11 @@ obj
 releases
 zip
 
+pkg/*/src
+pkg/*/pkg
+
+pkg/slssteam-local/PKGBUILD
+pkg/slssteam-local/SLSsteam.tar
+
 src/config_default.hpp
 src/version.hpp
