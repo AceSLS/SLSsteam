@@ -37,7 +37,7 @@ build() {
 package() {
 	cd "$pkgdir"
 
-	install -D "$srcdir/SLSsteam-$pkgver/bin/SLSsteam.so" "$pkgdir/usr/lib32/libSLSsteam.so"
+	install -D "$srcdir/SLSsteam-$pkgver/bin/SLSsteam.so" "$pkgdir/usr/lib/libSLSsteam.so"
 	install -D "$srcdir/SLSsteam-$pkgver/res/SLSsteam.desktop" "$pkgdir/usr/share/applications/SLSsteam.desktop"
 	install -D "$srcdir/SLSsteam-$pkgver/res/SLSsteam-native.desktop" "$pkgdir/usr/share/applications/SLSsteam-native.desktop"
 	install -D "$srcdir/SLSsteam-$pkgver/res/logo.png" "$pkgdir/usr/share/pixmaps/SLSsteam.png"

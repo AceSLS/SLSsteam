@@ -47,7 +47,7 @@ package() {
 	cp -rvL "$srcdir/SLSsteam/docs" "$pkgdir/usr/share/doc/SLSsteam"
 
 	#TODO: Create make install target
-	install -D "$srcdir/SLSsteam/bin/SLSsteam.so" "$pkgdir/usr/lib32/libSLSsteam.so"
+	install -D "$srcdir/SLSsteam/bin/SLSsteam.so" "$pkgdir/usr/lib/libSLSsteam.so"
 	install -D "$srcdir/SLSsteam/res/SLSsteam.desktop" "$pkgdir/usr/share/applications/SLSsteam.desktop"
 	install -D "$srcdir/SLSsteam/res/SLSsteam-native.desktop" "$pkgdir/usr/share/applications/SLSsteam-native.desktop"
 	install -D "$srcdir/SLSsteam/res/logo.png" "$pkgdir/usr/share/pixmaps/SLSsteam.png"

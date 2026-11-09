@@ -152,7 +152,7 @@ static void setup()
 	//more or less than mine does we just force append those
 	//Hopefully this won't mess anything else up
 	//auto ldLibPath = std::string(getenv("LD_LIBRARY_PATH"));
-	//ldLibPath.append("/usr/lib:/usr/lib32");
+	//ldLibPath.append("/usr/lib:/usr/lib");
 	//setenv("LD_LIBRARY_PATH", ldLibPath.c_str(), true);
 
 	setupSuccess = true;
