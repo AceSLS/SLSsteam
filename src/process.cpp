@@ -179,9 +179,14 @@ bool CPortableExecutableFile::parseSections()
 			return false;
 		}
 
+		#pragma GCC diagnostic push
+		#pragma GCC diagnostic ignored "-Wstringop-truncation"
+
 		char name[SECTION_HEADER_NAME_SIZE + 1] { }; //Zero allocate buffer for null termination
 		strncpy(name, reinterpret_cast<char*>(sectHdr), sizeof(name) - 1);
 		//snprintf(name, sizeof(name), "%s", reinterpret_cast<char*>(sectHdr));
+	
+		#pragma GCC diagnostic pop
 
 		const uint32_t rva = *reinterpret_cast<uint32_t*>(&sectHdr[0xC]);
 		const uint32_t size = *reinterpret_cast<uint32_t*>(&sectHdr[0x10]);
