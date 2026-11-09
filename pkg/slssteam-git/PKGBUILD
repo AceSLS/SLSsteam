@@ -2,33 +2,37 @@
 pkgname="slssteam-git"
 pkgver=20261106120254
 pkgrel=1
-pkgdesc="Steamclient Mod - Pre release"
-arch=("i686" "x86_64")
+pkgdesc="Steamclient Mod"
+arch=("x86_64")
 url="https://github.com/AceSLS/SLSsteam"
 license=("AGPL-3.0-only")
 
 depends=("steam"
-		"lib32-openssl"
-		"lib32-glibc"
-		"lib32-gcc-libs")
+         "curl"
+         "dbus"
+         "libstdc++"
+         "glibc"
+         "systemd-libs"
+         "dotnet-runtime")
 
-optdepends=("steam-native"
-			"ccache: Speeds up compilation"
-			"dotnet-runtime-9.0: sls-ticket-generator")
+makedepends=("make"
+             "gcc"
+             "pkg-config"
+             "dotnet-sdk")
+
+optdepends=("steam-native-runtime"
+            "ccache: Speeds up compilation")
 
 provides=("slssteam")
 conflicts=("slssteam")
 
-source=("git+$url#branch=dev")
-makedepends=("git"
-			"gcc"
-			"dotnet-sdk-9.0")
-
-#Disable stripping to not mess up disturb ticket-grabber
+#Disable stripping to not mess up ticket-grabber
 options=(!strip)
 
-sha256sums=('SKIP')
+source=("git+$url#branch=dev")
+sha256sums=("SKIP")
 validpgpkeys=("63AB8F4BF8A62EEEB8D8C7584410F8CF7129B2D6")
+
 
 pkgver() {
 	cd "$srcdir/SLSsteam"
