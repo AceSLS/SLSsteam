@@ -549,6 +549,13 @@ static bool hkSendPacket(void* pThis, const RouteInfo_t& route, void* pData, ste
 
 	Lua::fireCallback(Lua::Callbacks::Network_SendPkt, &packet);
 
+	if (Apps::shouldChokeSendPacket(&packet))
+	{
+		LOG_DEBUG("Choking outbound packet %s (0x%x)\n", packet.getProtoBufTypeName().c_str(), packet.getType());
+		packet.free();
+		return true;
+	}
+
 	Achievements::sendMsg(&packet);
 	Apps::sendMsg(&packet);
 	FakeAppIds::sendMsg(&packet);

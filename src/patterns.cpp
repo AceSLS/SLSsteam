@@ -6,25 +6,31 @@
 #include "libmem/libmem.h"
 
 
-Pattern_t::Pattern_t(const char* name, const char* pattern, MemHlp::SigFollowMode followMode, lm_module_t* module)
+Pattern_t::Pattern_t(const char* name, const char* pattern, MemHlp::SigFollowMode followMode, lm_module_t* module, bool optional)
 	:
-	Pattern_t(name, pattern, followMode, std::vector<int16_t>(), module)
+	Pattern_t(name, pattern, followMode, std::vector<int16_t>(), module, optional)
 {
 }
 
-Pattern_t::Pattern_t(const char* name, const char* pattern, MemHlp::SigFollowMode followMode, std::vector<int16_t> prologue, lm_module_t* module)
+Pattern_t::Pattern_t(const char* name, const char* pattern, MemHlp::SigFollowMode followMode, std::vector<int16_t> prologue, lm_module_t* module, bool optional)
 	:
 	name(name),
 	pattern(pattern),
 	followMode(followMode),
 	prologue(prologue),
-	module(module)
+	module(module),
+	optional(optional)
 {
 	Patterns::patterns.emplace_back(this);
 }
 
 bool Pattern_t::find()
 {
+	if (pattern.empty())
+	{
+		address = LM_ADDRESS_BAD;
+		return false;
+	}
 	address = MemHlp::searchSignature(name.c_str(), pattern.c_str(), module ? *module : *g_modSteamClient , followMode, &prologue[0], prologue.size());
 	return address != LM_ADDRESS_BAD;
 }
@@ -39,6 +45,12 @@ bool Patterns::init()
 	{
 		if (!pattern->find())
 		{
+			if (pattern->optional)
+			{
+				LOG_DEBUG("Optional pattern %s was not found, skipping\n", pattern->name.c_str());
+				continue;
+			}
+
 			found = false;
 		}
 	}
@@ -177,6 +189,24 @@ namespace Patterns
 			SigFollowMode::PrologueUpwards,
 			std::vector<int16_t> { 0x55, 0x41, 0x56, 0x41, 0x57, 0x41 }
 		#endif
+		};
+		//Returns true when the account holds a directly owned (non Family-Shared)
+		//license for the app, even if a family member also owns a copy.
+		//Optional and AArch64-unsupported on purpose: when the signature is missing
+		//the check fails safe to "owned", so injection still succeeds and no
+		//self-owned games are hidden.
+		Pattern_t OwnsAppDirectly
+		{
+			"CUser::OwnsAppDirectly",
+		#ifdef AARCH64
+			"",
+		#else
+			"41 57 41 56 41 89 F6 41 55 41 54 55 48 89 FD 53 48 83 EC 08 4C 8D 25 ? ? ? ? 49 8B 04 24 ? 8D ? 48 13 00 00",
+		#endif
+			SigFollowMode::None,
+			std::vector<int16_t>(),
+			nullptr,
+			true
 		};
 		Pattern_t PostCallback
 		{

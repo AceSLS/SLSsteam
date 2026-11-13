@@ -504,6 +504,59 @@ void Apps::sendAndRecvLastPlayedTimes(const char* name, CPlayer_GetLastPlayedTim
 	}
 }
 
+/*
+ * Returns true when the app is being used through Family Sharing (legacy or
+ * New Steam Families / FamilyGroups) without a directly owned license.
+ */
+static bool isFamilySharedApp(CUser* usr, const AppId_t appId, const uint32_t packetOwnerId = 0)
+{
+	if (!appId)
+	{
+		return false;
+	}
+
+	const bool hasSelf = g_currentSteamId.isSet();
+	const uint32_t selfAccountId = g_currentSteamId.accountId();
+
+	if (packetOwnerId && hasSelf && packetOwnerId != selfAccountId)
+	{
+		return true;
+	}
+
+	if (!usr)
+	{
+		return false;
+	}
+
+	AppOwnershipInfo_t info { };
+	if (!usr->checkAppOwnership(appId, &info))
+	{
+		return false;
+	}
+
+	//Legacy Family Sharing: Steam directly flags the ownership info.
+	if (info.familyShared)
+	{
+		return true;
+	}
+
+	if (info.owner && hasSelf && info.owner != selfAccountId)
+	{
+		return true;
+	}
+
+	//New Steam Families (FamilyGroups): CheckAppOwnership reports these apps as
+	//self-owned with familyShared == 0 and owner == self, so neither signal above
+	//fires. The reliable marker is the license itself: CUser::OwnsAppDirectly walks
+	//every license for the app and returns false when the only ones present carry
+	//Steam's family-shared license flag (0x4000).
+	//
+	//Forwarding such a borrowed session to the CM servers makes Valve start the
+	//180s family-lock timer, which terminates the game and disconnects the client
+	//with "This account logged in on another computer" every 3-5 minutes.
+	return !usr->ownsAppDirectly(appId);
+}
+
 void Apps::sendGamesPlayed(CNetPacket* pkt)
 {
 	const auto titles = g_config.gameTitles.get();
@@ -512,7 +565,8 @@ void Apps::sendGamesPlayed(CNetPacket* pkt)
 
 	auto msg = pkt->deserializeBody<CMsgClientGamesPlayed>();
 
-	for (int i = 0; i < msg.games_played_size(); i++)
+	// Iterate backward so removing unmasked Family-Shared entries does not skip items.
+	for (int i = msg.games_played_size() - 1; i >= 0; i--)
 	{
 		auto game = msg.mutable_games_played(i);
 		if (!game->game_id())
@@ -530,12 +584,23 @@ void Apps::sendGamesPlayed(CNetPacket* pkt)
 			continue;
 		}
 
+		const AppId_t fakeAppId = FakeAppIds::getFakeAppId(gameId);
+
+		// Omit unmasked Family-Shared apps so Valve's CM server never sees a shared
+		// session conflict and starts its 180s kick timer ("logged in on another computer").
+		if (g_config.disableFamilyLock.get() && !fakeAppId && isFamilySharedApp(usr, static_cast<AppId_t>(gameId), game->owner_id()))
+		{
+			LOG_DEBUG("Hiding unmasked Family-Shared app %lu from CMsgClientGamesPlayed\n", gameId);
+			msg.mutable_games_played()->DeleteSubrange(i, 1);
+			continue;
+		}
+
 		if (titles->contains(gameId))
 		{
 			game->set_game_extra_info(titles->at(gameId));
 		}
 		//This probably belongs into FakeAppIds, but the GameTitles does not so it stays here
-		else if (FakeAppIds::getFakeAppId(gameId))
+		else if (fakeAppId)
 		{
 			char name[256] {}; //No clue how long titles can get
 			int len;
@@ -625,6 +690,44 @@ void Apps::sendMsg(CNetPacket *pkt)
 		default:
 			break;
 	}
+}
+
+/*
+ * Returns true if an outbound CM packet should be dropped before Steam sends it.
+ * Suppresses Rich Presence uploads for Family-Shared apps hidden from
+ * CMsgClientGamesPlayed (DisableFamilyShareLock without a FakeAppId override).
+ */
+bool Apps::shouldChokeSendPacket(const CNetPacket* pkt)
+{
+	if (!pkt || !pkt->isValid() || !pkt->isProtoBuf())
+	{
+		return false;
+	}
+
+	if (!g_config.disableFamilyLock.get())
+	{
+		return false;
+	}
+
+	if (pkt->getProtoBufType() != k_EMsgClientRichPresenceUpload)
+	{
+		return false;
+	}
+
+	const auto header = pkt->deserializeHeader();
+	if (!header.has_routing_appid() || !header.routing_appid())
+	{
+		return false;
+	}
+
+	const AppId_t routingAppId = header.routing_appid();
+	if (FakeAppIds::getFakeAppId(routingAppId))
+	{
+		return false;
+	}
+
+	const auto usr = g_pSteamEngine ? g_pSteamEngine->getUser() : nullptr;
+	return isFamilySharedApp(usr, routingAppId);
 }
 
 void Apps::setConfigStoreString(const char* key, const char* value)

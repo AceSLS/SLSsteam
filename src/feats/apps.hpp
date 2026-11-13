@@ -38,5 +38,7 @@ namespace Apps
 	void sendPICSInfoRequest(CNetPacket* pkt);
 	void sendMsg(CNetPacket* pkt);
 
+	bool shouldChokeSendPacket(const CNetPacket* pkt);
+
 	void setConfigStoreString(const char* key, const char* value);
 };

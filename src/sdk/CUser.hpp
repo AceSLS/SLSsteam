@@ -80,6 +80,7 @@ public:
 	IClientUserStats* getClientUserStats();
 
 	bool checkAppOwnership(const AppId_t appId, AppOwnershipInfo_t* pInfo);
+	bool ownsAppDirectly(const AppId_t appId);
 	steamsize_t getSubscribedApps(AppId_t* pAppIds, steamsize_t numAppIds);
 	bool isSubscribed(const AppId_t appId);
 	void postCallback(const ECallbackType type, void* pCallback, const steamsize_t callbackSize);

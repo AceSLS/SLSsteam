@@ -46,6 +46,20 @@ bool CUser::checkAppOwnership(const AppId_t appId, AppOwnershipInfo_t* pInfo)
 	return Hooks::CUser_CheckAppOwnership->tramp.fn(this, appId, pInfo);
 }
 
+bool CUser::ownsAppDirectly(const AppId_t appId)
+{
+	const lm_address_t address = Patterns::CUser::OwnsAppDirectly.address;
+	if (!address || address == LM_ADDRESS_BAD)
+	{
+		//Fail safe: never classify an app as borrowed when the check is unavailable,
+		//otherwise a self-owned game could be hidden from the CM servers.
+		return true;
+	}
+
+	const auto fn = reinterpret_cast<bool(*)(void*, AppId_t)>(address);
+	return fn(this, appId);
+}
+
 steamsize_t CUser::getSubscribedApps(AppId_t* pAppIds, steamsize_t numAppIds)
 {
 	return Hooks::CUser_GetSubscribedApps->tramp.fn(this, pAppIds, numAppIds, 1);

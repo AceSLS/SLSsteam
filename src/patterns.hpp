@@ -18,9 +18,10 @@ public:
 
 	lm_address_t address;
 	lm_module_t* module;
+	const bool optional;
 
-	Pattern_t(const char* name, const char* pattern, MemHlp::SigFollowMode followMode, lm_module_t* module = nullptr);
-	Pattern_t(const char* name, const char* pattern, MemHlp::SigFollowMode followMode, std::vector<int16_t> prologue, lm_module_t* module = nullptr);
+	Pattern_t(const char* name, const char* pattern, MemHlp::SigFollowMode followMode, lm_module_t* module = nullptr, bool optional = false);
+	Pattern_t(const char* name, const char* pattern, MemHlp::SigFollowMode followMode, std::vector<int16_t> prologue, lm_module_t* module = nullptr, bool optional = false);
 	//~CPattern();
 
 	bool find();
@@ -58,6 +59,7 @@ namespace Patterns
 		//TODO: Order & Convert old patterns
 		extern Pattern_t CheckAppOwnership;
 		extern Pattern_t GetSubscribedApps;
+		extern Pattern_t OwnsAppDirectly;
 		extern Pattern_t PostCallback;
 		extern Pattern_t PostCallbackToAppId;
 		extern Pattern_t SpawnGameId;
