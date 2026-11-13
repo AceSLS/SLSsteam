@@ -15,6 +15,15 @@ std::unordered_map<AppId_t, std::chrono::time_point<std::chrono::system_clock>> 
 std::unordered_map<AppId_t, uint64_t> Achievements::preferredOwners = std::unordered_map<AppId_t, uint64_t>();
 std::unordered_map<AppId_t, std::unordered_set<uint64_t>> Achievements::ownerBlacklist = std::unordered_map<AppId_t, std::unordered_set<uint64_t>>();
 
+//Added (injected) apps are reported as owned by the ownership spoof, so
+//CUser::isSubscribed() returns true for them even though the account does not
+//own them. They still need the achievement spoofing, so treat "subscribed but
+//added" as unowned here. Genuinely owned apps are left untouched.
+static bool needsAchievementSpoof(const AppId_t appId)
+{
+	return g_config.isAddedAppId(appId) || !g_pSteamEngine->getUser(0)->isSubscribed(appId);
+}
+
 std::string Achievements::getReviewUrl(const AppId_t appId)
 {
 	std::ostringstream url;
@@ -159,7 +168,7 @@ uint32_t Achievements::sendAndRecvGetPlayerStats
 	}
 
 	//Don't do anything for legit apps
-	if (g_pSteamEngine->getUser(0)->isSubscribed(send->appid()))
+	if (!needsAchievementSpoof(send->appid()))
 	{
 		return k_EResultNoResult;
 	}
@@ -241,7 +250,7 @@ uint32_t Achievements::sendAndRecvGetUserStats(CAPIJob* job, CProtoBufMsgBase* s
 
 	const auto sendBdy = send->getBody<CMsgClientGetUserStats>();
 
-	if (g_pSteamEngine->getUser(0)->isSubscribed(sendBdy->game_id()))
+	if (!needsAchievementSpoof(sendBdy->game_id()))
 	{
 		return 0;
 	}
@@ -427,8 +436,8 @@ void Achievements::sendMsg(CNetPacket* pkt)
 		const auto msg = pkt->deserializeBody<CPlayer_GetUserAchievements_Request>();
 		const AppId_t appId = msg.appid();
 
-		//Only modify unowned games
-		if (!g_pSteamEngine->getUser()->isSubscribed(appId))
+		//Only modify unowned games (including injected/added ones)
+		if (needsAchievementSpoof(appId))
 		{
 			jobToAppIdMap[jobId] = msg.appid();
 			LOG_DEBUG("AppId %u is unowned! Injecting achievements\n", appId);
