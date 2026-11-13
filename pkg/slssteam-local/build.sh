@@ -16,3 +16,5 @@ sed -i "s|source=.*|source=(\"$GIT_TAR\")|" "PKGBUILD"
 sed -i 's|cd "$srcdir/SLSsteam"|cd "$srcdir"|' "PKGBUILD"
 
 makepkg -sfr
+
+rm -rv "pkg/" "src/"
